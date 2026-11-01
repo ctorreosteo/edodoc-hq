@@ -1,10 +1,18 @@
-import { useState, type FormEvent } from "react"
+import { ArrowRight, CircleAlert, Eye, EyeOff, Loader2 } from "lucide-react"
+import { useState, type FormEvent, type KeyboardEvent } from "react"
+import { FiloAccesso } from "@/components/login/filo-accesso"
 import { Logo } from "@/components/logo"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/auth-context"
+import { dataLunga } from "@/lib/format"
+import { oggiIso } from "@/lib/utils"
+import "@/style/login.css"
+
+function saluto(ore: number) {
+  if (ore >= 5 && ore < 13) return "Buongiorno"
+  return ore >= 13 && ore < 18 ? "Buon pomeriggio" : "Buonasera"
+}
 
 export default function Login() {
   const { login } = useAuth()
@@ -12,6 +20,8 @@ export default function Login() {
   const [password, setPassword] = useState("")
   const [errore, setErrore] = useState("")
   const [inCorso, setInCorso] = useState(false)
+  const [visibile, setVisibile] = useState(false)
+  const [maiuscole, setMaiuscole] = useState(false)
 
   const invia = async (e: FormEvent) => {
     e.preventDefault()
@@ -26,28 +36,41 @@ export default function Login() {
     }
   }
 
+  const leggiMaiuscole = (e: KeyboardEvent<HTMLInputElement>) => setMaiuscole(e.getModifierState("CapsLock"))
+
   return (
-    <div data-m-auth className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm shadow-2xl border-0">
-        <CardContent className="p-8">
-          <form onSubmit={invia} className="flex flex-col gap-5">
-            <div className="flex flex-col items-center text-center gap-3">
-              <Logo className="h-12" />
-              <p className="text-muted-foreground text-sm">Accedi al gestionale</p>
-            </div>
-            {errore ? <p role="alert" className="text-sm text-center text-destructive">{errore}</p> : null}
-            <div className="grid gap-2">
-              <Label htmlFor="username">Email</Label>
-              <Input id="username" type="email" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </div>
-            <Button type="submit" disabled={inCorso} className="w-full font-bold">{inCorso ? "Accesso…" : "Accedi"}</Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="ac-pagina">
+      <div className="ac-puntini" aria-hidden />
+      <FiloAccesso />
+
+      <div className="ac-benvenuto">
+        <Logo className="ac-logo" />
+        <h1 className="ac-saluto">{saluto(new Date().getHours())}</h1>
+        <p className="ac-data">{dataLunga(oggiIso())}</p>
+      </div>
+
+      <form onSubmit={invia} className="ac-scheda">
+        <p className="ac-titolo">Accedi al gestionale</p>
+        {errore ? <p role="alert" className="ac-errore"><CircleAlert className="size-4" aria-hidden />{errore}</p> : null}
+        <div className="ac-campo">
+          <Label htmlFor="username">Email</Label>
+          <Input id="username" className="ac-input" type="email" autoComplete="username" autoFocus value={username} onChange={(e) => setUsername(e.target.value)} required />
+        </div>
+        <div className="ac-campo">
+          <Label htmlFor="password">Password</Label>
+          <div className="ac-password">
+            <Input id="password" className="ac-input" type={visibile ? "text" : "password"} autoComplete="current-password" value={password}
+              onChange={(e) => setPassword(e.target.value)} onKeyUp={leggiMaiuscole} onBlur={() => setMaiuscole(false)} required />
+            <button type="button" className="ac-occhio" aria-label={visibile ? "Nascondi la password" : "Mostra la password"} aria-pressed={visibile} onClick={() => setVisibile((v) => !v)}>
+              {visibile ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+            </button>
+          </div>
+          {maiuscole ? <p className="ac-maiuscole" role="status">Maiuscole attive</p> : null}
+        </div>
+        <button type="submit" className="ac-invia" disabled={inCorso}>
+          {inCorso ? <><Loader2 className="size-4 animate-spin" aria-hidden />Accesso…</> : <>Accedi<ArrowRight className="size-4" aria-hidden /></>}
+        </button>
+      </form>
     </div>
   )
 }

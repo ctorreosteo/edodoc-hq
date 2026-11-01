@@ -1,0 +1,648 @@
+/*
+  Pagine Corsi e Corso: catalogo a copertine e percorso verso la pubblicazione.
+  Il vincolo .dark h1-h6 è !important: i titoli qui dentro impostano -webkit-text-fill-color.
+*/
+
+[data-vl] .cs-pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+[data-vl] .cs-pagina > .vl-hero { margin-bottom: 0; }
+
+[data-vl] .cs-tappa, [data-vl] .cs-mancante, [data-vl] .cs-lezione-apri, [data-vl] .cs-plancia-copertina { border: 0; }
+
+/* ───────────────────────── Copertina ───────────────────────── */
+
+[data-vl] .cs-copertina {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  color: #ffffff;
+  background: linear-gradient(135deg, #24406B 0%, #3A6098 100%);
+}
+
+[data-vl] .cs-copertina[data-tinta="1"] { background: linear-gradient(135deg, #1A3052 0%, #1E7A72 100%); }
+[data-vl] .cs-copertina[data-tinta="2"] { background: linear-gradient(135deg, #24406B 0%, #B4570F 100%); }
+[data-vl] .cs-copertina[data-tinta="3"] { background: linear-gradient(135deg, #2E2A5E 0%, #3A6098 100%); }
+
+[data-vl] .cs-copertina > img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-vl] .cs-copertina[data-immagine]::after {
+  content: "";
+  position: absolute;
+  inset: 35% 0 0;
+  z-index: -1;
+  background: linear-gradient(to bottom, transparent, rgba(10, 20, 40, 0.78));
+}
+
+[data-vl] .cs-motivo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+
+[data-vl] .cs-motivo path { fill: none; stroke: #ffffff; stroke-width: 1.2; }
+[data-vl] .cs-motivo-sole { fill: var(--vl-hero-accent); opacity: 0.58; }
+
+[data-vl] .cs-copertina-titolo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  margin: 0.9rem 1rem;
+  font-size: clamp(1.15rem, 1rem + 0.5vw, 1.45rem);
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  text-shadow: 0 1px 12px rgba(10, 20, 40, 0.45);
+}
+
+/* ───────────────────────── Stato ───────────────────────── */
+
+[data-vl] .cs-stato {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  padding: 0.22rem 0.6rem 0.22rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--vl-muted-fg);
+  background: var(--vl-muted-bg);
+}
+
+[data-vl] .cs-stato svg { width: 0.85rem; height: 0.85rem; }
+[data-vl] .cs-stato[data-tono="pronto"] { color: var(--vl-info-fg); background: var(--vl-info-bg); }
+[data-vl] .cs-stato[data-tono="online"] { color: var(--vl-ok-fg); background: var(--vl-ok-bg); }
+[data-vl] .cs-stato[data-tono="avviso"] { color: var(--vl-warn-fg); background: var(--vl-warn-bg); }
+
+/* Sulla copertina il fondo è opaco: l'etichetta deve reggere su qualsiasi immagine */
+[data-vl] .cs-carta-copertina .cs-stato {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.65rem;
+  box-shadow: 0 4px 14px -6px rgba(10, 20, 40, 0.6);
+}
+
+[data-vl] .cs-carta-copertina .cs-stato[data-tono="bozza"] { color: #4b5a70; background: #f1f4f8; }
+[data-vl] .cs-carta-copertina .cs-stato[data-tono="pronto"] { color: #1d4fd0; background: #ebf2ff; }
+[data-vl] .cs-carta-copertina .cs-stato[data-tono="online"] { color: #0d7a3e; background: #e7faef; }
+[data-vl] .cs-carta-copertina .cs-stato[data-tono="avviso"] { color: #a8550a; background: #fff4e3; }
+
+/* ───────────────────────── Tappe del catalogo ───────────────────────── */
+
+[data-vl] .cs-tappe {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.2rem;
+}
+
+[data-vl] .cs-tappa {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "numero testo" "numero nota";
+  column-gap: 0.8rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border-radius: 1rem;
+  text-align: left;
+  background: var(--vl-hero-glass);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+  animation: vl-rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+[data-vl] .cs-tappa:hover { background: var(--vl-hero-glass-hover); }
+[data-vl] .cs-tappa:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+[data-vl] .cs-tappa[aria-pressed="true"] { background: var(--vl-hero-glass-hover); box-shadow: 0 0 0 1.5px #ffffff inset; }
+
+[data-vl] .cs-tappa strong {
+  grid-area: numero;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+[data-vl] .cs-tappa[data-zero] strong { font-size: 1.25rem; font-weight: 600; color: var(--vl-hero-ink-3); }
+[data-vl] .cs-tappa span { grid-area: testo; font-size: 0.86rem; font-weight: 700; color: #ffffff; }
+[data-vl] .cs-tappa small { grid-area: nota; font-size: 0.72rem; color: var(--vl-hero-ink-2); }
+
+[data-vl] .cs-sintesi {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--vl-hero-ink-2);
+}
+
+/* ───────────────────────── Catalogo ───────────────────────── */
+
+[data-vl] .cs-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+}
+
+[data-vl] .cs-carta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 1.1rem;
+  color: inherit;
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--vl-line-strong), var(--vl-shadow);
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease;
+}
+
+[data-vl] .cs-carta:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--vl-line-strong), var(--vl-shadow-hover); }
+[data-vl] .cs-carta:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: 3px; }
+
+[data-vl] .cs-carta-copertina { position: relative; }
+[data-vl] .cs-carta-copertina img { transition: transform 420ms ease; }
+[data-vl] .cs-carta:hover .cs-carta-copertina img { transform: scale(1.03); }
+
+[data-vl] .cs-carta-corpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem 0.8rem;
+}
+
+[data-vl] .cs-avanzamento { display: grid; gap: 0.3rem; }
+
+[data-vl] .cs-passo {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--vl-ink);
+}
+
+[data-vl] .cs-passo svg { flex: none; width: 1rem; height: 1rem; color: var(--vl-ok-fg); }
+
+[data-vl] .cs-misura {
+  display: block;
+  height: 0.4rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--vl-thead);
+}
+
+.dark [data-vl] .cs-misura { background: rgba(255, 255, 255, 0.1); }
+
+[data-vl] .cs-misura > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--vl-accent-strong);
+}
+
+[data-vl] .cs-avanzamento-conto {
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .cs-manca {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+[data-vl] .cs-manca > li {
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--vl-warn-fg);
+  background: var(--vl-warn-bg);
+}
+
+[data-vl] .cs-carta-piede {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.8rem;
+  margin-top: auto;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--vl-line);
+  font-size: 0.74rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .cs-carta-piede > span { display: inline-flex; align-items: center; gap: 0.25rem; }
+[data-vl] .cs-carta-piede svg { width: 0.85rem; height: 0.85rem; }
+[data-vl] .cs-carta-piede .cs-carta-freccia { margin-left: auto; transition: transform 180ms ease; }
+[data-vl] .cs-carta:hover .cs-carta-freccia { transform: translateX(3px); }
+
+[data-vl] .cs-carta-nuova {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 14rem;
+  padding: 1.25rem;
+  border-radius: 1.1rem;
+  border: 1.5px dashed var(--vl-line-strong);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+[data-vl] .cs-carta-nuova:hover { background: var(--vl-hover); }
+[data-vl] .cs-carta-nuova:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: 3px; }
+
+[data-vl] .cs-carta-nuova > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.3rem;
+  border-radius: 999px;
+  color: var(--vl-accent-ink);
+  background: var(--vl-now-tint);
+}
+
+[data-vl] .cs-carta-nuova strong { font-size: 0.95rem; font-weight: 700; color: var(--vl-ink); }
+[data-vl] .cs-carta-nuova small { font-size: 0.76rem; color: var(--vl-ink-2); }
+
+/* ───────────────────────── Primo corso ───────────────────────── */
+
+[data-vl] .cs-vuoto {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--vl-line-strong), var(--vl-shadow);
+}
+
+[data-vl] .cs-vuoto-copertina .cs-copertina { height: 100%; min-height: 16rem; aspect-ratio: auto; }
+[data-vl] .cs-vuoto-copertina .cs-copertina-titolo { margin: 1.4rem; font-size: 1.9rem; }
+
+[data-vl] .cs-vuoto-guida { display: grid; gap: 1rem; padding: 1.5rem; align-content: center; justify-items: start; }
+[data-vl] .cs-vuoto-titolo { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; color: var(--vl-ink); }
+[data-vl] .cs-vuoto-guida ol { display: grid; gap: 0.75rem; }
+[data-vl] .cs-vuoto-guida li { display: flex; align-items: flex-start; gap: 0.7rem; }
+
+[data-vl] .cs-vuoto-guida li > span {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--vl-accent-ink);
+  background: var(--vl-now-tint);
+}
+
+[data-vl] .cs-vuoto-guida li strong { display: block; font-size: 0.9rem; font-weight: 700; color: var(--vl-ink); }
+[data-vl] .cs-vuoto-guida li small { display: block; font-size: 0.78rem; color: var(--vl-ink-2); }
+
+/* ───────────────────────── Corso: plancia ───────────────────────── */
+
+[data-vl] .cs-torna {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  font-size: 0.85rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .cs-torna:hover { color: var(--vl-ink); text-decoration: underline; }
+[data-vl] .cs-torna:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: 2px; border-radius: 0.2rem; }
+
+[data-vl] .cs-plancia {
+  display: grid;
+  grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr);
+  gap: 1.1rem;
+  margin-top: 1.2rem;
+}
+
+[data-vl] .cs-plancia-copertina {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px var(--vl-hero-line);
+}
+
+[data-vl] .cs-plancia-copertina:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+
+[data-vl] .cs-flusso {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.9rem 1.1rem;
+  border-radius: 1rem;
+  background: var(--vl-hero-glass);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+}
+
+[data-vl] .cs-flusso-frase {
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--vl-hero-ink-2);
+}
+
+[data-vl] .cs-flusso-frase strong { font-weight: 700; color: #ffffff; }
+
+[data-vl] .cs-passi {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+[data-vl] .cs-passo-flusso {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.55rem;
+  align-items: center;
+  min-width: 0;
+}
+
+[data-vl] .cs-passo-segno {
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--vl-hero-ink-2);
+  box-shadow: 0 0 0 1.5px var(--vl-hero-line) inset;
+}
+
+[data-vl] .cs-passo-segno svg { width: 1rem; height: 1rem; }
+[data-vl] .cs-passo-flusso[data-stato="fatto"] .cs-passo-segno { color: #24406B; background: #ffffff; box-shadow: none; }
+[data-vl] .cs-passo-flusso[data-stato="attuale"] .cs-passo-segno { color: var(--vl-cta-ink); background: var(--vl-hero-accent); box-shadow: none; }
+
+[data-vl] .cs-passo-nome { font-size: 0.86rem; font-weight: 700; line-height: 1.2; color: #ffffff; }
+[data-vl] .cs-passo-flusso[data-stato="futuro"] .cs-passo-nome { color: var(--vl-hero-ink-2); }
+[data-vl] .cs-passo-nota { font-size: 0.72rem; line-height: 1.25; color: var(--vl-hero-ink-2); }
+
+[data-vl] .cs-cta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ───────────────────────── Corso: struttura ───────────────────────── */
+
+[data-vl] .cs-corpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 19rem;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+[data-vl] .cs-corpo[data-pieno] { grid-template-columns: minmax(0, 1fr); }
+
+[data-vl] .cs-moduli { display: grid; gap: 0.9rem; }
+
+[data-vl] .cs-modulo {
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border-radius: 1.1rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--vl-line) inset;
+}
+
+[data-vl] .cs-modulo-testa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
+[data-vl] .cs-numero {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  overflow: hidden;
+  border-radius: 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+  background: var(--vl-thead);
+}
+
+.dark [data-vl] .cs-numero { background: rgba(255, 255, 255, 0.1); }
+[data-vl] .cs-numero img { width: 100%; height: 100%; object-fit: cover; }
+
+[data-vl] .cs-modulo-nome { flex: 1 1 11rem; min-width: 0; }
+
+[data-vl] .cs-modulo-nome h2 {
+  overflow: hidden;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-text-fill-color: var(--vl-ink);
+}
+
+[data-vl] .cs-modulo-nome p {
+  overflow: hidden;
+  font-size: 0.76rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .cs-modulo-azioni, [data-vl] .cs-lezione-azioni { display: flex; align-items: center; margin-left: auto; }
+
+[data-vl] .cs-maniglia { flex: none; width: 1rem; height: 1rem; color: var(--vl-ink-3); cursor: grab; }
+
+[data-vl] .cs-lezioni { display: grid; gap: 0.3rem; counter-reset: lezione; }
+
+[data-vl] .cs-lezione {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.4rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.75rem;
+  background: var(--vs-riga, var(--card));
+  box-shadow: 0 0 0 1px var(--vl-line);
+  transition: box-shadow 160ms ease;
+}
+
+[data-vl] .cs-lezione:hover { box-shadow: 0 0 0 1px var(--vl-line-strong); }
+
+[data-vl] .cs-lezione-apri {
+  display: flex;
+  flex: 1 1 12rem;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: 0.1rem 0.2rem;
+  border-radius: 0.5rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-vl] .cs-lezione-apri:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: 1px; }
+
+[data-vl] .cs-lezione-tipo {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 0.5rem;
+  color: var(--vl-ink-2);
+  background: var(--vl-surface-2);
+}
+
+[data-vl] .cs-lezione-tipo svg { width: 0.95rem; height: 0.95rem; }
+[data-vl] .cs-lezione-testo { display: block; min-width: 0; }
+
+[data-vl] .cs-lezione-titolo {
+  display: block;
+  overflow: hidden;
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--vl-ink);
+}
+
+[data-vl] .cs-lezione-meta {
+  display: block;
+  overflow: hidden;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .cs-modulo-aggiungi { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+[data-vl] .cs-modulo-vuoto { font-size: 0.8rem; color: var(--vl-ink-2); }
+
+/* ───────────────────────── Corso: cosa manca ───────────────────────── */
+
+[data-vl] .cs-lato {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+  padding: 1rem;
+  border-radius: 1.1rem;
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--vl-line-strong), var(--vl-shadow);
+}
+
+[data-vl] .cs-lato-titolo { font-size: 0.95rem; font-weight: 700; color: var(--vl-ink); }
+[data-vl] .cs-lato-sotto { margin-top: 0.1rem; font-size: 0.76rem; line-height: 1.35; color: var(--vl-ink-2); }
+
+[data-vl] .cs-mancanti { display: grid; gap: 0.3rem; }
+
+[data-vl] .cs-mancante {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.65rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+[data-vl] .cs-mancante:hover { background: var(--vl-hover); }
+[data-vl] .cs-mancante:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: 1px; }
+[data-vl] .cs-mancante svg { flex: none; width: 1rem; height: 1rem; margin-top: 0.08rem; color: var(--vl-ink-3); }
+[data-vl] .cs-mancante[data-urgente] svg { color: var(--vl-warn-fg); }
+[data-vl] .cs-mancante strong { display: block; font-size: 0.8rem; font-weight: 700; color: var(--vl-ink); overflow-wrap: anywhere; }
+[data-vl] .cs-mancante small { display: block; font-size: 0.72rem; color: var(--vl-ink-2); }
+[data-vl] .cs-mancanti-altre { padding: 0 0.5rem; font-size: 0.74rem; color: var(--vl-ink-2); }
+
+[data-vl] .cs-lato-app {
+  display: grid;
+  gap: 0.1rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--vl-line);
+  font-size: 0.78rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .cs-lato-app strong { font-size: 0.86rem; font-weight: 700; color: var(--vl-ink); }
+
+@media (max-width: 1179px) {
+  [data-vl] .cs-corpo { grid-template-columns: minmax(0, 1fr); }
+  [data-vl] .cs-lato { position: static; order: -1; }
+}
+
+@media (max-width: 767px) {
+  [data-vl] .cs-vuoto { grid-template-columns: minmax(0, 1fr); }
+  [data-vl] .cs-vuoto-copertina .cs-copertina { min-height: 11rem; }
+  [data-vl] .cs-plancia { grid-template-columns: minmax(0, 1fr); }
+  [data-vl] .cs-plancia-copertina { display: none; }
+}
+
+@media (max-width: 639px) {
+  [data-vl] .cs-tappe { gap: 0.4rem; }
+  [data-vl] .cs-tappa { grid-template-columns: minmax(0, 1fr); grid-template-areas: "numero" "testo" "nota"; row-gap: 0.1rem; padding: 0.65rem 0.7rem; }
+  [data-vl] .cs-tappa strong { font-size: 1.5rem; }
+  [data-vl] .cs-tappa[data-zero] strong { font-size: 1.5rem; }
+  [data-vl] .cs-tappa small { display: none; }
+  [data-vl] .cs-passi { grid-template-columns: minmax(0, 1fr); gap: 0.55rem; }
+  [data-vl] .cs-modulo { padding: 0.6rem; }
+  [data-vl] .cs-lezione-apri { flex-basis: 100%; }
+  [data-vl] .cs-pagina .vl-card-heading > :first-child { flex-basis: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vl] .cs-tappa { animation: none; }
+  [data-vl] .cs-carta, [data-vl] .cs-carta img, [data-vl] .cs-carta-freccia { transition: none; }
+  [data-vl] .cs-carta:hover { transform: none; }
+  [data-vl] .cs-carta:hover .cs-carta-copertina img { transform: none; }
+}

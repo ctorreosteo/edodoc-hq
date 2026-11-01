@@ -1,106 +1,62 @@
-import { ClipboardCheck, Search, UserPlus, Users, Wallet } from "lucide-react"
 import { useMemo, useState } from "react"
-import { Chip } from "@/components/chip"
-import { LuxAvatar, LuxHero, LuxKpi } from "@/components/lux"
-import { MenuPaziente } from "@/components/menu-contestuali"
-import { Cta, Pagina, Riquadro, Tabella } from "@/components/pagina"
-import { Caricamento, Errore, Vuoto } from "@/components/stati"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAzioni } from "@/contexts/azioni-context"
+import { Pagina } from "@/components/pagina"
+import { ElencoPazienti } from "@/components/pazienti/elenco-pazienti"
+import { PazientiHero } from "@/components/pazienti/pazienti-hero"
+import { Caricamento, Errore } from "@/components/stati"
 import { useDati } from "@/hooks/use-dati"
-import { dataOra, euro } from "@/lib/format"
-import { SITUAZIONE_PAGAMENTI, STATO_PAZIENTE, TIPO_PERCORSO } from "@/lib/etichette"
+import { movimentoRidotto } from "@/hooks/use-conteggio"
+import { etichettaMotivo, leggiPaziente, ordina, type Motivo, type Ordine } from "@/lib/pazienti"
 import { pazientiService } from "@/services/gestionale"
+import "@/style/pazienti.css"
+
+const portaAllElenco = () => document.getElementById("pz-elenco")?.scrollIntoView({ behavior: movimentoRidotto() ? "auto" : "smooth", block: "start" })
 
 export default function Pazienti() {
-  const azioni = useAzioni()
   const { dati, errore, riprova } = useDati(pazientiService.lista, [])
   const [ricerca, setRicerca] = useState("")
   const [stato, setStato] = useState("TUTTI")
+  const [ordine, setOrdine] = useState<Ordine>("PRIORITA")
+  const [motivo, setMotivo] = useState<Motivo | null>(null)
+  const [gradino, setGradino] = useState<number | null>(null)
+  const [oggi] = useState(() => new Date())
+
+  const letture = useMemo(() => (dati ?? []).map((p) => leggiPaziente(p, oggi)), [dati, oggi])
 
   const filtrati = useMemo(() => {
     const testo = ricerca.trim().toLowerCase()
-    return (dati ?? []).filter((p) =>
+    return ordina(letture.filter(({ p, motivi, checkAssente, rimanenti }) =>
       (stato === "TUTTI" || p.stato === stato) &&
-      (!testo || `${p.nome} ${p.cognome} ${p.email ?? ""} ${p.cellulare ?? ""}`.toLowerCase().includes(testo)))
-  }, [dati, ricerca, stato])
+      (!motivo || (motivo === "CHECK" ? checkAssente : motivi.includes(motivo))) &&
+      (gradino == null || rimanenti === gradino) &&
+      (!testo || `${p.nome} ${p.cognome} ${p.cognome} ${p.nome} ${p.email ?? ""} ${p.cellulare ?? ""}`.toLowerCase().includes(testo))), ordine)
+  }, [letture, ricerca, stato, motivo, gradino, ordine])
 
   if (errore) return <Errore messaggio={errore} onRiprova={riprova} />
   if (!dati) return <Caricamento />
 
-  const attivi = dati.filter((p) => p.stato === "ATTIVO" || p.stato === "MANTENIMENTO")
-  const scaduti = dati.filter((p) => p.situazionePagamenti === "SCADUTO").length
+  const scegliMotivo = (nuovo: Motivo | null) => {
+    setMotivo(nuovo)
+    setGradino(null)
+    if (nuovo) portaAllElenco()
+  }
+  const scegliGradino = (nuovo: number | null) => {
+    setGradino(nuovo)
+    setMotivo(null)
+    if (nuovo != null) portaAllElenco()
+  }
+  const filtro = motivo ? etichettaMotivo(motivo, 2, oggi)
+    : gradino === 0 ? "Tutte le visite fatte"
+    : gradino === 1 ? "Manca 1 visita"
+    : gradino != null ? `Mancano ${gradino} visite`
+    : null
 
   return (
     <Pagina>
-      <LuxHero ariaLabel="Pazienti" eyebrow="Anagrafiche" title="Pazienti" subtitle="Percorso, prossima visita e pagamenti di ogni paziente"
-        actions={<Cta icona={UserPlus} onClick={() => azioni.nuovoPaziente()}>Nuovo paziente</Cta>}>
-        <div className="vl-kpis vl-kpis--3">
-          <LuxKpi icon={<Users className="size-4" />} label="In percorso" value={attivi.length} foot={`${dati.length} in anagrafica`} />
-          <LuxKpi icon={<ClipboardCheck className="size-4" />} label="Check di questa settimana" value={attivi.filter((p) => p.checkSettimana).length} unit={`/${attivi.length}`} />
-          <LuxKpi icon={<Wallet className="size-4" />} label="Pagamenti scaduti" value={scaduti} foot={scaduti ? "Da sollecitare" : "Tutto in regola"} />
-        </div>
-      </LuxHero>
-
-      <Riquadro titolo="Elenco" conteggio={filtrati.length} descrizione="Tasto destro su una riga per tutte le azioni"
-        azioni={
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 opacity-50" aria-hidden />
-              <Input aria-label="Cerca paziente" placeholder="Cerca" value={ricerca} onChange={(e) => setRicerca(e.target.value)} className="pl-8 w-52" />
-            </div>
-            <Select value={stato} onValueChange={setStato}>
-              <SelectTrigger aria-label="Filtra per stato" className="w-44"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="TUTTI">Tutti gli stati</SelectItem>
-                {Object.entries(STATO_PAZIENTE).map(([k, v]) => <SelectItem key={k} value={k}>{v.testo}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-        }>
-        {filtrati.length === 0 ? <Vuoto titolo="Nessun paziente" descrizione={dati.length ? "Prova a cambiare i filtri." : "Aggiungi il primo paziente."} /> : (
-          <Tabella>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Paziente</TableHead>
-                <TableHead>Stato</TableHead>
-                <TableHead>Percorso</TableHead>
-                <TableHead>Prossima visita</TableHead>
-                <TableHead>Pagamenti</TableHead>
-                <TableHead>Check</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtrati.map((p) => (
-                <MenuPaziente key={p.id} paziente={p}>
-                  <TableRow className="cursor-pointer" onClick={() => azioni.apriPaziente(p.id)}>
-                    <TableCell>
-                      <span className="flex items-center gap-2.5">
-                        <LuxAvatar first={p.nome} second={p.cognome} />
-                        <span className="min-w-0">
-                          <span className="block font-semibold">{p.cognome} {p.nome}</span>
-                          <span className="block text-xs text-muted-foreground truncate">{p.email ?? p.cellulare ?? "—"}</span>
-                        </span>
-                      </span>
-                    </TableCell>
-                    <TableCell><Chip tono={STATO_PAZIENTE[p.stato].tono}>{STATO_PAZIENTE[p.stato].testo}</Chip></TableCell>
-                    <TableCell>{p.percorso ? `${TIPO_PERCORSO[p.percorso.tipo]} · ${p.percorso.visiteFissate}/${p.percorso.visiteTotali}` : "—"}</TableCell>
-                    <TableCell className="tabular-nums">{p.prossimaVisita ? dataOra(p.prossimaVisita) : "—"}</TableCell>
-                    <TableCell>
-                      <Chip tono={SITUAZIONE_PAGAMENTI[p.situazionePagamenti].tono}>
-                        {p.residuo > 0 ? `${SITUAZIONE_PAGAMENTI[p.situazionePagamenti].testo}: ${euro(p.residuo)}` : SITUAZIONE_PAGAMENTI[p.situazionePagamenti].testo}
-                      </Chip>
-                    </TableCell>
-                    <TableCell>{p.stato === "ATTIVO" || p.stato === "MANTENIMENTO" ? <Chip tono={p.checkSettimana ? "ok" : "warn"}>{p.checkSettimana ? "Compilato" : "Manca"}</Chip> : "—"}</TableCell>
-                  </TableRow>
-                </MenuPaziente>
-              ))}
-            </TableBody>
-          </Tabella>
-        )}
-      </Riquadro>
+      <div className="pz-pagina">
+        <PazientiHero letture={letture} motivo={motivo} gradino={gradino} oggi={oggi} onMotivo={scegliMotivo} onGradino={scegliGradino} />
+        <ElencoPazienti letture={filtrati} totale={dati.length} ricerca={ricerca} stato={stato} ordine={ordine} filtro={filtro} oggi={oggi}
+          onRicerca={setRicerca} onStato={setStato} onOrdine={setOrdine} onLiberaFiltro={() => scegliMotivo(null)} />
+      </div>
     </Pagina>
   )
 }

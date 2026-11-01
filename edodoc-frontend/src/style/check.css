@@ -1,0 +1,672 @@
+/*
+  Pagina Check: nell'hero il nastro del giro, sotto la coda di lavoro e accanto la scheda del paziente aperto.
+  Un gettone per paziente: le iniziali diventano una spunta quando è contattato.
+  I colori di stato arrivano sempre con icona o testo.
+*/
+
+[data-vl] {
+  --ck-dedicato: #fca5a5;
+  --ck-sollecito: #fcd34d;
+  --ck-motivazionale: #86efac;
+}
+
+[data-vl] .ck-pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+  transition: opacity 180ms ease;
+}
+
+[data-vl] .ck-pagina[data-in-attesa] { opacity: 0.6; }
+[data-vl] .ck-pagina > .vl-hero { margin-bottom: 0; }
+[data-vl] .ck-pagina .vl-kpi-foot { white-space: normal; line-height: 1.3; }
+
+/* ───────────────────────── Settimana ───────────────────────── */
+
+[data-vl] .ck-settimana {
+  display: inline-flex;
+  align-items: center;
+  height: 3rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--vl-hero-glass);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+}
+
+[data-vl] .ck-settimana > span {
+  min-width: 3.9rem;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+[data-vl] .ck-settimana > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  color: var(--vl-hero-ink-2);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+[data-vl] .ck-settimana > button:hover { background: var(--vl-hero-glass-hover); color: #ffffff; }
+
+[data-vl] .ck-settimana > button:focus-visible,
+[data-vl] .ck-giri button:focus-visible,
+[data-vl] .ck-prossimo:focus-visible,
+[data-vl] .ck-torna:focus-visible,
+[data-vl] .ck-gettone:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+
+/* ───────────────────────── Plancia ───────────────────────── */
+
+[data-vl] .ck-plancia {
+  display: grid;
+  grid-template-columns: minmax(17rem, 21rem) minmax(0, 1fr);
+  gap: 2.25rem;
+  margin-top: 1.5rem;
+}
+
+[data-vl] .ck-avanzamento { display: grid; justify-items: start; align-content: start; min-width: 0; }
+
+[data-vl] .ck-giri {
+  display: flex;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.2rem;
+  border-radius: 0.8rem;
+  background: var(--vl-hero-glass);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+}
+
+[data-vl] .ck-giri button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.2rem;
+  padding: 0 0.5rem;
+  border-radius: 0.62rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--vl-hero-ink-2);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+[data-vl] .ck-giri button small { font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+[data-vl] .ck-giri button:hover { color: #ffffff; }
+[data-vl] .ck-giri button[aria-pressed="true"] { background: #ffffff; color: #1F3A63; }
+
+[data-vl] .ck-conteggio {
+  display: flex;
+  align-items: baseline;
+  margin-top: 0.9rem;
+  line-height: 1;
+  color: #ffffff;
+}
+
+[data-vl] .ck-conteggio strong {
+  font-size: clamp(3.25rem, 2.4rem + 3vw, 4.75rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl] .ck-conteggio span {
+  margin-left: 0.15rem;
+  font-size: 1.5rem;
+  font-weight: 650;
+  color: var(--vl-hero-ink-2);
+}
+
+[data-vl] .ck-conteggio-etichetta {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--vl-hero-ink-2);
+}
+
+[data-vl] .ck-prossimo, [data-vl] .ck-finito {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 100%;
+  margin-top: 0.8rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+[data-vl] .ck-prossimo {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22) inset;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+[data-vl] .ck-prossimo:hover { background: rgba(255, 255, 255, 0.2); }
+[data-vl] .ck-prossimo svg { flex: none; transition: transform 160ms ease; }
+[data-vl] .ck-prossimo:hover svg { transform: translateX(2px); }
+
+[data-vl] .ck-finito {
+  background: rgba(74, 222, 128, 0.17);
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.42) inset;
+}
+
+[data-vl] .ck-torna {
+  margin-top: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--vl-hero-ink-2);
+  cursor: pointer;
+}
+
+[data-vl] .ck-torna:hover { color: #ffffff; }
+
+/* Nastro */
+
+[data-vl] .ck-nastro {
+  container-type: inline-size;
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+[data-vl] .ck-corsia {
+  --ck-tono: var(--ck-motivazionale);
+  display: grid;
+  grid-template-columns: 12.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem 1rem;
+  min-width: 0;
+  padding: 0.7rem 1rem;
+  border-radius: 1rem;
+  background: var(--vl-hero-glass);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+}
+
+[data-vl] .ck-corsia[data-azione="MESSAGGIO_DEDICATO"] { --ck-tono: var(--ck-dedicato); }
+[data-vl] .ck-corsia[data-azione="SOLLECITO"] { --ck-tono: var(--ck-sollecito); }
+
+[data-vl] .ck-corsia-testa {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+[data-vl] .ck-corsia-testa i { display: inline-flex; color: var(--ck-tono); }
+[data-vl] .ck-corsia-testa svg { width: 0.95rem; height: 0.95rem; }
+[data-vl] .ck-corsia-testa strong { font-size: 0.82rem; font-weight: 700; color: #ffffff; }
+
+[data-vl] .ck-corsia-testa span {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-hero-ink-2);
+}
+
+[data-vl] .ck-corsia-vuota { font-size: 0.78rem; color: var(--vl-hero-ink-2); }
+
+[data-vl] .ck-gettoni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+[data-vl] .ck-gettone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ck-tono) 65%, transparent) inset;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 200ms ease;
+  animation: ck-entra 420ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+[data-vl] .ck-gettone:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.15); }
+[data-vl] .ck-gettone svg { width: 1.05rem; height: 1.05rem; stroke-width: 3; }
+[data-vl] .ck-gettone[data-fatto] { background: var(--ck-tono); color: #132542; box-shadow: none; }
+[data-vl] .ck-gettone[data-attivo] { outline: 2px solid #ffffff; outline-offset: 2px; }
+
+/* Fascia stretta: il titolo sta sopra i gettoni. */
+@container (max-width: 34rem) {
+  [data-vl] .ck-corsia { grid-template-columns: minmax(0, 1fr); padding: 0.65rem 0.8rem; }
+}
+
+@keyframes ck-entra {
+  from { opacity: 0; transform: scale(0.7); }
+}
+
+/* ───────────────────────── Lavoro ───────────────────────── */
+
+[data-vl] .ck-lavoro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+[data-vl] .ck-lavoro[data-largo] { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+
+/* La colonna è stretta: il titolo occupa la sua riga e i filtri vanno sotto. */
+[data-vl] .ck-coda .vl-card-heading > div:first-child { flex-basis: 100%; }
+
+/* Filtri */
+
+[data-vl] .ck-filtri {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-vl] .ck-segmenti {
+  display: inline-flex;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: 0.7rem;
+  background: var(--vl-thead);
+}
+
+.dark [data-vl] .ck-segmenti { background: rgba(255, 255, 255, 0.07); }
+
+[data-vl] .ck-segmenti > button {
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--vl-ink-2);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+[data-vl] .ck-segmenti > button:hover { color: var(--vl-ink); }
+[data-vl] .ck-segmenti > button[aria-pressed="true"] { background: var(--vl-surface); color: var(--vl-ink); box-shadow: var(--vl-shadow); }
+.dark [data-vl] .ck-segmenti > button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.14); }
+
+[data-vl] .ck-solo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--vl-ink-2);
+  cursor: pointer;
+}
+
+[data-vl] .ck-solo:hover { color: var(--vl-ink); }
+
+[data-vl] .ck-solo i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.3rem;
+  box-shadow: 0 0 0 1.5px var(--vl-line-strong) inset;
+}
+
+[data-vl] .ck-solo[aria-pressed="true"] { color: var(--vl-ink); }
+[data-vl] .ck-solo[aria-pressed="true"] i { background: var(--vl-accent-strong); box-shadow: none; color: #ffffff; }
+[data-vl] .ck-solo svg { width: 0.72rem; height: 0.72rem; stroke-width: 3.2; }
+
+[data-vl] .ck-segmenti > button:focus-visible,
+[data-vl] .ck-solo:focus-visible,
+[data-vl] .ck-voce-corpo:focus-visible,
+[data-vl] .ck-spunta:focus-visible,
+[data-vl] .ck-avanti-cta:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: 2px; }
+
+/* Gruppi */
+
+[data-vl] .ck-gruppo { --ck-gruppo: var(--vl-ok-fg); --ck-gruppo-bg: var(--vl-ok-bg); }
+[data-vl] .ck-gruppo[data-azione="MESSAGGIO_DEDICATO"] { --ck-gruppo: var(--vl-danger-fg); --ck-gruppo-bg: var(--vl-danger-bg); }
+[data-vl] .ck-gruppo[data-azione="SOLLECITO"] { --ck-gruppo: var(--vl-warn-fg); --ck-gruppo-bg: var(--vl-warn-bg); }
+[data-vl] .ck-gruppo + .ck-gruppo { margin-top: 1.1rem; }
+
+[data-vl] .ck-gruppo > header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+
+[data-vl] .ck-gruppo > header > i {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.6rem;
+  background: var(--ck-gruppo-bg);
+  color: var(--ck-gruppo);
+}
+
+[data-vl] .ck-gruppo > header svg { width: 1rem; height: 1rem; }
+[data-vl] .ck-gruppo > header > span { display: grid; flex: 1; min-width: 0; }
+[data-vl] .ck-gruppo > header strong { font-size: 0.875rem; font-weight: 700; color: var(--vl-ink); }
+[data-vl] .ck-gruppo > header small { font-size: 0.72rem; line-height: 1.3; color: var(--vl-ink-2); }
+
+[data-vl] .ck-gruppo > header > b {
+  flex: none;
+  font-size: 0.82rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl] .ck-gruppo ol { display: grid; gap: 0.3rem; }
+
+[data-vl] .ck-voce {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-right: 0.45rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 0 0 1px var(--vl-line) inset;
+  scroll-margin: 5rem 1rem 1rem;
+  transition: background-color 140ms ease, box-shadow 140ms ease;
+}
+
+[data-vl] .ck-voce:hover { background: var(--vl-hover); }
+
+[data-vl] .ck-voce[data-attiva] {
+  background: var(--vl-now-tint);
+  box-shadow: 0 0 0 1.5px var(--vl-accent) inset;
+}
+
+[data-vl] .ck-voce-corpo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.55rem 0.2rem 0.55rem 0.7rem;
+  border-radius: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-vl] .ck-voce-avatar { position: relative; flex: none; display: inline-flex; }
+
+/* lux.css nasconde gli avatar sul telefono: qui portano la spunta del contatto. */
+[data-vl] .ck-voce-avatar .vl-avatar, [data-vl] .ck-focus-testa .vl-avatar { display: inline-flex; }
+
+[data-vl] .ck-voce-avatar > i {
+  position: absolute;
+  right: -0.2rem;
+  bottom: -0.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 999px;
+  background: var(--vl-ok-fg);
+  color: #ffffff;
+  box-shadow: 0 0 0 2px var(--card);
+  animation: ck-spunta 260ms cubic-bezier(0.2, 0.9, 0.3, 1.4) backwards;
+}
+
+.dark [data-vl] .ck-voce-avatar > i { color: #132542; }
+[data-vl] .ck-voce-avatar svg { width: 0.62rem; height: 0.62rem; stroke-width: 3.4; }
+
+@keyframes ck-spunta {
+  from { transform: scale(0); }
+}
+
+[data-vl] .ck-voce-testo { display: grid; gap: 0.15rem; min-width: 0; }
+
+[data-vl] .ck-voce-testo strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.1rem 0.45rem;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--vl-ink);
+}
+
+[data-vl] .ck-voce-testo em {
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--vl-accent-ink);
+}
+
+[data-vl] .ck-voce-testo small {
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .ck-voce[data-fatto] .ck-voce-testo strong { color: var(--vl-ink-2); }
+
+[data-vl] .ck-segnali { display: flex; flex-wrap: wrap; gap: 0.2rem; }
+
+[data-vl] .ck-voce-azioni {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+[data-vl] .ck-senza-numero {
+  display: inline-flex;
+  justify-content: center;
+  width: 2.25rem;
+  color: var(--vl-ink-3);
+}
+
+/* Spunte */
+
+[data-vl] .ck-spunte { display: inline-flex; gap: 0.25rem; }
+
+[data-vl] .ck-spunta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  min-height: 2.25rem;
+  padding: 0 0.5rem 0 0.42rem;
+  border-radius: 0.6rem;
+  box-shadow: 0 0 0 1px var(--vl-line-strong) inset;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+[data-vl] .ck-spunta[data-attuale] { box-shadow: 0 0 0 1.5px var(--vl-accent) inset; color: var(--vl-ink); }
+[data-vl] .ck-spunta:hover { background: var(--vl-hover); color: var(--vl-ink); }
+
+[data-vl] .ck-spunta > i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 0.28rem;
+  box-shadow: 0 0 0 1.5px var(--vl-line-strong) inset;
+}
+
+[data-vl] .ck-spunta svg { width: 0.7rem; height: 0.7rem; stroke-width: 3.2; }
+
+[data-vl] .ck-spunta[aria-checked="true"] {
+  background: var(--vl-ok-bg);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--vl-ok-fg) 40%, transparent) inset;
+  color: var(--vl-ok-fg);
+}
+
+[data-vl] .ck-spunta[aria-checked="true"] > i { background: var(--vl-ok-fg); box-shadow: none; color: #ffffff; }
+.dark [data-vl] .ck-spunta[aria-checked="true"] > i { color: #132542; }
+
+/* ───────────────────────── Scheda ───────────────────────── */
+
+/* La testata dell'app resta in alto mentre si scorre: la scheda si ferma sotto di lei. */
+[data-vl] .ck-focus {
+  --ck-bordo: 1.15rem;
+  position: sticky;
+  top: 4.75rem;
+  max-height: calc(100svh - 5.5rem);
+  overflow-y: auto;
+  padding: var(--ck-bordo);
+  border-radius: 1.1rem;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--vl-line) inset, var(--vl-shadow);
+}
+
+[data-vl] .ck-scheda { display: grid; gap: 0.9rem; min-width: 0; }
+
+/* I segnali sono già detti a parole nel riquadro sopra. */
+[data-vl] .ck-risposte > div > :first-child { display: none; }
+
+[data-vl] .ck-focus-testa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.7rem;
+}
+
+[data-vl] .ck-focus-testa .vl-avatar { width: 2.6rem; height: 2.6rem; font-size: 0.85rem; }
+[data-vl] .ck-focus-testa > span:nth-child(2) { display: grid; flex: 1; min-width: 10rem; }
+[data-vl] .ck-focus-testa strong { font-size: 1.15rem; font-weight: 750; letter-spacing: -0.015em; color: var(--vl-ink); }
+[data-vl] .ck-focus-testa small { font-size: 0.78rem; color: var(--vl-ink-2); }
+
+[data-vl] .ck-perche {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.8rem;
+  background: var(--vl-ok-bg);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+[data-vl] .ck-perche p { color: var(--vl-ok-fg); }
+[data-vl] .ck-perche[data-azione="MESSAGGIO_DEDICATO"] { background: var(--vl-danger-bg); }
+[data-vl] .ck-perche[data-azione="MESSAGGIO_DEDICATO"] p { color: var(--vl-danger-fg); }
+[data-vl] .ck-perche[data-azione="SOLLECITO"] { background: var(--vl-warn-bg); }
+[data-vl] .ck-perche[data-azione="SOLLECITO"] p { color: var(--vl-warn-fg); }
+
+[data-vl] .ck-gesti {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+[data-vl] .ck-senza-cellulare { font-size: 0.82rem; color: var(--vl-ink-2); }
+
+[data-vl] .ck-avanti {
+  position: sticky;
+  bottom: calc(-1 * var(--ck-bordo, 1.5rem));
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 calc(-1 * var(--ck-bordo, 1.5rem)) calc(-1 * var(--ck-bordo, 1.5rem));
+  padding: 0.7rem var(--ck-bordo, 1.5rem);
+  border-top: 1px solid var(--vl-line);
+  background: var(--card);
+}
+
+[data-vl] .ck-avanti > span {
+  min-width: 3.4rem;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .ck-avanti-cta {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border-radius: 0.75rem;
+  background: var(--vl-cta-bg);
+  font-size: 0.86rem;
+  font-weight: 750;
+  color: var(--vl-cta-ink);
+  cursor: pointer;
+  transition: filter 160ms ease;
+}
+
+[data-vl] .ck-avanti-cta:hover { filter: brightness(1.06); }
+
+[data-vl] .ck-focus-vuoto {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+[data-vl] .ck-focus-vuoto > svg { width: 1.9rem; height: 1.9rem; margin-bottom: 0.3rem; color: var(--vl-accent-strong); }
+[data-vl] .ck-focus-vuoto[data-finito] > svg { color: var(--vl-ok-fg); }
+[data-vl] .ck-focus-vuoto strong { font-size: 1.05rem; font-weight: 750; color: var(--vl-ink); }
+[data-vl] .ck-focus-vuoto p { max-width: 22rem; margin-bottom: 0.6rem; font-size: 0.85rem; color: var(--vl-ink-2); }
+
+/* ───────────────────────── Spazi stretti ───────────────────────── */
+
+/* Stessa regola con cui lux.css passa a due colonne: dipende dalla sidebar, non dallo schermo. */
+@container page (max-width: 899px) {
+  [data-vl] .ck-pagina .vl-kpi:last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 1099px) {
+  [data-vl] .ck-plancia { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+}
+
+@media (max-width: 639px) {
+  [data-vl] .ck-pagina { gap: 1rem; }
+  [data-vl] .ck-plancia { margin-top: 1rem; }
+  [data-vl] .vl-hero-actions:has(.ck-settimana) { flex-direction: row; flex-wrap: nowrap; align-items: stretch; width: 100%; }
+  [data-vl] .ck-settimana > span { min-width: 3.4rem; font-size: 0.82rem; }
+  [data-vl] .ck-settimana > button { width: 1.9rem; }
+  [data-vl] .vl-hero-actions:has(.ck-settimana) .vl-cta { flex: 1; min-width: 0; padding-right: 0.8rem; font-size: 0.85rem; gap: 0.4rem; }
+  [data-vl] .ck-filtri { width: 100%; }
+  [data-vl] .ck-segmenti { display: flex; width: 100%; }
+  [data-vl] .ck-segmenti > button { flex: 1; padding-inline: 0.3rem; }
+  [data-vl] .ck-voce { flex-wrap: wrap; padding: 0 0.5rem 0.5rem 0; }
+  [data-vl] .ck-voce-corpo { flex-basis: 100%; }
+  [data-vl] .ck-voce-azioni { width: 100%; justify-content: flex-end; }
+  [data-vl] .ck-spunta { min-height: 2.6rem; padding-inline: 0.7rem 0.8rem; }
+  [data-vl] .ck-scheda { --ck-bordo: 1rem; }
+  [data-vl] .ck-avanti-cta { padding-inline: 0.55rem; font-size: 0.82rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vl] .ck-gettone, [data-vl] .ck-voce-avatar > i { animation: none; }
+  [data-vl] .ck-gettone { transition: none; }
+  [data-vl] .ck-gettone:hover, [data-vl] .ck-prossimo:hover svg { transform: none; }
+}

@@ -51,6 +51,9 @@ public interface VisitaRepository extends JpaRepository<Visita, Long> {
 
     Optional<Visita> findByGoogleEventId(String googleEventId);
 
+    @Query("select v from Visita v join fetch v.paziente where v.googleEventId in :ids")
+    List<Visita> findByGoogleEventIdIn(@Param("ids") Collection<String> ids);
+
     @Query("""
             select v.paziente.id as pazienteId, min(v.inizio) as inizio from Visita v
             where v.stato = 'PROGRAMMATA' and v.inizio >= :da

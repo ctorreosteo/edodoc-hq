@@ -71,6 +71,10 @@ public class GmailPosta implements CasellaPosta {
             }
             throw new IllegalStateException("Gmail non risponde, riprova tra poco", e);
         } catch (IOException | GeneralSecurityException e) {
+            if (e instanceof IOException io && GoogleClients.delegaNegata(io)) {
+                logger.warn("Delega Gmail non autorizzata: {}", e.getMessage());
+                throw new IntegrazioneDisattivataException("Google non autorizza l'accesso alla casella: controlla la delega gmail.modify");
+            }
             logger.warn("Gmail non raggiungibile: {}", e.getMessage());
             throw new IllegalStateException("Gmail non risponde, riprova tra poco", e);
         }

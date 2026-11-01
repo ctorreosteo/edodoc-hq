@@ -141,6 +141,7 @@ export const financeService = {
   eliminaMovimento: (id: number) => api.delete<void>(`/finance/movimenti/${id}`),
   scadenze: (anno: number) => api.get<ScadenzaFiscale[]>("/finance/scadenze", { anno }),
   creaScadenza: (corpo: ScadenzaForm) => api.post<ScadenzaFiscale>("/finance/scadenze", corpo),
+  aggiornaScadenza: (id: number, corpo: ScadenzaForm) => api.put<ScadenzaFiscale>(`/finance/scadenze/${id}`, corpo),
   pagaScadenza: (id: number, data: string, importo: number) => api.post<ScadenzaFiscale>(`/finance/scadenze/${id}/paga`, { data, importo }),
   eliminaScadenza: (id: number) => api.delete<void>(`/finance/scadenze/${id}`),
 }

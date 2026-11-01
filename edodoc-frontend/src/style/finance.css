@@ -1,0 +1,697 @@
+/*
+  Pagina Finance: plancia nell'hero, conto del mese, agenda fiscale e registro.
+  Valori e titoli sullo stesso font del resto del gestionale; le cifre in colonna sono tabular-nums,
+  quelle grandi restano proporzionali. Il testo non prende mai il colore delle serie.
+*/
+
+[data-vl] {
+  --fi-pazienti: var(--grafico-blu);
+  --fi-youtube: var(--grafico-arancione);
+  --fi-altro: #1E9E8A;
+  --fi-spese: #94A3B8;
+}
+
+.dark [data-vl] {
+  --fi-altro: #2FA48E;
+}
+
+[data-vl] [data-serie="pazienti"], [data-vl] [data-serie="resta"] { background: var(--fi-pazienti); }
+[data-vl] [data-serie="youtube"], [data-vl] [data-serie="fisco"] { background: var(--fi-youtube); }
+[data-vl] [data-serie="altro"] { background: var(--fi-altro); }
+[data-vl] [data-serie="spese"] { background: var(--fi-spese); }
+
+[data-vl] .fi-pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+  transition: opacity 180ms ease;
+}
+
+[data-vl] .fi-pagina[data-in-attesa] { opacity: 0.6; }
+[data-vl] .fi-pagina > .vl-hero { margin-bottom: 0; }
+[data-vl] .fi-pagina .vl-kpi-foot { white-space: normal; line-height: 1.3; }
+
+/* ───────────────────────── Anno ───────────────────────── */
+
+[data-vl] .fi-anno {
+  display: inline-flex;
+  align-items: center;
+  height: 3rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--vl-hero-glass);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+}
+
+[data-vl] .fi-anno > span {
+  min-width: 3.1rem;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+[data-vl] .fi-anno > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  color: var(--vl-hero-ink-2);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+[data-vl] .fi-anno > button:hover:not(:disabled) { background: var(--vl-hero-glass-hover); color: #ffffff; }
+[data-vl] .fi-anno > button:disabled { opacity: 0.35; cursor: default; }
+[data-vl] .fi-anno > button:focus-visible { outline: 2px solid #ffffff; outline-offset: -2px; }
+
+/* ───────────────────────── Plancia ───────────────────────── */
+
+[data-vl] .fi-plancia {
+  display: grid;
+  grid-template-columns: minmax(19rem, 25rem) minmax(0, 1fr);
+  gap: 2rem;
+  margin-top: 1.6rem;
+}
+
+[data-vl] .fi-traguardo { min-width: 0; }
+
+[data-vl] .fi-traguardo-etichetta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--vl-hero-ink-2);
+}
+
+[data-vl] .fi-traguardo-valore {
+  margin-top: 0.15rem;
+  font-size: clamp(2.75rem, 2rem + 2.6vw, 4rem);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  color: #ffffff;
+}
+
+[data-vl] .fi-verdetto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+  padding: 0.38rem 0.8rem 0.38rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+}
+
+[data-vl] .fi-verdetto[data-tono="ok"] { background: rgba(74, 222, 128, 0.17); box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.42) inset; }
+[data-vl] .fi-verdetto[data-tono="warn"] { background: rgba(251, 191, 36, 0.17); box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.45) inset; }
+[data-vl] .fi-verdetto[data-tono="danger"] { background: rgba(248, 113, 113, 0.22); box-shadow: 0 0 0 1px rgba(252, 165, 165, 0.55) inset; }
+
+[data-vl] .fi-scenari {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 1.1rem;
+  border-top: 1px solid var(--vl-hero-line);
+}
+
+[data-vl] .fi-scenari > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--vl-hero-line);
+}
+
+[data-vl] .fi-scenari > li > i {
+  flex: none;
+  width: 1.1rem;
+  margin-top: 0.5rem;
+  border-top: 2.5px solid currentColor;
+}
+
+[data-vl] .fi-scenari > li > i[data-tratteggio] { border-top-style: dashed; border-top-width: 2px; }
+
+[data-vl] .fi-scenario-nome, [data-vl] .fi-scenario-valori { display: grid; gap: 0.08rem; min-width: 0; }
+[data-vl] .fi-scenario-nome { flex: 1; }
+[data-vl] .fi-scenario-valori { flex: none; text-align: right; }
+
+[data-vl] .fi-scenari strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+[data-vl] .fi-scenario-valori strong { font-variant-numeric: tabular-nums; }
+
+[data-vl] .fi-scenari small {
+  font-size: 0.7rem;
+  line-height: 1.3;
+  color: var(--vl-hero-ink-2);
+}
+
+[data-vl] .fi-curva {
+  position: relative;
+  min-width: 0;
+  min-height: 19rem;
+  height: 100%;
+}
+
+/* Il riquadro del grafico riempie la colonna: l'altezza la dà sempre l'antenato, non il contenuto. */
+[data-vl] .fi-curva > * { position: absolute !important; inset: 0; }
+
+.fi-curva-etichetta {
+  font-size: 11px;
+  font-weight: 600;
+  fill: rgba(255, 255, 255, 0.82);
+}
+
+[data-vl] .fi-curva-tip {
+  min-width: 10rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(16, 32, 56, 0.92);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14) inset, 0 16px 30px -14px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+[data-vl] .fi-curva-tip-mese {
+  margin-bottom: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+[data-vl] .fi-curva-tip-riga {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-vl] .fi-curva-tip-riga i { width: 0.75rem; height: 2px; border-radius: 2px; }
+
+[data-vl] .fi-curva-tip-riga strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+/* ───────────────────────── Segmenti ───────────────────────── */
+
+[data-vl] .fi-segmenti {
+  display: inline-flex;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: 0.7rem;
+  background: var(--vl-thead);
+}
+
+[data-vl] .fi-segmenti > button {
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--vl-ink-2);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+[data-vl] .fi-segmenti > button:hover { color: var(--vl-ink); }
+[data-vl] .fi-segmenti > button[aria-pressed="true"] { background: var(--vl-surface); color: var(--vl-ink); box-shadow: var(--vl-shadow); }
+.dark [data-vl] .fi-segmenti { background: rgba(255, 255, 255, 0.07); }
+.dark [data-vl] .fi-segmenti > button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.14); }
+[data-vl] .fi-segmenti > button:focus-visible { outline: 2px solid var(--vl-ring); outline-offset: 1px; }
+
+/* ───────────────────────── Mese per mese ───────────────────────── */
+
+[data-vl] .fi-mesi-griglia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 21rem;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+[data-vl] .fi-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .fi-legenda > span { display: inline-flex; align-items: center; gap: 0.4rem; }
+[data-vl] .fi-legenda i { width: 0.65rem; height: 0.65rem; border-radius: 3px; }
+
+[data-vl] .fi-colonne {
+  position: relative;
+  display: grid;
+  padding-left: 2.1rem;
+}
+
+[data-vl] .fi-tacche {
+  position: absolute;
+  inset: 0 0 1.9rem 0;
+  pointer-events: none;
+}
+
+[data-vl] .fi-tacche > span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--vl-line);
+  font-size: 0.68rem;
+  line-height: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-3);
+}
+
+[data-vl] .fi-mesi {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+[data-vl] .fi-mese {
+  display: grid;
+  grid-template-rows: 17rem 1.9rem;
+  min-width: 0;
+  border-radius: 0.6rem 0.6rem 0.6rem 0.6rem;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+[data-vl] .fi-mese:focus { outline: none; }
+[data-vl] .fi-mese:focus-visible { outline: 2px solid var(--vl-ring); outline-offset: -2px; }
+[data-vl] .fi-mese[data-attivo], [data-vl] .fi-mese[aria-pressed="true"] { background: var(--vl-hover); }
+
+[data-vl] .fi-mese-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+[data-vl] .fi-pila {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(1.5rem, 60%);
+  min-height: 3px;
+  transform-origin: bottom;
+  transition: filter 160ms ease;
+  animation: fi-cresci 620ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+[data-vl] .fi-pila > i { min-height: 1px; }
+[data-vl] .fi-pila > i:first-of-type { border-radius: 4px 4px 0 0; }
+[data-vl] .fi-mese[data-attivo] .fi-pila { filter: brightness(1.12); }
+
+[data-vl] .fi-pila > b {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 0.3rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 0.35rem;
+  background: var(--card);
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl] .fi-mese-nome {
+  align-self: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--vl-ink-3);
+}
+
+[data-vl] .fi-mese[data-attivo] .fi-mese-nome,
+[data-vl] .fi-mese[aria-pressed="true"] .fi-mese-nome { color: var(--vl-ink); }
+
+@keyframes fi-cresci {
+  from { transform: scaleY(0); }
+}
+
+/* Conto */
+
+[data-vl] .fi-conto {
+  min-width: 0;
+  padding: 1.15rem 1.2rem 0.6rem;
+  border-radius: 1rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--vl-line) inset;
+}
+
+[data-vl] .fi-conto-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 1.5rem;
+}
+
+[data-vl] .fi-conto-testa p {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .fi-conto-testa button {
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: 999px;
+  color: var(--vl-ink-2);
+  cursor: pointer;
+}
+
+[data-vl] .fi-conto-testa button:hover { background: var(--vl-hover); color: var(--vl-ink); }
+
+[data-vl] .fi-conto-resta {
+  margin-top: 0.1rem;
+  font-size: 2.15rem;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--vl-ink);
+}
+
+[data-vl] .fi-conto-nota {
+  font-size: 0.78rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .fi-quote {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  margin-top: 0.8rem;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+[data-vl] .fi-conto-righe { margin-top: 0.55rem; }
+
+[data-vl] .fi-conto-righe > li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+  font-size: 0.8rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .fi-conto-righe > li > span { display: inline-flex; align-items: center; gap: 0.45rem; min-width: 0; }
+[data-vl] .fi-conto-righe > li > span:last-child { flex: none; font-variant-numeric: tabular-nums; }
+[data-vl] .fi-conto-righe i { width: 0.5rem; height: 0.5rem; border-radius: 999px; }
+
+[data-vl] .fi-conto-righe > li[data-forte] {
+  margin: 0.15rem 0;
+  border-top: 1px solid var(--vl-line-strong);
+  padding-top: 0.45rem;
+  font-weight: 700;
+  color: var(--vl-ink);
+}
+
+/* ───────────────────────── Agenda ───────────────────────── */
+
+[data-vl] .fi-agenda { display: grid; gap: 0.6rem; }
+
+[data-vl] .fi-agenda > li {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.9rem;
+  box-shadow: 0 0 0 1px var(--vl-line) inset;
+  transition: background-color 160ms ease;
+}
+
+[data-vl] .fi-agenda > li:hover { background: var(--vl-hover); }
+
+[data-vl] .fi-agenda > li[data-prossima] {
+  background: var(--vl-now-tint);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--vl-accent) 40%, transparent) inset;
+}
+
+[data-vl] .fi-agenda-data {
+  display: grid;
+  justify-items: center;
+  padding: 0.3rem 0;
+  border-radius: 0.65rem;
+  background: var(--vl-thead);
+}
+
+.dark [data-vl] .fi-agenda-data { background: rgba(255, 255, 255, 0.08); }
+
+[data-vl] .fi-agenda-data strong {
+  font-size: 1.15rem;
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--vl-ink);
+}
+
+[data-vl] .fi-agenda-data span {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .fi-agenda-corpo {
+  display: grid;
+  min-width: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-vl] .fi-agenda-corpo strong {
+  font-size: 0.875rem;
+  line-height: 1.25;
+  font-weight: 650;
+  color: var(--vl-ink);
+}
+
+[data-vl] .fi-agenda-corpo span { font-size: 0.75rem; color: var(--vl-ink-2); }
+
+[data-vl] .fi-agenda-stato {
+  display: grid;
+  justify-items: end;
+  gap: 0.2rem;
+}
+
+[data-vl] .fi-agenda-stato strong {
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl] .fi-agenda-azioni { display: flex; align-items: center; gap: 0.15rem; }
+
+/* La matita serve solo dove non c'è il cursore a far capire che la riga è toccabile. */
+[data-vl] .fi-agenda-azioni button:nth-child(2) { display: none; }
+
+[data-vl] .fi-tutto-pagato {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--vl-ok-fg);
+}
+
+[data-vl] .fi-pagate { margin-top: 0.75rem; }
+
+[data-vl] .fi-pagate summary {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--vl-ink-2);
+  cursor: pointer;
+}
+
+[data-vl] .fi-pagate ul { display: grid; gap: 0.3rem; margin-top: 0.5rem; }
+
+[data-vl] .fi-pagate li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.78rem;
+  color: var(--vl-ink-2);
+}
+
+/* ───────────────────────── Registro ───────────────────────── */
+
+[data-vl] .fi-registro-filtri {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+[data-vl] .fi-cerca {
+  position: relative;
+  flex: 1;
+  min-width: 8rem;
+}
+
+[data-vl] .fi-cerca > svg {
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--vl-ink-3);
+  pointer-events: none;
+}
+
+[data-vl] .fi-cerca input { padding-left: 2rem; }
+
+[data-vl] .fi-filtro-mese {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--vl-now-tint);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--vl-accent-ink);
+  cursor: pointer;
+}
+
+[data-vl] .fi-registro {
+  display: grid;
+  gap: 0.85rem;
+  max-height: 26rem;
+  overflow-y: auto;
+  padding-right: 0.15rem;
+}
+
+[data-vl] .fi-registro header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0.1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .fi-registro header span:last-child { font-variant-numeric: tabular-nums; }
+
+[data-vl] .fi-registro li {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  border-radius: 0.75rem;
+  transition: background-color 160ms ease;
+}
+
+[data-vl] .fi-registro li:hover { background: var(--vl-hover); }
+[data-vl] .fi-registro li > button:last-child { opacity: 0; transition: opacity 160ms ease; }
+[data-vl] .fi-registro li:hover > button:last-child,
+[data-vl] .fi-registro li > button:last-child:focus-visible { opacity: 1; }
+
+[data-vl] .fi-movimento {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+  padding: 0.45rem 0.4rem;
+  border-radius: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-vl] .fi-movimento:focus-visible { outline: 2px solid var(--vl-ring); outline-offset: -2px; }
+
+[data-vl] .fi-movimento-segno {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+}
+
+[data-vl] .fi-movimento-segno[data-tipo="ENTRATA"] { background: var(--vl-ok-bg); color: var(--vl-ok-fg); }
+[data-vl] .fi-movimento-segno[data-tipo="USCITA"] { background: var(--vl-muted-bg); color: var(--vl-muted-fg); }
+
+[data-vl] .fi-movimento-testo { display: grid; flex: 1; min-width: 0; }
+
+[data-vl] .fi-movimento-testo strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--vl-ink);
+}
+
+[data-vl] .fi-movimento-testo small { font-size: 0.72rem; color: var(--vl-ink-2); }
+
+[data-vl] .fi-movimento-importo {
+  flex: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+/* ───────────────────────── Spazi stretti ───────────────────────── */
+
+@media (hover: none) {
+  [data-vl] .fi-registro li > button:last-child { opacity: 1; }
+  [data-vl] .fi-agenda-azioni button:nth-child(2) { display: inline-flex; }
+}
+
+@media (max-width: 1279px) {
+  [data-vl] .fi-mesi-griglia { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+}
+
+@media (max-width: 1099px) {
+  [data-vl] .fi-plancia { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  [data-vl] .fi-curva { height: 19rem; }
+}
+
+@media (max-width: 639px) {
+  [data-vl] .fi-pagina { gap: 1rem; }
+  [data-vl] .fi-plancia { margin-top: 1rem; gap: 0.5rem; }
+  /* Sul telefono la previsione fa da legenda: sta subito sotto il grafico. */
+  [data-vl] .fi-traguardo { display: contents; }
+  [data-vl] .fi-curva { order: 1; }
+  [data-vl] .fi-scenari { order: 2; margin-top: 0; }
+  [data-vl] .fi-traguardo-valore { margin-top: -0.35rem; }
+  [data-vl] .fi-verdetto { justify-self: start; margin: 0 0 0.5rem; }
+  [data-vl] .vl-hero-actions:has(.fi-anno) { flex-direction: row; flex-wrap: nowrap; align-items: stretch; width: 100%; }
+  [data-vl] .fi-anno > span { min-width: 2.7rem; font-size: 0.85rem; }
+  [data-vl] .fi-anno > button { width: 1.8rem; }
+  [data-vl] .vl-hero-actions:has(.fi-anno) .vl-cta { flex: 1; min-width: 0; padding-right: 0.8rem; font-size: 0.85rem; gap: 0.4rem; }
+  [data-vl] .fi-curva { height: 16.5rem; min-height: 0; margin-inline: -0.35rem; }
+  [data-vl] .fi-colonne { padding-left: 0; }
+  [data-vl] .fi-tacche > span { font-size: 0; }
+  [data-vl] .fi-mese { grid-template-rows: 12rem 1.9rem; }
+  [data-vl] .fi-mese-nome { font-size: 0.62rem; }
+  [data-vl] .fi-pila { width: 62%; }
+  [data-vl] .fi-pila > b { display: none; }
+
+  [data-vl] .fi-pagina .vl-kpi:last-child .vl-kpi-value { font-size: 1.2rem; }
+  [data-vl] .fi-agenda > li { grid-template-columns: 3rem minmax(0, 1fr) auto; gap: 0.6rem 0.7rem; }
+  [data-vl] .fi-agenda-azioni { grid-column: 1 / -1; justify-content: flex-end; }
+  [data-vl] .fi-agenda-azioni button:first-child { margin-right: auto; }
+}

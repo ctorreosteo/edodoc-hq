@@ -1,4 +1,4 @@
-import { Mail, Banknote, CalendarDays, ClipboardCheck, FileText, GraduationCap, LayoutDashboard, ListChecks, LogOut, Settings, ShoppingBag, Users, Wallet, type LucideIcon } from "lucide-react"
+import { Mail, Banknote, CalendarDays, CalendarRange, ClipboardCheck, FileText, GraduationCap, LayoutDashboard, ListChecks, LogOut, Settings, ShoppingBag, Users, Wallet, type LucideIcon } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar"
 import { Logo } from "@/components/logo"
@@ -12,6 +12,7 @@ const GRUPPI: { titolo: string; voci: Voce[] }[] = [
     { titolo: "Dashboard", url: "/", icona: LayoutDashboard },
     { titolo: "Pazienti", url: "/pazienti", icona: Users },
     { titolo: "Visite", url: "/visite", icona: CalendarDays },
+    { titolo: "Calendario", url: "/calendario", icona: CalendarRange },
     { titolo: "Check settimanale", url: "/check", icona: ClipboardCheck },
     { titolo: "Email", url: "/email", icona: Mail },
     { titolo: "Task", url: "/task", icona: ListChecks },

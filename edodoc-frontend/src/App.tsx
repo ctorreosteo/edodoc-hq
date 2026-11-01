@@ -11,6 +11,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AuthProvider, useAuth } from "@/contexts/auth-context"
 import { AzioniProvider } from "@/contexts/azioni-context"
 import Acquisti from "@/pages/Acquisti"
+import Calendario from "@/pages/Calendario"
 import Check from "@/pages/Check"
 import Corsi from "@/pages/Corsi"
 import Corso from "@/pages/Corso"
@@ -26,7 +27,7 @@ import Task from "@/pages/Task"
 import Visite from "@/pages/Visite"
 
 const TITOLI: Record<string, string> = {
-  "/": "Dashboard", "/pazienti": "Pazienti", "/visite": "Visite", "/check": "Check settimanale", "/email": "Email", "/task": "Task", "/corsi": "Corsi",
+  "/": "Dashboard", "/pazienti": "Pazienti", "/visite": "Visite", "/calendario": "Calendario", "/check": "Check settimanale", "/email": "Email", "/task": "Task", "/corsi": "Corsi",
   "/acquisti": "Acquisti", "/pagamenti": "Pagamenti", "/fatture": "Fatture", "/finance": "Finance", "/impostazioni": "Impostazioni",
 }
 
@@ -54,6 +55,7 @@ function Gestionale() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/pazienti" element={<Pazienti />} />
                 <Route path="/visite" element={<Visite />} />
+                <Route path="/calendario" element={<Calendario />} />
                 <Route path="/check" element={<Check />} />
                 <Route path="/email" element={<Email />} />
                 <Route path="/task" element={<Task />} />

@@ -68,6 +68,7 @@ export const api = {
     json<T>("GET", `${percorso}${query(parametri)}`),
   post: <T>(percorso: string, corpo?: unknown) => json<T>("POST", percorso, corpo),
   put: <T>(percorso: string, corpo: unknown) => json<T>("PUT", percorso, corpo),
+  patch: <T>(percorso: string, corpo: unknown) => json<T>("PATCH", percorso, corpo),
   delete: <T>(percorso: string) => json<T>("DELETE", percorso),
   blob: async (percorso: string) => (await chiama("GET", percorso)).blob(),
 }

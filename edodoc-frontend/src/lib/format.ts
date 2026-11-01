@@ -1,8 +1,10 @@
 import { format, parseISO } from "date-fns"
 import { it } from "date-fns/locale"
 
-const EURO = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" })
-const EURO_TONDI = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 })
+/* In italiano Intl non separa le migliaia sotto 10.000: senza "always" 3550 € starebbe accanto a 88.550 €. */
+const SEMPRE = "always" as unknown as boolean // tipi di TypeScript fermi al booleano
+const EURO = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", useGrouping: SEMPRE })
+const EURO_TONDI = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0, useGrouping: SEMPRE })
 
 export const euro = (valore: number | null | undefined) => EURO.format(valore ?? 0)
 export const euroTondi = (valore: number | null | undefined) => EURO_TONDI.format(valore ?? 0)

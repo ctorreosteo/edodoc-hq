@@ -49,6 +49,7 @@ export function TaskDialog({ open, onOpenChange, task, iniziali }: {
       setPaziente(task.pazienteId)
     } else {
       applicaPreset(iniziali?.tipoCodice ?? "ALTRO")
+      if (iniziali?.scadenza) setScadenza(iniziali.scadenza)
       setDescrizione("")
       setPaziente(iniziali?.pazienteId ?? null)
     }

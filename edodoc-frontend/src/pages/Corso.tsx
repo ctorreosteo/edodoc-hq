@@ -1,22 +1,25 @@
-import { ArrowDown, ArrowLeft, ArrowUp, Eye, EyeOff, FileText, GripVertical, Layers, ListVideo, Pencil, Plus, Trash2, Video } from "lucide-react"
+import { ArrowDown, ArrowLeft, ArrowUp, Eye, EyeOff, FileText, GripVertical, Pencil, Plus, Trash2, Video } from "lucide-react"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
+import { CorsoFlusso, CosaManca } from "@/components/corsi/corso-flusso"
 import { StatoLezione } from "@/components/corsi/corso-ui"
 import { CorsoDialog } from "@/components/forms/corso-dialog"
 import { LezioneDialog } from "@/components/forms/lezione-dialog"
 import { ModuloDialog } from "@/components/forms/modulo-dialog"
-import { LuxHero, LuxKpi } from "@/components/lux"
-import { Cta, Pagina, Riquadro } from "@/components/pagina"
+import { LuxHero } from "@/components/lux"
+import { Pagina, Riquadro } from "@/components/pagina"
 import { Caricamento, Errore, Vuoto } from "@/components/stati"
 import { Button } from "@/components/ui/button"
 import { useAzioni } from "@/contexts/azioni-context"
 import { useDati } from "@/hooks/use-dati"
 import { useRiordino } from "@/hooks/use-riordino"
+import { contiLezioni, faseCorso } from "@/lib/corsi"
 import { durata } from "@/lib/format"
 import { toast, toastErrore } from "@/lib/toast"
 import { corsiService } from "@/services/gestionale"
 import type { ModuloConLezioni, RigaLezione, RigaModulo, TipoLezione } from "@/types"
 import "@/style/corsi.css"
+import "@/style/corsi-hq.css"
 
 const POLLING_MS = 5000
 
@@ -59,19 +62,17 @@ function RigaDiLezione({ lezione, numero, totale, trascina, sposta, onApri }: {
   })
   const TipoIcona = lezione.tipo === "VIDEO" ? Video : FileText
   return (
-    <li {...trascina} className="flex flex-wrap items-center gap-1 rounded-xl border bg-card px-2 py-1.5">
-      <GripVertical className="hidden size-4 shrink-0 cursor-grab opacity-40 sm:block" aria-hidden />
-      <button type="button" className="flex min-w-0 flex-1 basis-48 items-center gap-2 py-1 text-left" onClick={onApri}>
-        <TipoIcona className="size-4 shrink-0 opacity-60" aria-hidden />
-        <span className="min-w-0">
-          <span className="block truncate text-sm font-semibold">{lezione.titolo}</span>
-          <span className="block truncate text-xs text-muted-foreground">
-            {lezione.tipo === "VIDEO" ? "Video" : "Testo"}{lezione.durataSecondi ? ` · ${durata(lezione.durataSecondi)}` : ""}
-          </span>
+    <li {...trascina} className="cs-lezione">
+      <GripVertical className="cs-maniglia hidden sm:block" aria-hidden />
+      <button type="button" className="cs-lezione-apri" onClick={onApri}>
+        <span className="cs-lezione-tipo"><TipoIcona aria-hidden /></span>
+        <span className="cs-lezione-testo">
+          <span className="cs-lezione-titolo">{lezione.titolo}</span>
+          <span className="cs-lezione-meta">{lezione.tipo === "VIDEO" ? "Video" : "Testo"}{lezione.durataSecondi ? ` · ${durata(lezione.durataSecondi)}` : ""}</span>
         </span>
       </button>
       <StatoLezione lezione={lezione} />
-      <div className="ml-auto flex items-center">
+      <div className="cs-lezione-azioni">
         <Icona etichetta={lezione.pubblicata ? "Riporta in bozza" : "Pubblica"} onClick={() => void pubblica()} disabled={!lezione.completa && !lezione.pubblicata}>
           {lezione.pubblicata ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
         </Icona>
@@ -110,15 +111,17 @@ function SchedaModulo({ voce, numero, totale, trascina, sposta, onModifica, onLe
       azioni.aggiorna()
     },
   })
+  const pubblicate = contiLezioni(lezioni).pubblicate
   return (
-    <section {...trascina} className="grid min-w-0 gap-2 rounded-2xl border p-3">
-      <header className="flex flex-wrap items-center gap-1">
-        <GripVertical className="hidden size-4 shrink-0 cursor-grab opacity-40 sm:block" aria-hidden />
-        <div className="min-w-0 flex-1 basis-48 px-1">
-          <h2 className="truncate font-semibold">{numero}. {modulo.titolo}</h2>
-          {modulo.descrizione ? <p className="truncate text-xs text-muted-foreground">{modulo.descrizione}</p> : null}
+    <section {...trascina} className="cs-modulo">
+      <header className="cs-modulo-testa">
+        <GripVertical className="cs-maniglia hidden sm:block" aria-hidden />
+        <span className="cs-numero" aria-hidden>{numero}</span>
+        <div className="cs-modulo-nome">
+          <h2>{modulo.titolo}</h2>
+          <p>{lezioni.length > 0 ? `${pubblicate} su ${lezioni.length} pubblicate` : "Nessuna lezione"}{modulo.descrizione ? ` · ${modulo.descrizione}` : ""}</p>
         </div>
-        <div className="ml-auto flex items-center">
+        <div className="cs-modulo-azioni">
           <Icona etichetta="Sposta su" onClick={() => sposta(-1)} disabled={numero === 1}><ArrowUp aria-hidden /></Icona>
           <Icona etichetta="Sposta giù" onClick={() => sposta(1)} disabled={numero === totale}><ArrowDown aria-hidden /></Icona>
           <Icona etichetta="Modifica modulo" onClick={onModifica}><Pencil aria-hidden /></Icona>
@@ -126,14 +129,14 @@ function SchedaModulo({ voce, numero, totale, trascina, sposta, onModifica, onLe
         </div>
       </header>
       {riordino.lista.length > 0 ? (
-        <ol className="grid gap-1.5">
+        <ol className="cs-lezioni">
           {riordino.lista.map((l, i) => (
             <RigaDiLezione key={l.id} lezione={l} numero={i + 1} totale={riordino.lista.length} trascina={riordino.trascina(l.id)}
               sposta={(delta) => riordino.sposta(l.id, delta)} onApri={() => onLezione({ tipo: l.tipo, lezione: l })} />
           ))}
         </ol>
       ) : null}
-      <div className="flex flex-wrap gap-2">
+      <div className="cs-modulo-aggiungi">
         <Button type="button" variant="outline" size="sm" onClick={() => onLezione({ tipo: "VIDEO" })}><Video aria-hidden />Aggiungi video</Button>
         <Button type="button" variant="outline" size="sm" onClick={() => onLezione({ tipo: "TESTO" })}><FileText aria-hidden />Aggiungi testo</Button>
       </div>
@@ -177,6 +180,10 @@ function Costruttore({ corsoId }: { corsoId: number }) {
   if (!dati) return <Caricamento />
 
   const { corso } = dati
+  const conti = contiLezioni(dati.moduli.flatMap((m) => m.lezioni))
+  const fase = faseCorso(corso, conti)
+  const bloccato = !corso.pubblicato && conti.pubblicate === 0
+  const CtaIcona = corso.pubblicato ? EyeOff : Eye
   const pubblica = async () => {
     try {
       await corsiService.pubblica(corso.id, !corso.pubblicato)
@@ -199,36 +206,42 @@ function Costruttore({ corsoId }: { corsoId: number }) {
 
   return (
     <Pagina>
-      <Link to="/corsi" className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:underline"><ArrowLeft className="size-4" aria-hidden />Tutti i corsi</Link>
+      <div className="cs-pagina">
+        <Link to="/corsi" className="cs-torna"><ArrowLeft className="size-4" aria-hidden />Tutti i corsi</Link>
 
-      <LuxHero ariaLabel="Corso" eyebrow={corso.pubblicato ? "Pubblicato: visibile nell'app" : "Bozza: i pazienti non lo vedono"} title={corso.titolo}
-        subtitle={corso.descrizione ?? "Aggiungi una descrizione per dire cosa impara il paziente"}
-        actions={
-          <>
-            <button type="button" className="vl-ghost-btn" onClick={() => setModificaCorso(true)}><Pencil /><span>Modifica</span></button>
-            <button type="button" className="vl-ghost-btn" onClick={elimina}><Trash2 /><span>Elimina</span></button>
-            <Cta icona={corso.pubblicato ? EyeOff : Eye} onClick={() => void pubblica()}>{corso.pubblicato ? "Riporta in bozza" : "Pubblica corso"}</Cta>
-          </>
-        }>
-        <div className="vl-kpis vl-kpis--3">
-          <LuxKpi icon={<Layers className="size-4" />} label="Moduli" value={corso.moduli} />
-          <LuxKpi icon={<ListVideo className="size-4" />} label="Lezioni pubblicate" value={corso.lezioniPubblicate} foot={`su ${corso.lezioni}`} />
-          <LuxKpi icon={<Video className="size-4" />} label="Video" value={durata(corso.secondiVideo)} />
+        <LuxHero ariaLabel="Corso" eyebrow={corso.pubblicato ? "Pubblicato: visibile nell'app" : "Bozza: i pazienti non lo vedono"} title={corso.titolo}
+          subtitle={corso.descrizione ?? "Aggiungi una descrizione per dire cosa impara il paziente"}
+          actions={
+            <>
+              <button type="button" className="vl-ghost-btn" onClick={() => setModificaCorso(true)}><Pencil /><span>Modifica</span></button>
+              <button type="button" className="vl-ghost-btn" onClick={elimina}><Trash2 /><span>Elimina</span></button>
+              <button type="button" className="vl-cta cs-cta" disabled={bloccato} title={bloccato ? "Serve almeno una lezione pubblicata" : undefined} onClick={() => void pubblica()}>
+                <span className="vl-cta-icon" aria-hidden><CtaIcona className="size-4" /></span>
+                <span className="vl-cta-label">{corso.pubblicato ? "Riporta in bozza" : "Pubblica corso"}</span>
+              </button>
+            </>
+          }>
+          <CorsoFlusso corso={corso} conti={conti} fase={fase} onCopertina={() => setModificaCorso(true)} />
+        </LuxHero>
+
+        <div className="cs-corpo" data-pieno={conti.totali === 0 ? "" : undefined}>
+          <Riquadro titolo="Moduli e lezioni" conteggio={corso.moduli} descrizione="Trascina per cambiare l'ordine. Ogni lezione si pubblica da sola: l'occhio la mostra ai pazienti"
+            azioni={<Button variant="outline" size="sm" onClick={() => setFinestraModulo({})}><Plus aria-hidden />Nuovo modulo</Button>}>
+            {riordino.lista.length === 0 ? <Vuoto titolo="Ancora nessun modulo" descrizione="Crea il primo modulo, poi aggiungi video e lezioni scritte" /> : (
+              <div className="cs-moduli">
+                {riordino.lista.map(({ id, voce }, i) => (
+                  <SchedaModulo key={id} voce={voce} numero={i + 1} totale={riordino.lista.length} trascina={riordino.trascina(id)}
+                    sposta={(delta) => riordino.sposta(id, delta)} onModifica={() => setFinestraModulo({ modulo: voce.modulo })}
+                    onLezione={(f) => setFinestraLezione({ ...f, moduloId: id })} />
+                ))}
+              </div>
+            )}
+          </Riquadro>
+          {conti.totali > 0 ? (
+            <CosaManca corso={corso} moduli={dati.moduli} conti={conti} onLezione={(moduloId, lezione) => setFinestraLezione({ moduloId, tipo: lezione.tipo, lezione })} />
+          ) : null}
         </div>
-      </LuxHero>
-
-      <Riquadro titolo="Moduli e lezioni" conteggio={corso.moduli} descrizione="Trascina per cambiare l'ordine. Ogni lezione si pubblica da sola: l'occhio la mostra ai pazienti"
-        azioni={<Button variant="outline" size="sm" onClick={() => setFinestraModulo({})}><Plus aria-hidden />Nuovo modulo</Button>}>
-        {riordino.lista.length === 0 ? <Vuoto titolo="Ancora nessun modulo" descrizione="Crea il primo modulo, poi aggiungi video e lezioni scritte" /> : (
-          <div className="grid gap-3">
-            {riordino.lista.map(({ id, voce }, i) => (
-              <SchedaModulo key={id} voce={voce} numero={i + 1} totale={riordino.lista.length} trascina={riordino.trascina(id)}
-                sposta={(delta) => riordino.sposta(id, delta)} onModifica={() => setFinestraModulo({ modulo: voce.modulo })}
-                onLezione={(f) => setFinestraLezione({ ...f, moduloId: id })} />
-            ))}
-          </div>
-        )}
-      </Riquadro>
+      </div>
 
       <CorsoDialog open={modificaCorso} onOpenChange={setModificaCorso} corso={corso} onSalvato={azioni.aggiorna} />
       <ModuloDialog open={finestraModulo != null} onOpenChange={(a) => !a && setFinestraModulo(null)} corsoId={corso.id} modulo={finestraModulo?.modulo} />

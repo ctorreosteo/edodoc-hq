@@ -1,0 +1,350 @@
+/*
+  Pagina Acquisti. Colori e pezzi comuni stanno in pagamenti.css.
+  L'elemento firma è la doppia traccia di ogni scheda: visite sopra, importi sotto, stessa larghezza.
+*/
+
+[data-vl] .aq-plancia {
+  display: grid;
+  grid-template-columns: minmax(14rem, 19rem) minmax(0, 1fr);
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+[data-vl] .aq-valore {
+  min-width: 0;
+  padding: 0.95rem 1.05rem 0.9rem;
+  border-radius: 1.1rem;
+  background: rgba(15, 30, 54, 0.42);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+}
+
+[data-vl] .aq-valore-titolo {
+  margin-bottom: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+[data-vl] .aq-valore .aq-barra { height: 1rem; }
+
+[data-vl] .aq-valore-voci {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+}
+
+[data-vl] .aq-valore-voci > li { display: flex; gap: 0.45rem; min-width: 0; }
+[data-vl] .aq-valore-voci i { flex: none; width: 0.7rem; height: 0.7rem; margin-top: 0.15rem; border-radius: 3px; }
+[data-vl] .aq-valore-voci span { display: grid; gap: 0.05rem; min-width: 0; }
+
+[data-vl] .aq-valore-voci strong {
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: #ffffff;
+}
+
+[data-vl] .aq-valore-voci small {
+  font-size: 0.7rem;
+  line-height: 1.25;
+  color: var(--vl-hero-ink-2);
+}
+
+/* ───────────────────────── Situazioni da seguire ───────────────────────── */
+
+[data-vl] .aq-attenzioni {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+[data-vl] .aq-attenzione {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.15rem 0.75rem;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border-radius: 1rem;
+  text-align: left;
+  background: var(--vl-hero-glass);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+  cursor: pointer;
+  transition: background-color 180ms ease, box-shadow 180ms ease;
+}
+
+[data-vl] .aq-attenzione:hover:not(:disabled) { background: var(--vl-hero-glass-hover); }
+[data-vl] .aq-attenzione:disabled { cursor: default; }
+[data-vl] .aq-attenzione:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+[data-vl] .aq-attenzione[aria-pressed="true"] { background: rgba(255, 255, 255, 0.16); box-shadow: 0 0 0 2px #ffffff inset; }
+
+[data-vl] .aq-attenzione-testa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+[data-vl] .aq-attenzione-testa svg { color: var(--vl-hero-accent); }
+
+[data-vl] .aq-attenzione strong {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 1.85rem;
+  line-height: 1;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+[data-vl] .aq-attenzione small {
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: var(--vl-hero-ink-2);
+}
+
+/* ───────────────────────── Legenda ed elenco ───────────────────────── */
+
+[data-vl] .aq-testa-elenco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  margin-bottom: 0.9rem;
+}
+
+[data-vl] .aq-legenda i[data-visita] { border-radius: 999px; height: 0.45rem; width: 0.9rem; }
+[data-vl] .aq-legenda i[data-oggi] { width: 2px; height: 0.8rem; border-radius: 2px; background: var(--vl-ink); }
+
+[data-vl] .aq-elenco { display: grid; gap: 0.5rem; }
+
+[data-vl] .aq-scheda {
+  position: relative;
+  border-radius: 1rem;
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--vl-line) inset;
+  transition: box-shadow 180ms ease, background-color 180ms ease;
+}
+
+[data-vl] .aq-scheda:hover { background: var(--vl-hover); box-shadow: 0 0 0 1px var(--vl-line-strong) inset; }
+
+[data-vl] .aq-scheda[data-tono="danger"] {
+  background: color-mix(in srgb, var(--vl-danger-bg) 50%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--vl-danger-fg) 24%, transparent) inset;
+}
+
+[data-vl] .aq-scheda[data-tono="muted"] { opacity: 0.72; }
+
+[data-vl] .aq-scheda-riga {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.15fr) minmax(12rem, 1.2fr) minmax(9.5rem, 0.85fr) 9rem;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.7rem 0.85rem;
+}
+
+[data-vl] .aq-chi {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0.5rem;
+}
+
+[data-vl] .aq-chi:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: 2px; }
+[data-vl] .aq-chi .vl-avatar { flex: none; }
+[data-vl] .aq-chi > span:last-child { display: grid; min-width: 0; }
+
+[data-vl] .aq-chi strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--vl-ink);
+}
+
+[data-vl] .aq-chi small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.73rem;
+  line-height: 1.3;
+  color: var(--vl-ink-2);
+}
+
+/* ───────────────────────── Doppia traccia ───────────────────────── */
+
+[data-vl] .aq-traccia { display: grid; gap: 0.22rem; min-width: 0; }
+
+[data-vl] .aq-traccia-riga {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.73rem;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl] .aq-traccia-riga span { font-weight: 650; color: var(--vl-ink); }
+[data-vl] .aq-traccia-riga small { font-size: 0.73rem; color: var(--vl-ink-2); }
+[data-vl] .aq-visite + .aq-traccia-riga { margin-top: 0.2rem; }
+
+[data-vl] .aq-visite {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  height: 0.5rem;
+}
+
+[data-vl] .aq-visite > i { flex: 1; min-width: 0; border-radius: 2px; }
+[data-vl] [data-visita="fatta"] { background: var(--vl-ink); }
+[data-vl] [data-visita="fissata"] { background: color-mix(in srgb, var(--vl-ink) 34%, transparent); }
+[data-vl] [data-visita="libera"] { background: var(--pg-traccia); }
+
+/* La tacca di oggi attraversa le visite: dice se il percorso è avanti o indietro col tempo. */
+[data-vl] .aq-oggi {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--vl-accent-strong);
+  box-shadow: 0 0 0 1.5px var(--card);
+}
+
+[data-vl] .aq-barra {
+  display: flex;
+  gap: 2px;
+  height: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--pg-traccia);
+}
+
+[data-vl] .aq-barra > i { flex-basis: 0; min-width: 3px; }
+
+[data-vl] .aq-stato { display: grid; gap: 0.1rem; min-width: 0; }
+[data-vl] .aq-stato .pg-stato { font-size: 0.8rem; font-weight: 700; }
+[data-vl] .aq-stato small { font-size: 0.73rem; line-height: 1.3; color: var(--vl-ink-2); }
+
+[data-vl] .aq-azioni {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+[data-vl] .aq-apri {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.4rem 0.25rem 0.55rem;
+  border-radius: 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-2);
+  cursor: pointer;
+}
+
+[data-vl] .aq-apri:hover { background: var(--vl-hover); color: var(--vl-ink); }
+[data-vl] .aq-apri:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: 1px; }
+
+/* ───────────────────────── Dettaglio ───────────────────────── */
+
+[data-vl] .aq-dettaglio {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.65rem 0.85rem 0.8rem;
+  border-top: 1px solid var(--vl-line);
+}
+
+[data-vl] .aq-spiega {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.7rem;
+  background: var(--vl-warn-bg);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--vl-ink);
+}
+
+[data-vl] .aq-spiega svg { flex: none; margin-top: 0.1rem; color: var(--vl-warn-fg); }
+
+[data-vl] .aq-nessuno { font-size: 0.8rem; color: var(--vl-ink-2); }
+[data-vl] .aq-rate { display: grid; gap: 0.15rem; }
+
+[data-vl] .aq-rata {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.6rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+[data-vl] .aq-rata:hover { background: var(--vl-hover); }
+[data-vl] .aq-rata:focus-visible { outline: 2px solid var(--vl-accent-strong); outline-offset: -2px; }
+
+[data-vl] .aq-rata-testo { display: grid; flex: 1; min-width: 0; }
+
+[data-vl] .aq-rata-testo strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.83rem;
+  font-weight: 650;
+  color: var(--vl-ink);
+}
+
+[data-vl] .aq-rata-testo small { font-size: 0.73rem; color: var(--vl-ink-2); }
+
+[data-vl] .aq-rata-importo { display: grid; flex: none; justify-items: end; min-width: 6rem; }
+
+[data-vl] .aq-rata-importo strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+/* ───────────────────────── Spazi stretti ───────────────────────── */
+
+@media (max-width: 1279px) {
+  [data-vl] .aq-scheda-riga { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) 9rem; }
+  [data-vl] .aq-stato { grid-column: 1 / 3; grid-row: 2; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.1rem 0.5rem; }
+  [data-vl] .aq-azioni { grid-column: 3; grid-row: 1 / span 2; }
+}
+
+@media (max-width: 1099px) {
+  [data-vl] .aq-plancia { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  [data-vl] .aq-valore-voci { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 639px) {
+  [data-vl] .aq-plancia { margin-top: 1rem; }
+  [data-vl] .aq-attenzioni { grid-template-columns: minmax(0, 1fr); gap: 0.5rem; }
+  [data-vl] .aq-scheda-riga { grid-template-columns: minmax(0, 1fr); gap: 0.65rem; padding: 0.75rem; }
+  [data-vl] .aq-stato { grid-column: 1; grid-row: auto; }
+  [data-vl] .aq-azioni { grid-column: 1; grid-row: auto; justify-content: space-between; }
+  [data-vl] .aq-azioni .pg-azione { min-height: 2.5rem; }
+  [data-vl] .aq-apri { min-height: 2.5rem; margin-left: auto; }
+  [data-vl] .aq-rata { flex-wrap: wrap; gap: 0.2rem 0.6rem; }
+  [data-vl] .aq-rata-testo { flex-basis: 60%; }
+}

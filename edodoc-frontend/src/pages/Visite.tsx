@@ -1,102 +1,147 @@
-import { addDays, addWeeks, format, isSameDay, parseISO, startOfWeek } from "date-fns"
+import { addDays, addWeeks, format, isSameDay, startOfWeek } from "date-fns"
 import { it } from "date-fns/locale"
-import { CalendarCheck, CalendarPlus, CalendarX, ChevronLeft, ChevronRight, Video } from "lucide-react"
+import { Ban, CalendarPlus, Check, ChevronLeft, ChevronRight, ClipboardCheck, Info, TriangleAlert, X } from "lucide-react"
 import { useMemo, useState } from "react"
-import { Chip } from "@/components/chip"
-import { LuxHero, LuxKpi } from "@/components/lux"
-import { MenuVisita } from "@/components/menu-contestuali"
-import { Cta, Pagina, Riquadro } from "@/components/pagina"
+import { Link } from "react-router-dom"
+import { Pagina, Riquadro } from "@/components/pagina"
 import { Caricamento, Errore } from "@/components/stati"
 import { Button } from "@/components/ui/button"
+import { AgendaGiorno } from "@/components/visite/agenda-giorno"
+import { AgendaSettimana } from "@/components/visite/agenda-settimana"
+import { useAdesso, useVistaGiorno } from "@/components/visite/use-agenda"
+import { VisiteHero } from "@/components/visite/visite-hero"
 import { useAzioni } from "@/contexts/azioni-context"
 import { useDati } from "@/hooks/use-dati"
-import { ora } from "@/lib/format"
-import { MODALITA_VISITA, STATO_VISITA, SYNC_GOOGLE, TIPO_VISITA } from "@/lib/etichette"
-import { cn, formatDateOnlyLocal } from "@/lib/utils"
-import { visiteService } from "@/services/gestionale"
+import { TIPO_VISITA } from "@/lib/etichette"
+import { formatDateOnlyLocal } from "@/lib/utils"
+import {
+  attiva, conta, daSegnare, delGiorno, densita, durataMinuti, filtriUtili, fraseDiOggi, prossimaVisita, rispettaFiltro, sovrapposte as trovaSovrapposte, type FiltroAgenda,
+} from "@/lib/visite"
+import { impostazioniService, visiteService } from "@/services/gestionale"
+import "@/style/visite.css"
+
+const GIORNI_ORIZZONTE = 60
+const CODICE_CALENDARIO = "GOOGLE_CALENDAR_SYNC_ENABLED"
+
+const lunediDi = (data: Date) => startOfWeek(data, { weekStartsOn: 1 })
 
 export default function Visite() {
   const azioni = useAzioni()
-  const [lunedi, setLunedi] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
+  const adesso = useAdesso()
+  const vistaGiorno = useVistaGiorno()
+  const [lunedi, setLunedi] = useState(() => lunediDi(new Date()))
+  const [scelto, setScelto] = useState<number | null>(null)
+  const [filtro, setFiltro] = useState<FiltroAgenda>("tutte")
+  const [conAnnullate, setConAnnullate] = useState(false)
+
   const giorni = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(lunedi, i)), [lunedi])
   const da = formatDateOnlyLocal(giorni[0])
   const a = formatDateOnlyLocal(giorni[6])
-  const { dati, errore, riprova } = useDati(() => visiteService.periodo(da, a), [da, a])
+  const oggi = formatDateOnlyLocal(adesso)
+  const { dati, errore, riprova } = useDati(async () => ({ da, visite: await visiteService.periodo(da, a) }), [da, a])
+  // La prossima visita non dipende dalla settimana guardata; se manca, l'agenda resta comunque utilizzabile
+  const { dati: future } = useDati(() => visiteService.periodo(oggi, formatDateOnlyLocal(addDays(adesso, GIORNI_ORIZZONTE))).catch(() => null), [oggi])
+  const { dati: impostazioni } = useDati(() => impostazioniService.carica().catch(() => null), [])
+
+  const inCaricamento = dati?.da !== da
+  const visite = useMemo(() => (dati && dati.da === da ? dati.visite : []), [dati, da])
+  const riepilogo = useMemo(() => densita(giorni, visite), [giorni, visite])
+  const sovrapposte = useMemo(() => trovaSovrapposte(visite), [visite])
 
   if (errore) return <Errore messaggio={errore} onRiprova={riprova} />
+  if (!dati) return <Caricamento />
 
-  const visite = dati ?? []
-  const valide = visite.filter((v) => v.stato !== "ANNULLATA")
-  const conMeet = valide.filter((v) => v.conMeet).length
-  const inAttesaGoogle = valide.filter((v) => v.googleSyncStato !== "SINCRONIZZATA").length
+  const valide = visite.filter(attiva)
+  const annullate = visite.length - valide.length
+  const finiteDaSegnare = valide.filter((v) => daSegnare(v, adesso)).length
+  const filtri = filtriUtili(visite, adesso)
+  const filtroAttivo = filtri.some((f) => f.valore === filtro) ? filtro : "tutte"
+  const mostrate = visite.filter((v) => (attiva(v) || conAnnullate) && rispettaFiltro(v, filtroAttivo, adesso))
+
+  const indiceOggi = giorni.findIndex((g) => isSameDay(g, adesso))
+  const primoConVisite = riepilogo.findIndex((g) => g.visite > 0)
+  const giornoAperto = scelto ?? (indiceOggi >= 0 ? indiceOggi : Math.max(primoConVisite, 0))
+  const settimanaCorrente = indiceOggi >= 0
+  const calendarioSpento = impostazioni?.integrazioni.find((i) => i.codice === CODICE_CALENDARIO)?.attiva === false
+
+  const vaiA = (nuovo: Date) => {
+    setLunedi(nuovo)
+    setScelto(null)
+  }
+  const scegliGiorno = (indice: number) => setScelto((attuale) => (!vistaGiorno && attuale === indice ? null : indice))
+  const fissa = (inizio: string) => azioni.nuovaVisita({ inizio })
 
   return (
     <Pagina>
-      <LuxHero ariaLabel="Visite" eyebrow="Agenda" title="Visite" subtitle={`Settimana del ${format(lunedi, "d MMMM", { locale: it })}`}
-        actions={<Cta icona={CalendarPlus} onClick={() => azioni.nuovaVisita()}>Nuova visita</Cta>}>
-        <div className="vl-kpis vl-kpis--3">
-          <LuxKpi icon={<CalendarCheck className="size-4" />} label="Visite della settimana" value={valide.length} />
-          <LuxKpi icon={<Video className="size-4" />} label="Con Google Meet" value={conMeet} />
-          <LuxKpi icon={<CalendarX className="size-4" />} label="In attesa di Google" value={inAttesaGoogle} foot="Si pubblicano quando colleghi il calendario" />
-        </div>
-      </LuxHero>
+      <div className="vs-pagina">
+        <VisiteHero frase={fraseDiOggi(future ?? visite, adesso)} prossima={prossimaVisita(future ?? [], adesso)} adesso={adesso} densita={riepilogo}
+          scelto={vistaGiorno ? giornoAperto : scelto} onScelto={scegliGiorno} minutiTotali={valide.reduce((s, v) => s + durataMinuti(v), 0)}
+          visiteTotali={valide.length} daSegnare={finiteDaSegnare} inCaricamento={inCaricamento} onNuova={() => azioni.nuovaVisita()}
+          periodo={`${format(giorni[0], "d MMMM", { locale: it })} – ${format(giorni[6], "d MMMM", { locale: it })}`} />
 
-      <Riquadro titolo="Settimana" conteggio={valide.length} descrizione="Clic su un giorno per fissare una visita, tasto destro su una visita per le azioni"
-        azioni={
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" aria-label="Settimana precedente" onClick={() => setLunedi((l) => addWeeks(l, -1))}><ChevronLeft /></Button>
-            <Button variant="outline" onClick={() => setLunedi(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Oggi</Button>
-            <Button variant="outline" size="icon" aria-label="Settimana successiva" onClick={() => setLunedi((l) => addWeeks(l, 1))}><ChevronRight /></Button>
-          </div>
-        }>
-        {!dati ? <Caricamento /> : (
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
-            {giorni.map((giorno) => {
-              const delGiorno = visite.filter((v) => isSameDay(parseISO(v.inizio), giorno))
-              const oggi = isSameDay(giorno, new Date())
-              return (
-                <section key={giorno.toISOString()} aria-label={format(giorno, "EEEE d MMMM", { locale: it })} className={cn("min-w-0 rounded-xl border p-2 flex flex-col gap-2 md:min-h-64", oggi && "border-[var(--brand-orange)]")}>
-                  <button type="button" className="text-left" title="Fissa una visita" onClick={() => azioni.nuovaVisita({ inizio: `${formatDateOnlyLocal(giorno)}T09:00` })}>
-                    <span className="block text-xs capitalize text-muted-foreground">{format(giorno, "EEE", { locale: it })}</span>
-                    <span className="block text-lg font-bold tabular-nums">{format(giorno, "d")}</span>
-                  </button>
-                  {delGiorno.map((v) => (
-                    <MenuVisita key={v.id} visita={v}>
-                      <button type="button" onClick={() => azioni.modificaVisita(v)} disabled={v.stato === "ANNULLATA"}
-                        className={cn("w-full rounded-lg border bg-card p-2 text-left", v.stato === "ANNULLATA" && "opacity-50 line-through")}>
-                        <span className="flex items-center gap-1 text-xs font-bold tabular-nums">
-                          {ora(v.inizio)}
-                          {v.conMeet ? <Video className="size-3" aria-label="Con Google Meet" /> : null}
-                        </span>
-                        <span className="block truncate text-xs font-semibold">{v.pazienteNome}</span>
-                        <span className="block truncate text-[11px] text-muted-foreground">
-                          {v.numeroVisita ? `${v.numeroVisita} su ${v.visiteTotali}` : TIPO_VISITA[v.tipo]} · {MODALITA_VISITA[v.modalita]}
-                        </span>
-                      </button>
-                    </MenuVisita>
-                  ))}
-                </section>
-              )
-            })}
-          </div>
-        )}
-      </Riquadro>
+        <Riquadro titolo={settimanaCorrente ? "Questa settimana" : `Settimana del ${format(lunedi, "d MMMM", { locale: it })}`} conteggio={valide.length}
+          descrizione={vistaGiorno ? "Tocca uno spazio libero per fissare una visita, tieni premuta una visita per le azioni" : "Clic su uno spazio vuoto per fissare una visita, tasto destro su una visita per le azioni"}
+          azioni={
+            <div className="vs-comandi">
+              <Button variant="outline" size="icon" aria-label="Settimana precedente" onClick={() => vaiA(addWeeks(lunedi, -1))}><ChevronLeft /></Button>
+              <Button variant="outline" disabled={settimanaCorrente} onClick={() => vaiA(lunediDi(new Date()))}>Oggi</Button>
+              <Button variant="outline" size="icon" aria-label="Settimana successiva" onClick={() => vaiA(addWeeks(lunedi, 1))}><ChevronRight /></Button>
+            </div>
+          }>
+          {filtri.length > 0 || annullate > 0 ? (
+            <div className="vs-filtri" role="group" aria-label="Filtra le visite">
+              {filtri.length > 0 ? <button type="button" className="vs-filtro" aria-pressed={filtroAttivo === "tutte"} onClick={() => setFiltro("tutte")}>Tutte</button> : null}
+              {filtri.map((f) => (
+                <button key={f.valore} type="button" className="vs-filtro" aria-pressed={filtroAttivo === f.valore} onClick={() => setFiltro(filtroAttivo === f.valore ? "tutte" : f.valore)}>
+                  {f.testo} <b>{f.quante}</b>
+                </button>
+              ))}
+              {annullate > 0 ? (
+                <button type="button" className="vs-filtro" aria-pressed={conAnnullate} onClick={() => setConAnnullate((c) => !c)}><Ban aria-hidden />Annullate <b>{annullate}</b></button>
+              ) : null}
+            </div>
+          ) : null}
 
-      <Riquadro titolo="Stato delle visite" descrizione="Sincronizzazione con Google Calendar visita per visita">
-        <ul className="grid gap-2">
-          {visite.map((v) => (
-            <MenuVisita key={v.id} visita={v}>
-              <li className="flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2">
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{v.titoloCalendario}</span>
-                <span className="text-xs text-muted-foreground tabular-nums">{format(parseISO(v.inizio), "EEE d, HH:mm", { locale: it })}</span>
-                <Chip tono={STATO_VISITA[v.stato].tono}>{STATO_VISITA[v.stato].testo}</Chip>
-                <Chip tono={SYNC_GOOGLE[v.googleSyncStato].tono}>{SYNC_GOOGLE[v.googleSyncStato].testo}</Chip>
-              </li>
-            </MenuVisita>
-          ))}
-          {visite.length === 0 ? <li className="py-6 text-center text-sm text-muted-foreground">Nessuna visita in questa settimana</li> : null}
-        </ul>
-      </Riquadro>
+          {vistaGiorno ? (
+            <AgendaGiorno giorno={giorni[giornoAperto]} visite={delGiorno(mostrate, giorni[giornoAperto])} adesso={adesso} sovrapposte={sovrapposte} inCaricamento={inCaricamento} onSlot={fissa} />
+          ) : (
+            <AgendaSettimana giorni={giorni} visite={mostrate} adesso={adesso} inCaricamento={inCaricamento} sceltoIndice={scelto} sovrapposte={sovrapposte} onSlot={fissa}
+              vuoto={!inCaricamento && mostrate.length === 0 ? (
+                <div className="vs-vuoto">
+                  <div>
+                    <CalendarPlus aria-hidden />
+                    <strong>Settimana libera</strong>
+                    <span>Clicca un orario per fissare la prima visita</span>
+                  </div>
+                </div>
+              ) : null} />
+          )}
+
+          {sovrapposte.size > 0 ? (
+            <p className="vs-nota" data-tono="warn"><TriangleAlert aria-hidden />{conta(sovrapposte.size, "visita si sovrappone", "visite si sovrappongono")} ad altre in questa settimana: sono segnate col triangolo.</p>
+          ) : null}
+
+          {!vistaGiorno ? (
+            <div className="vs-piede">
+              <div className="vs-legenda" aria-label="Legenda">
+                {Object.entries(TIPO_VISITA).map(([codice, testo]) => <span key={codice} data-tipo={codice}><i aria-hidden />{testo}</span>)}
+              </div>
+              <div className="vs-legenda" aria-hidden>
+                <span><Check />Effettuata</span>
+                <span><ClipboardCheck />Da segnare</span>
+                <span><X />Non presentato</span>
+              </div>
+            </div>
+          ) : null}
+
+          {calendarioSpento ? (
+            <p className="vs-nota">
+              <Info aria-hidden />
+              <span>Google Calendar è spento: per ora niente link Meet né inviti ai pazienti. Le visite future si pubblicano da sole quando lo colleghi. <Link to="/impostazioni">Vai alle Impostazioni</Link></span>
+            </p>
+          ) : null}
+        </Riquadro>
+      </div>
     </Pagina>
   )
 }

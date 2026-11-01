@@ -1,0 +1,2507 @@
+/*
+  Pagina Task — strato visivo sopra lux.css. Pagina: [data-vl-page="task"];
+  popover e dialoghi in portale portano anch'essi data-vl + data-vl-page="task" per avere i token.
+  --tk-c è il colore della lista (header, icone, chip del calendario).
+*/
+
+[data-vl][data-vl-page="task"] {
+  --tk-radius: 1rem;
+  --tk-radius-sm: 0.65rem;
+  --tk-c: #6366f1;
+  --tk-row-h: 3.25rem;
+  --tk-ease: cubic-bezier(0.2, 0, 0, 1);
+  --tk-late: #e11d48;
+  --tk-today: #d97706;
+  --tk-unread: #8b5cf6;
+  color: var(--vl-ink);
+}
+
+.dark [data-vl][data-vl-page="task"] {
+  --tk-late: #fb7185;
+  --tk-today: #fbbf24;
+  --tk-unread: #a78bfa;
+}
+
+[data-vl-page="task"] button {
+  font-weight: inherit;
+}
+
+[data-vl-page="task"] button:focus,
+[data-vl-page="task"] button:focus-visible {
+  outline: none;
+}
+
+[data-vl-page="task"] :is(button, [role="button"], [role="row"]):focus-visible {
+  outline: 2px solid var(--vl-ring);
+  outline-offset: 2px;
+}
+
+[data-vl-page="task"] .tk-muted {
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] .tk-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--vl-accent-ink);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+[data-vl-page="task"] .tk-link:hover {
+  text-decoration: underline;
+}
+
+/* ───────────────────────── Layout ───────────────────────── */
+
+[data-vl].tk-page {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+  min-height: calc(100dvh - 8rem);
+}
+
+[data-vl].tk-page[data-rail-compatta] {
+  grid-template-columns: 3.75rem minmax(0, 1fr);
+}
+
+[data-vl].tk-page--loading {
+  display: grid;
+  place-items: center;
+  grid-template-columns: 1fr;
+  color: var(--vl-ink-3);
+}
+
+.tk-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ───────────────────────── Rail ───────────────────────── */
+
+[data-vl-page="task"] .tk-rail {
+  position: sticky;
+  top: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-height: calc(100dvh - 7rem);
+  overflow-y: auto;
+  padding: 0.6rem;
+  border: 1px solid var(--vl-line);
+  border-radius: var(--tk-radius);
+  background: var(--vl-surface);
+  box-shadow: var(--vl-shadow);
+  scrollbar-width: thin;
+}
+
+[data-vl-page="task"] .tk-rail-toggle {
+  align-self: flex-end;
+  display: inline-grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-bottom: 0.2rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] .tk-rail-toggle:hover {
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-rail-toggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl-page="task"] .tk-rail-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.55rem;
+  border: 0;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--vl-ink-2);
+  font-size: 0.875rem;
+  font-weight: 560;
+  text-align: left;
+  transition: background 160ms var(--tk-ease), color 160ms var(--tk-ease);
+}
+
+[data-vl-page="task"] .tk-rail-item:hover {
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-rail-item[data-active] {
+  background: color-mix(in srgb, var(--tk-c) 12%, transparent);
+  color: var(--vl-ink);
+  font-weight: 700;
+}
+
+[data-vl-page="task"] .tk-rail-item--home[data-active],
+[data-vl-page="task"] .tk-rail-item:not([style])[data-active] {
+  background: var(--vl-now-tint);
+}
+
+[data-vl-page="task"] .tk-rail-item[data-active]::before {
+  content: "";
+  position: absolute;
+  left: -0.6rem;
+  top: 0.55rem;
+  bottom: 0.55rem;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--tk-c);
+}
+
+[data-vl-page="task"] .tk-rail-item--home[data-active]::before,
+[data-vl-page="task"] .tk-rail-item:not([style])[data-active]::before {
+  background: var(--vl-accent-strong);
+}
+
+[data-vl-page="task"] .tk-rail-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-vl-page="task"] .tk-rail-count {
+  flex: none;
+  min-width: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--vl-muted-bg);
+  color: var(--vl-muted-fg);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 750;
+  line-height: 1.25rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="task"] .tk-rail-count[data-tone="late"] {
+  background: var(--vl-danger-bg);
+  color: var(--vl-danger-fg);
+}
+
+[data-vl-page="task"] .tk-rail-count[data-tone="today"] {
+  background: var(--vl-warn-bg);
+  color: var(--vl-warn-fg);
+}
+
+[data-vl-page="task"] .tk-rail-unread {
+  position: absolute;
+  top: 0.45rem;
+  left: 1.95rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--tk-unread);
+  box-shadow: 0 0 0 2px var(--vl-surface);
+}
+
+[data-vl-page="task"] .tk-rail-home-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.55rem;
+  background: linear-gradient(135deg, #2E4F80, #162A48);
+  color: var(--vl-hero-accent);
+}
+
+[data-vl-page="task"] .tk-rail-home-icon svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl-page="task"] .tk-rail-home-icon--all {
+  background: var(--vl-muted-bg);
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="task"] .tk-rail-home-icon--ghost {
+  background: transparent;
+  color: var(--vl-ink-3);
+  box-shadow: inset 0 0 0 1px var(--vl-line-strong);
+}
+
+
+[data-vl-page="task"] .tk-rail-section-title {
+  color: var(--vl-ink-3);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-vl-page="task"] .tk-rail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+[data-vl-page="task"] .tk-rail-empty {
+  padding: 0.5rem 0.55rem;
+  color: var(--vl-ink-3);
+  font-size: 0.8rem;
+}
+
+[data-vl-page="task"] .tk-rail-item--manage {
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] {
+  align-items: center;
+  padding: 0.5rem 0.35rem;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] :is(.tk-rail-label, .tk-rail-empty) {
+  display: none;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-toggle {
+  align-self: center;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-item {
+  justify-content: center;
+  padding: 0.35rem;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-count {
+  position: absolute;
+  top: -0.1rem;
+  right: -0.15rem;
+  min-width: 1.05rem;
+  padding: 0 0.25rem;
+  font-size: 0.6rem;
+  line-height: 1.05rem;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-unread {
+  left: auto;
+  right: 0.2rem;
+  top: auto;
+  bottom: 0.3rem;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-item[data-active]::before {
+  left: -0.35rem;
+}
+
+/* Pannello dal basso su telefono (montato fuori dalla pagina: ha il suo scope) */
+[data-vl-page="task"].tk-albero-sheet {
+  display: flex;
+  max-height: 85dvh;
+  flex-direction: column;
+  background: var(--vl-surface);
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-albero-sheet-head {
+  padding: 1.1rem 4rem 0.5rem 1.25rem;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-albero-head {
+  margin-top: 0.25rem;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-albero-sheet-body {
+  overflow-y: auto;
+  padding: 0 0.75rem calc(1rem + env(safe-area-inset-bottom));
+  overscroll-behavior: contain;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-albero-row {
+  min-height: 2.75rem;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-albero-item {
+  min-height: 2.6rem;
+  font-size: 15px !important;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-albero-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-rail-section-title {
+  padding: 0.75rem 0.55rem 0.35rem;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-albero-head .tk-albero-btn {
+  border: 1px solid var(--vl-line);
+}
+
+/* Intestazione: percorso cliccabile e pulsante Condividi */
+[data-vl-page="task"] .tk-crumbs {
+  display: inline-flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.3rem;
+}
+
+[data-vl-page="task"] .tk-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+[data-vl-page="task"] .tk-crumb svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  opacity: 0.6;
+}
+
+[data-vl-page="task"] .tk-crumb button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: inherit !important;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 140ms var(--tk-ease);
+}
+
+[data-vl-page="task"] .tk-crumb button:hover {
+  text-decoration-color: currentColor;
+}
+
+[data-vl-page="task"] .tk-crumbs .tk-crumbs-tipo + .tk-crumb {
+  margin-left: 0.05rem;
+}
+
+[data-vl-page="task"] .tk-crumbs > :last-child:not(.tk-crumb) {
+  margin-left: 0.35rem;
+}
+
+[data-vl-page="task"] .tk-condividi {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--vl-hero-accent, #fff) 30%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vl-hero-accent, #fff) 10%, transparent);
+  color: inherit;
+  font-size: 14px !important;
+  font-weight: 650;
+  backdrop-filter: blur(6px);
+  transition: background 160ms var(--tk-ease), border-color 160ms var(--tk-ease);
+}
+
+[data-vl-page="task"] .tk-condividi:hover {
+  background: color-mix(in srgb, var(--vl-hero-accent, #fff) 18%, transparent);
+  border-color: color-mix(in srgb, var(--vl-hero-accent, #fff) 50%, transparent);
+}
+
+[data-vl-page="task"] .tk-condividi svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ───────────────────────── Icona lista ───────────────────────── */
+
+[data-vl] .tk-lista-icona {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--tk-c) 16%, transparent);
+  color: var(--tk-c);
+}
+
+[data-vl] .tk-lista-icona svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl] .tk-lista-icona[data-size="sm"] {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 0.5rem;
+}
+
+[data-vl] .tk-lista-icona[data-size="sm"] svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+[data-vl] .tk-lista-icona[data-size="lg"] {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.95rem;
+  background: linear-gradient(145deg, var(--tk-c), color-mix(in srgb, var(--tk-c) 60%, #000));
+  color: #fff;
+  box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--tk-c) 80%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+[data-vl] .tk-lista-icona[data-size="lg"] svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+[data-vl] .tk-lista-icona--home[data-size="lg"] {
+  background: linear-gradient(145deg, #2E4F80, #162A48);
+  color: var(--vl-cta-bg);
+}
+
+.silvia [data-vl] .tk-lista-icona--home[data-size="lg"] {
+  background: linear-gradient(145deg, #2a2a2a, #0d0d0d);
+  color: #fff;
+}
+
+/* ───────────────────────── Toolbar ───────────────────────── */
+[data-vl-page="task"] .tk-toolbar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+[data-vl-page="task"] .tk-toolbar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* CTA "Nuovo task" */
+[data-vl] .tk-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.6rem;
+  padding: 0 0.95rem 0 0.8rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: var(--vl-cta-bg);
+  color: var(--vl-cta-ink);
+  font-size: 0.875rem;
+  font-weight: 750;
+  box-shadow: 0 10px 24px -14px var(--vl-cta-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 160ms var(--tk-ease), box-shadow 160ms var(--tk-ease);
+}
+
+[data-vl] .tk-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px -14px var(--vl-cta-glow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+[data-vl] .tk-cta:active {
+  transform: translateY(0);
+}
+
+[data-vl] .tk-cta svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+[data-vl] .tk-cta kbd {
+  padding: 0 0.35rem;
+  border-radius: 0.3rem;
+  background: rgba(0, 37, 82, 0.12);
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.15rem;
+}
+
+.silvia [data-vl] .tk-cta kbd {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+[data-vl] .tk-cta--sm {
+  height: 2.25rem;
+}
+
+/* Bottoni secondari */
+[data-vl] .tk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--vl-line-strong);
+  border-radius: 0.65rem;
+  background: var(--vl-surface);
+  color: var(--vl-ink-2);
+  font-size: 0.82rem;
+  font-weight: 650;
+  transition: background 140ms, color 140ms, border-color 140ms;
+}
+
+[data-vl] .tk-btn:hover,
+[data-vl] .tk-btn[data-active] {
+  border-color: color-mix(in srgb, var(--vl-accent-strong) 50%, var(--vl-line-strong));
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl] .tk-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl] .tk-btn-count {
+  min-width: 1.15rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--vl-accent-strong);
+  color: #fff;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+[data-vl] .tk-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--vl-line-strong);
+  border-radius: 0.65rem;
+  background: var(--vl-surface);
+  color: var(--vl-ink-2);
+}
+
+[data-vl] .tk-icon-btn:hover {
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl] .tk-icon-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Ricerca */
+[data-vl-page="task"] .tk-search {
+  display: flex;
+  min-width: min(100%, 18rem);
+  flex: 1 1 18rem;
+  max-width: 28rem;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.4rem;
+  padding: 0 0.7rem;
+  border: 1px solid var(--vl-line-strong);
+  border-radius: 0.75rem;
+  background: var(--vl-surface-2);
+  color: var(--vl-ink-3);
+  transition: border-color 160ms, box-shadow 160ms, background 160ms;
+}
+
+[data-vl-page="task"] .tk-search:focus-within {
+  border-color: var(--vl-accent-strong);
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 3px var(--vl-ring);
+}
+
+[data-vl-page="task"] .tk-search > svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+[data-vl-page="task"] .tk-search input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--vl-ink);
+  font-size: 0.875rem;
+  outline: none;
+}
+
+[data-vl-page="task"] .tk-search input::placeholder {
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] .tk-search kbd {
+  padding: 0 0.35rem;
+  border: 1px solid var(--vl-line-strong);
+  border-radius: 0.3rem;
+  font-family: inherit;
+  font-size: 0.7rem;
+  line-height: 1.1rem;
+}
+
+[data-vl-page="task"] .tk-search-clear {
+  display: inline-grid;
+  place-items: center;
+  padding: 0.15rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] .tk-search-clear svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+/* Selettore vista */
+[data-vl-page="task"] .tk-segmented {
+  display: inline-flex;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: 0.8rem;
+  background: var(--vl-muted-bg);
+}
+
+[data-vl-page="task"] .tk-segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0.62rem;
+  background: transparent;
+  color: var(--vl-ink-2);
+  font-size: 0.82rem;
+  font-weight: 650;
+  transition: background 160ms var(--tk-ease), color 160ms, box-shadow 160ms;
+}
+
+[data-vl-page="task"] .tk-segmented button:hover {
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-segmented button[data-active] {
+  background: var(--vl-surface);
+  color: var(--vl-ink);
+  box-shadow: 0 1px 2px rgba(0, 37, 82, 0.08), 0 4px 12px -6px rgba(0, 37, 82, 0.25);
+}
+
+.dark [data-vl-page="task"] .tk-segmented button[data-active] {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+[data-vl-page="task"] .tk-segmented button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl-page="task"] .tk-segmented--sm button {
+  height: 1.75rem;
+  padding: 0 0.6rem;
+  font-size: 0.78rem;
+}
+
+/* Popover filtri */
+[data-vl].tk-filters {
+  overflow: hidden;
+  border-color: var(--vl-line-strong);
+  border-radius: 0.9rem;
+  color: var(--vl-ink);
+}
+
+[data-vl].tk-filters .tk-filters-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid var(--vl-line);
+  font-size: 0.9rem;
+}
+
+[data-vl].tk-filters .tk-filters-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.9rem;
+}
+
+[data-vl] .tk-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+[data-vl] .tk-field-label {
+  color: var(--vl-ink-3);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-vl] .tk-field-hint {
+  font-size: 0.75rem;
+}
+
+[data-vl] .tk-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+[data-vl] .tk-chip-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.9rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--vl-line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--vl-ink-2);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: border-color 140ms, background 140ms, box-shadow 140ms;
+}
+
+[data-vl] .tk-chip-toggle:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl] .tk-chip-toggle[data-active] {
+  border-color: var(--vl-accent-strong);
+  background: var(--vl-now-tint);
+  color: var(--vl-ink);
+  box-shadow: 0 0 0 1px var(--vl-accent-strong);
+}
+
+[data-vl] .tk-chip-toggle svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+[data-vl] .tk-chip-toggle--bare {
+  padding: 0.15rem 0.3rem;
+}
+
+[data-vl] .tk-check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--vl-ink-2);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* ───────────────────────── Elementi riga ───────────────────────── */
+
+[data-vl] .tk-unread {
+  display: inline-block;
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--tk-unread, #8b5cf6);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tk-unread, #8b5cf6) 22%, transparent);
+}
+
+[data-vl] .tk-counters {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--vl-ink-3);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl] .tk-counters > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+[data-vl] .tk-counters > span[data-done] {
+  color: var(--vl-ok-fg);
+}
+
+[data-vl] .tk-counters svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* Codice "#123" del task: cliccabile per copiarlo */
+[data-vl] .tk-id {
+  flex: none;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.35rem;
+  color: var(--vl-ink-3);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: copy;
+  transition: background-color 120ms, color 120ms;
+}
+
+[data-vl] .tk-id:hover,
+[data-vl] .tk-id:focus-visible {
+  background: var(--vl-info-bg);
+  color: var(--vl-info-fg);
+  outline: none;
+}
+
+[data-vl] .tk-paziente {
+  display: inline-flex;
+  max-width: 14rem;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.05rem 0.45rem 0.05rem 0.35rem;
+  border-radius: 0.45rem;
+  background: var(--vl-info-bg);
+  color: var(--vl-info-fg);
+  font-size: 0.74rem;
+  font-weight: 650;
+}
+
+[data-vl] .tk-paziente svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: none;
+}
+
+[data-vl] .tk-paziente span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-vl-page="task"] .tk-chevron {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: none;
+  color: var(--vl-ink-3);
+  transition: transform 200ms var(--tk-ease);
+}
+
+[data-vl-page="task"] .tk-chevron[data-closed] {
+  transform: rotate(-90deg);
+}
+
+/* ───────────────────────── Vista lista ───────────────────────── */
+
+/* Un riquadro per stato */
+[data-vl-page="task"] .tk-tabelle {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+[data-vl-page="task"] .tk-table {
+  --tk-cols: 2.5rem minmax(14rem, 1fr) 7.5rem 9.5rem 7.5rem 8.5rem 6.5rem;
+  /* clip e non hidden: l'intestazione sticky deve seguire lo scroll della pagina */
+  overflow: clip;
+  border: 1px solid var(--vl-line);
+  border-radius: var(--tk-radius);
+  background: var(--vl-surface);
+  box-shadow: var(--vl-shadow);
+  padding-bottom: 0.25rem;
+}
+
+[data-vl-page="task"] .tk-table[data-con-lista] {
+  --tk-cols: 2.5rem minmax(14rem, 1fr) 7.5rem 9.5rem 7.5rem 8.5rem 6.5rem 9rem;
+}
+
+[data-vl-page="task"] :is(.tk-thead, .tk-row) {
+  display: grid;
+  grid-template-columns: var(--tk-cols);
+  align-items: center;
+  column-gap: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+[data-vl-page="task"] .tk-thead {
+  position: sticky;
+  top: 4rem;
+  z-index: 2;
+  min-height: 2.5rem;
+  border-bottom: 1px solid var(--vl-line);
+  background: var(--vl-thead);
+  color: var(--vl-ink-3);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 140ms;
+}
+
+[data-vl-page="task"] .tk-thead:hover {
+  background: var(--vl-hover);
+}
+
+/* Riquadro chiuso: resta solo l'header con lo stato */
+[data-vl-page="task"] .tk-thead[data-chiuso] {
+  border-bottom: 0;
+}
+
+[data-vl-page="task"] .tk-table:has(.tk-thead[data-chiuso]) {
+  padding-bottom: 0;
+}
+
+[data-vl-page="task"] .tk-thead .tk-c-titolo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+[data-vl-page="task"] .tk-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+[data-vl-page="task"] .tk-sort:hover,
+[data-vl-page="task"] .tk-sort[data-active] {
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-sort svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+[data-vl-page="task"] :is(.tk-group, .tk-archivio) {
+  --tk-s: var(--vl-muted-dot);
+}
+
+[data-vl-page="task"] :is(.tk-group, .tk-archivio)[data-stato="IN_CORSO"] { --tk-s: var(--vl-info-dot); }
+[data-vl-page="task"] :is(.tk-group, .tk-archivio)[data-stato="IN_ATTESA"] { --tk-s: var(--vl-warn-dot); }
+[data-vl-page="task"] :is(.tk-group, .tk-archivio)[data-stato="COMPLETATO"] { --tk-s: var(--vl-ok-dot); }
+[data-vl-page="task"] :is(.tk-group, .tk-archivio)[data-stato="ANNULLATO"] { --tk-s: var(--vl-ink-3); }
+
+[data-vl-page="task"] .tk-group-check {
+  display: inline-flex;
+  width: 2rem;
+  justify-content: center;
+}
+
+[data-vl-page="task"] .tk-group-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.15rem 0.35rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--vl-ink);
+  font-size: 0.85rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-vl-page="task"] .tk-group-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  flex: none;
+  border-radius: 999px;
+  background: var(--tk-s, var(--vl-muted-dot));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tk-s, var(--vl-muted-dot)) 22%, transparent);
+}
+
+[data-vl-page="task"] .tk-row {
+  position: relative;
+  min-height: var(--tk-row-h);
+  border-top: 1px solid var(--vl-line);
+  cursor: pointer;
+  transition: background 140ms;
+}
+
+[data-vl-page="task"] .tk-thead + .tk-row {
+  border-top-color: transparent;
+}
+
+[data-vl-page="task"] .tk-row:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="task"] .tk-row[data-selected] {
+  background: color-mix(in srgb, var(--vl-accent-strong) 8%, transparent);
+}
+
+[data-vl-page="task"] .tk-row[data-active] {
+  background: var(--vl-now-tint);
+  box-shadow: inset 3px 0 0 var(--vl-accent-strong);
+}
+
+[data-vl-page="task"] .tk-c-sel {
+  display: inline-flex;
+  justify-content: center;
+}
+
+[data-vl-page="task"] .tk-row .tk-c-sel {
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+[data-vl-page="task"] .tk-row:hover .tk-c-sel,
+[data-vl-page="task"] .tk-row[data-selected] .tk-c-sel,
+[data-vl-page="task"] .tk-table[data-selezione] .tk-row .tk-c-sel {
+  opacity: 1;
+}
+
+[data-vl-page="task"] .tk-row .tk-c-titolo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0;
+}
+
+[data-vl-page="task"] .tk-row-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+[data-vl-page="task"] .tk-row :is(.tk-c-assegnatari, .tk-c-scadenza, .tk-c-priorita, .tk-c-stato) {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+[data-vl-page="task"] .tk-c-aggiornato {
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+[data-vl-page="task"] .tk-c-lista {
+  min-width: 0;
+  overflow: hidden;
+}
+
+[data-vl-page="task"] .tk-cell-btn {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  padding: 0.15rem 0.35rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+}
+
+[data-vl-page="task"] .tk-cell-btn:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="task"] .tk-cell-placeholder {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1.5px dashed var(--vl-line-strong);
+  border-radius: 999px;
+  color: var(--vl-ink-3);
+  opacity: 0;
+  transition: opacity 140ms;
+}
+
+[data-vl-page="task"] .tk-row:hover .tk-cell-placeholder {
+  opacity: 1;
+}
+
+[data-vl-page="task"] .tk-cell-placeholder svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* Il trigger del picker scadenza nelle celle: niente bordo finché non serve */
+[data-vl-page="task"] .tk-cell-picker {
+  max-width: 100%;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-vl-page="task"] .tk-row:hover .tk-cell-picker {
+  background: var(--vl-hover) !important;
+}
+
+[data-vl-page="task"] .tk-quick-add {
+  display: flex;
+  width: calc(100% - 1.5rem);
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.6rem;
+  margin: 0.15rem 0.75rem 0.35rem;
+  padding: 0 0.75rem 0 3.25rem;
+  border: 1px dashed transparent;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--vl-ink-3);
+  font-size: 0.85rem;
+  text-align: left;
+  transition: color 140ms, background 140ms, border-color 140ms;
+}
+
+[data-vl-page="task"] .tk-quick-add:hover {
+  border-color: var(--vl-line-strong);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-quick-add svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: none;
+}
+
+[data-vl-page="task"] .tk-quick-add--open {
+  border: 1px solid var(--vl-accent-strong);
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 3px var(--vl-ring);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-quick-add input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--vl-ink);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+[data-vl-page="task"] .tk-quick-add .tk-muted {
+  flex: none;
+  font-size: 0.72rem;
+}
+
+/* Barra azioni multiple */
+[data-vl].tk-bulk {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: flex;
+  max-width: calc(100vw - 2rem);
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.45rem 0.4rem 0.9rem;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #2E4F80, #162A48);
+  color: #fff;
+  box-shadow: 0 24px 60px -20px rgba(0, 20, 60, 0.6);
+  transform: translateX(-50%);
+  animation: tk-rise 260ms var(--tk-ease, ease);
+}
+
+.silvia [data-vl].tk-bulk {
+  background: #161616;
+}
+
+@keyframes tk-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+  }
+}
+
+[data-vl].tk-bulk .tk-bulk-count {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.4rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+}
+
+[data-vl].tk-bulk .tk-bulk-count b {
+  color: var(--vl-cta-bg);
+  font-size: 1rem;
+}
+
+[data-vl].tk-bulk .tk-bulk-count svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl].tk-bulk :is(.tk-bulk-btn, .tk-bulk-close) {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.35rem;
+  height: 2.1rem;
+  padding: 0 0.7rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+[data-vl].tk-bulk :is(.tk-bulk-btn, .tk-bulk-close):hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-vl].tk-bulk :is(.tk-bulk-btn, .tk-bulk-close) svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl].tk-bulk .tk-bulk-btn--apply {
+  background: var(--vl-cta-bg);
+  color: var(--vl-cta-ink);
+}
+
+[data-vl].tk-bulk .tk-bulk-btn--apply:hover:not(:disabled) {
+  background: #8dfba7;
+}
+
+[data-vl].tk-bulk .tk-bulk-btn--danger {
+  color: #fda4af;
+}
+
+[data-vl].tk-bulk .tk-bulk-close {
+  margin-left: 0.2rem;
+  padding: 0 0.5rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+[data-vl].tk-bulk .tk-bulk-picker {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+}
+
+[data-vl].tk-bulk .tk-bulk-picker-icon {
+  display: none;
+}
+
+[data-vl].tk-bulk .tk-bulk-picker button {
+  height: 2.1rem;
+  border: 0 !important;
+  background: transparent !important;
+  color: #fff !important;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+[data-vl].tk-bulk .tk-bulk-picker button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-vl].tk-bulk .tk-bulk-picker button :is(span, svg) {
+  color: #fff !important;
+}
+
+/* ───────────────────────── Stati vuoti e caricamento ───────────────────────── */
+
+[data-vl-page="task"] .tk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3.5rem 1.5rem;
+  border: 1px dashed var(--vl-line-strong);
+  border-radius: var(--tk-radius);
+  background: var(--vl-surface);
+  color: var(--vl-ink-2);
+  text-align: center;
+}
+
+[data-vl-page="task"] .tk-empty > b {
+  margin-top: 0.5rem;
+  color: var(--vl-ink);
+  font-size: 1.05rem;
+}
+
+[data-vl-page="task"] .tk-empty > span {
+  max-width: 26rem;
+  font-size: 0.875rem;
+}
+
+[data-vl-page="task"] .tk-empty > button {
+  margin-top: 0.75rem;
+}
+
+[data-vl-page="task"] .tk-empty-art {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  background: var(--vl-now-tint);
+  color: var(--vl-accent-strong);
+}
+
+[data-vl-page="task"] .tk-empty[data-variante="errore"] .tk-empty-art {
+  background: var(--vl-danger-bg);
+  color: var(--vl-danger-dot);
+}
+
+[data-vl-page="task"] .tk-empty[data-variante="filtri"] .tk-empty-art {
+  background: var(--vl-muted-bg);
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] .tk-empty-art svg {
+  position: relative;
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+[data-vl-page="task"] .tk-empty-ring {
+  position: absolute;
+  inset: -0.6rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  opacity: 0.18;
+  animation: tk-ring 3.2s ease-out infinite;
+}
+
+[data-vl-page="task"] .tk-empty-ring--2 {
+  animation-delay: 1.6s;
+}
+
+@keyframes tk-ring {
+  0% { transform: scale(0.85); opacity: 0.3; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vl-page="task"] .tk-empty-ring,
+  [data-vl].tk-bulk {
+    animation: none;
+  }
+}
+
+[data-vl-page="task"] .tk-skeleton {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--vl-line);
+  border-radius: var(--tk-radius);
+  background: var(--vl-surface);
+}
+
+[data-vl-page="task"] .tk-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: var(--tk-row-h);
+  padding: 0 1rem;
+}
+
+[data-vl-page="task"] .tk-skeleton-row + .tk-skeleton-row {
+  border-top: 1px solid var(--vl-line);
+}
+
+[data-vl-page="task"] .tk-skeleton-kanban {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(14rem, 1fr));
+  gap: 0.9rem;
+  overflow: hidden;
+}
+
+[data-vl-page="task"] .tk-skeleton-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border: 1px solid var(--vl-line);
+  border-radius: var(--tk-radius);
+  background: var(--vl-surface);
+}
+
+/* ───────────────────────── Intestazione ───────────────────────── */
+/*
+  Scala tipografica della pagina: titolo (hero), testo 0.875rem, meta 0.75rem.
+  Verde brand solo per l'azione primaria e il "fatto", rosso solo per in ritardo/urgente.
+*/
+
+[data-vl-page="task"] .tk-hero .vl-hero {
+  margin-bottom: 0;
+  padding: 1.35rem 1.6rem 1.25rem;
+}
+
+[data-vl-page="task"] .tk-hero .vl-hero .vl-title {
+  margin-top: 0.7rem;
+  font-size: clamp(1.6rem, 1.2rem + 1.1vw, 2.15rem);
+}
+
+[data-vl-page="task"] .tk-hero .vl-hero .vl-subtitle {
+  margin-top: 0.35rem;
+}
+
+[data-vl-page="task"] .tk-hero[data-ambito="lista"] .vl-live-dot {
+  background: var(--tk-c);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tk-c) 35%, transparent);
+}
+
+[data-vl-page="task"] .tk-hero .vl-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+[data-vl] .tk-hero-cta kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  margin-left: -0.35rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--vl-cta-ink) 12%, transparent);
+  color: var(--vl-cta-ink);
+  font: 700 0.7rem/1 inherit;
+  opacity: 0.75;
+}
+
+/* Frase riepilogo: ogni numero è un filtro */
+[data-vl-page="task"] .tk-frase {
+  display: inline;
+  color: var(--vl-hero-ink-2);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+[data-vl-page="task"] .tk-frase b {
+  color: #fff;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="task"] .tk-frase--loading {
+  opacity: 0.7;
+}
+
+[data-vl-page="task"] .tk-frase-calma {
+  color: var(--vl-hero-accent);
+  font-weight: 650;
+}
+
+[data-vl-page="task"] .tk-frase-sep {
+  opacity: 0.45;
+}
+
+[data-vl-page="task"] .tk-frase-late {
+  color: #fda4af !important;
+}
+
+[data-vl-page="task"] .tk-frase-num {
+  display: inline;
+  margin: 0 -0.3rem;
+  padding: 0.1rem 0.3rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background 150ms var(--tk-ease), color 150ms var(--tk-ease);
+}
+
+[data-vl-page="task"] .tk-frase-num:hover {
+  background: var(--vl-hero-glass-hover);
+  color: #fff;
+}
+
+[data-vl-page="task"] .tk-frase-num[data-tono="late"] b { color: #fda4af; }
+[data-vl-page="task"] .tk-frase-num[data-tono="today"] b { color: #fcd34d; }
+[data-vl-page="task"] .tk-frase-num[data-tono="unread"] b { color: #c4b5fd; }
+
+[data-vl-page="task"] .tk-frase-num[data-active] {
+  background: var(--vl-hero-glass);
+  box-shadow: 0 0 0 1px var(--vl-hero-line) inset;
+  color: #fff;
+}
+
+[data-vl-page="task"] .tk-frase-num:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+/* Toolbar sotto l'intestazione */
+[data-vl-page="task"] .tk-main > .tk-toolbar {
+  padding: 0 0.1rem;
+}
+
+[data-vl-page="task"] .tk-btn[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--vl-accent-strong) 45%, transparent);
+  background: var(--vl-now-tint);
+  color: var(--vl-ink);
+}
+
+@media (hover: none) {
+  [data-vl-page="task"] .tk-keys-btn {
+    display: none;
+  }
+}
+
+[data-vl-page="task"] .tk-filtro-attivo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.75rem;
+  background: var(--vl-now-tint);
+  color: var(--vl-ink-2);
+  font-size: 0.875rem;
+}
+
+[data-vl-page="task"] .tk-filtro-attivo b {
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+[data-vl-page="task"] .tk-link svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+[data-vl-page="task"] .tk-link--center {
+  align-self: center;
+  margin-top: 0.25rem;
+}
+
+
+
+
+/* ───────────────────────── Righe (I miei task e lista) ───────────────────────── */
+
+[data-vl-page="task"] .tk-riga-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+[data-vl-page="task"] .tk-riga-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+[data-vl-page="task"] .tk-riga-title b {
+  overflow: hidden;
+  color: var(--vl-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-vl-page="task"] [data-unread] .tk-riga-title b {
+  font-weight: 750;
+}
+
+[data-vl-page="task"] [data-chiuso] .tk-riga-title b {
+  color: var(--vl-ink-3);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--vl-ink-3) 60%, transparent);
+}
+
+[data-vl-page="task"] .tk-riga-sub {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+  color: var(--vl-ink-3);
+  font-size: 0.75rem;
+}
+
+[data-vl-page="task"] .tk-riga-check {
+  display: inline-flex;
+  flex: none;
+}
+
+/* Azione al passaggio (posticipa): su touch sempre visibile */
+[data-vl-page="task"] .tk-riga-posticipa {
+  display: inline-flex;
+  flex: none;
+}
+
+[data-vl-page="task"] .tk-row-action {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--vl-ink-3);
+  opacity: 0;
+  transition: opacity 140ms, background 140ms, color 140ms;
+}
+
+[data-vl-page="task"] .tk-row-action svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl-page="task"] .tk-row-action:hover,
+[data-vl-page="task"] .tk-row-action[data-state="open"] {
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] :is(.tk-riga, .tk-row):is(:hover, :focus-within, [data-active]) .tk-row-action,
+[data-vl-page="task"] .tk-row-action[data-state="open"],
+[data-vl-page="task"] .tk-row-action:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  [data-vl-page="task"] .tk-row-action {
+    opacity: 1;
+  }
+}
+
+/* ───────────────────────── I miei task ───────────────────────── */
+
+[data-vl-page="task"] .tk-inbox {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+[data-vl-page="task"] .tk-giornata {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--vl-ok-dot) 30%, transparent);
+  border-radius: var(--tk-radius);
+  background: var(--vl-ok-bg);
+  color: var(--vl-ok-fg);
+  font-size: 0.875rem;
+  animation: tk-entra 420ms var(--tk-ease) backwards;
+}
+
+[data-vl-page="task"] .tk-giornata b {
+  margin-right: 0.35rem;
+}
+
+[data-vl-page="task"] .tk-giornata-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vl-ok-dot) 18%, transparent);
+}
+
+[data-vl-page="task"] .tk-giornata-icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl-page="task"] .tk-gruppo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+[data-vl-page="task"] .tk-gruppo-head {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.15rem 0.4rem 0.15rem 0.2rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--vl-ink-2);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-vl-page="task"] .tk-gruppo-head b {
+  font-weight: 750;
+}
+
+[data-vl-page="task"] button.tk-gruppo-head:hover {
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] :is(.tk-gruppo-head, .tk-group-toggle) em {
+  min-width: 1.35rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--vl-muted-bg);
+  color: var(--vl-muted-fg);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 750;
+  letter-spacing: 0;
+  line-height: 1.25rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="task"] .tk-gruppo[data-gruppo="ritardo"] .tk-gruppo-head { color: var(--tk-late); }
+[data-vl-page="task"] .tk-gruppo[data-gruppo="ritardo"] .tk-gruppo-head em { background: var(--vl-danger-bg); color: var(--vl-danger-fg); }
+[data-vl-page="task"] .tk-gruppo[data-gruppo="oggi"] .tk-gruppo-head { color: var(--tk-today); }
+[data-vl-page="task"] .tk-gruppo[data-gruppo="oggi"] .tk-gruppo-head em { background: var(--vl-warn-bg); color: var(--vl-warn-fg); }
+[data-vl-page="task"] .tk-gruppo[data-gruppo="chiusi"] .tk-gruppo-head { color: var(--tk-unread); }
+
+[data-vl-page="task"] .tk-righe {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--vl-line);
+  border-radius: var(--tk-radius);
+  background: var(--vl-surface);
+  box-shadow: var(--vl-shadow);
+  list-style: none;
+}
+
+[data-vl-page="task"] .tk-gruppo[data-gruppo="ritardo"] .tk-righe {
+  border-color: color-mix(in srgb, var(--tk-late) 28%, var(--vl-line));
+}
+
+[data-vl-page="task"] .tk-riga-li + .tk-riga-li {
+  border-top: 1px solid var(--vl-line);
+}
+
+[data-vl-page="task"] .tk-riga {
+  position: relative;
+  display: flex;
+  min-height: 3.5rem;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.55rem 0.75rem 0.55rem 1rem;
+  cursor: pointer;
+  transition: background 140ms;
+}
+
+[data-vl-page="task"] .tk-riga:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="task"] .tk-riga[data-active] {
+  background: var(--vl-now-tint);
+  box-shadow: inset 3px 0 0 var(--vl-accent-strong);
+}
+
+[data-vl-page="task"] .tk-riga:focus-visible,
+[data-vl-page="task"] .tk-row:focus-visible {
+  outline: none;
+  background: var(--vl-hover);
+  box-shadow: inset 0 0 0 2px var(--vl-ring);
+}
+
+[data-vl-page="task"] .tk-riga-side {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+[data-vl-page="task"] .tk-riga-when {
+  display: inline-flex;
+  min-width: 5.25rem;
+  justify-content: flex-end;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* Riga completata: resta un attimo (spunta), poi si chiude */
+[data-vl-page="task"] .tk-riga-li[data-uscente] {
+  overflow: hidden;
+  animation: tk-esce 650ms var(--tk-ease) forwards;
+}
+
+@keyframes tk-esce {
+  0%, 40% { max-height: 6rem; opacity: 1; transform: none; }
+  100% { max-height: 0; opacity: 0; transform: translateX(0.75rem); }
+}
+
+@keyframes tk-entra {
+  from { opacity: 0; transform: translateY(0.35rem); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ───────────────────────── Lista (ritocchi v2) ───────────────────────── */
+
+[data-vl-page="task"] .tk-table {
+  --tk-cols: 2rem minmax(0, 1fr) 6rem 8.5rem 6.75rem 6rem;
+}
+
+[data-vl-page="task"] .tk-table[data-con-lista] {
+  --tk-cols: 2rem minmax(0, 1fr) 6rem 8.5rem 6.75rem 6rem 8.5rem;
+}
+
+/* Una sola riga di dettagli sotto il titolo: le righe restano della stessa altezza */
+[data-vl-page="task"] .tk-row .tk-riga-sub {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+[data-vl-page="task"] .tk-row .tk-riga-sub > * {
+  flex: none;
+}
+
+@media (max-width: 1535px) {
+  [data-vl-page="task"] .tk-table {
+    --tk-cols: 2rem minmax(0, 1fr) 6rem 8.5rem 6.75rem;
+  }
+
+  [data-vl-page="task"] .tk-table[data-con-lista] {
+    --tk-cols: 2rem minmax(0, 1fr) 6rem 8.5rem 6.75rem 8.5rem;
+  }
+
+  [data-vl-page="task"] .tk-c-aggiornato {
+    display: none;
+  }
+}
+
+[data-vl-page="task"] .tk-row .tk-c-titolo {
+  gap: 0.75rem;
+}
+
+/* Valori "quieti": diventano controlli solo al passaggio o con il fuoco */
+[data-vl-page="task"] .tk-cell-quiet[data-vuota] > * {
+  opacity: 0;
+  transition: opacity 140ms;
+}
+
+[data-vl-page="task"] .tk-row:is(:hover, :focus-within) .tk-cell-quiet[data-vuota] > * {
+  opacity: 1;
+}
+
+/* Selezione del gruppo: solo al passaggio o con una selezione attiva */
+[data-vl-page="task"] .tk-table:not([data-selezione]) .tk-thead .tk-group-check {
+  opacity: 0;
+  transition: opacity 140ms;
+}
+
+[data-vl-page="task"] .tk-table .tk-thead:hover .tk-group-check,
+[data-vl-page="task"] .tk-table .tk-thead:focus-within .tk-group-check {
+  opacity: 1;
+}
+
+[data-vl-page="task"] .tk-group-toggle b {
+  font-size: 0.875rem;
+}
+
+[data-vl-page="task"] .tk-quick-add--open {
+  padding-left: 0.75rem;
+}
+
+[data-vl-page="task"] .tk-quick-add-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.5rem;
+  margin-left: 1.95rem;
+  color: var(--vl-accent-strong);
+}
+
+[data-vl-page="task"] .tk-quick-add-input {
+  min-width: 0;
+  flex: 1;
+}
+
+[data-vl-page="task"] .tk-quick-add-hint {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--vl-ink-3);
+  font-size: 0.75rem;
+}
+
+[data-vl-page="task"] .tk-quick-add-hint svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* ───────────────────────── Navigazione telefono e pulsante fluttuante ───────────────────────── */
+
+[data-vl-page="task"] .tk-navm,
+[data-vl-page="task"] .tk-fab {
+  display: none;
+}
+
+[data-vl-page="task"] .tk-rail-section-title {
+  padding: 0.85rem 0.55rem 0.3rem;
+}
+
+[data-vl-page="task"] .tk-rail-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--vl-line);
+}
+
+[data-vl-page="task"] .tk-rail-foot .tk-rail-item--manage {
+  margin-top: 0;
+}
+
+[data-vl-page="task"] .tk-rail-foot .tk-rail-toggle {
+  align-self: center;
+  margin: 0 0 0 auto;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-section-title {
+  display: none;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-foot {
+  flex-direction: column;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-foot .tk-rail-toggle {
+  margin: 0;
+}
+
+/* ───────────────────────── Scorciatoie ───────────────────────── */
+
+[data-vl].tk-keys-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1.25rem 1.75rem;
+}
+
+[data-vl].tk-keys .tk-keys-titolo {
+  margin: 0 0 0.4rem;
+  color: var(--vl-ink-3);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-vl].tk-keys dl {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+[data-vl].tk-keys dl > div {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, auto) 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+[data-vl].tk-keys dt {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+[data-vl].tk-keys dd {
+  margin: 0;
+  color: var(--vl-ink-2);
+}
+
+[data-vl].tk-keys kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--vl-line-strong);
+  border-bottom-width: 2px;
+  border-radius: 0.4rem;
+  background: var(--vl-surface-2, var(--vl-surface));
+  color: var(--vl-ink);
+  font: 650 0.75rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ───────────────────────── Responsive ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vl-page="task"] :is(.tk-riga-li[data-uscente], .tk-giornata) {
+    animation: none;
+  }
+}
+
+
+@media (max-width: 1023px) {
+  [data-vl].tk-page,
+  [data-vl].tk-page[data-rail-compatta] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  [data-vl-page="task"] .tk-rail {
+    display: none;
+  }
+
+  /* Segmenti in alto, fissi durante lo scroll */
+  [data-vl-page="task"] .tk-navm {
+    position: sticky;
+    top: 0.5rem;
+    z-index: 20;
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--vl-line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--vl-surface) 88%, transparent);
+    box-shadow: var(--vl-shadow);
+    backdrop-filter: blur(10px);
+  }
+
+  [data-vl-page="task"] .tk-navm > button {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+    min-height: 2.5rem;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0 0.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--vl-ink-2);
+    font-size: 0.875rem;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+
+  [data-vl-page="task"] .tk-navm > button svg {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+  }
+
+  [data-vl-page="task"] .tk-navm > button[data-active] {
+    background: var(--vl-now-tint);
+    color: var(--vl-ink);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--vl-accent-strong) 30%, transparent) inset;
+  }
+
+  [data-vl-page="task"] .tk-navm-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-vl-page="task"] .tk-navm-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    flex: none;
+    border-radius: 999px;
+    background: var(--tk-c);
+  }
+
+  [data-vl-page="task"] .tk-navm .tk-rail-count {
+    min-width: 1.2rem;
+    font-size: 0.65rem;
+    line-height: 1.1rem;
+  }
+
+  /* Su schede niente colonne: dell'header resta lo stato */
+  [data-vl-page="task"] .tk-thead,
+  [data-vl-page="task"] .tk-table[data-con-lista] .tk-thead {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  [data-vl-page="task"] .tk-thead > :not(.tk-c-sel, .tk-c-titolo),
+  [data-vl-page="task"] .tk-thead .tk-sort {
+    display: none;
+  }
+
+  [data-vl-page="task"] .tk-table:not([data-selezione]) .tk-thead {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Righe della lista come schede: titolo sopra, valori sotto */
+  [data-vl-page="task"] .tk-row,
+  [data-vl-page="task"] .tk-table[data-con-lista] .tk-row {
+    grid-template-columns: 2rem auto auto 1fr;
+    grid-template-areas:
+      "sel titolo titolo titolo"
+      ". assegnatari scadenza priorita";
+    row-gap: 0.1rem;
+    padding: 0.4rem 0.75rem 0.55rem;
+  }
+
+  [data-vl-page="task"] .tk-row .tk-c-sel { grid-area: sel; opacity: 1; }
+  [data-vl-page="task"] .tk-row .tk-c-titolo { grid-area: titolo; }
+  [data-vl-page="task"] .tk-row .tk-c-assegnatari { grid-area: assegnatari; }
+  [data-vl-page="task"] .tk-row .tk-c-scadenza { grid-area: scadenza; }
+  [data-vl-page="task"] .tk-row .tk-c-priorita { grid-area: priorita; justify-content: flex-end; }
+  [data-vl-page="task"] .tk-row .tk-c-lista { display: none; }
+
+  [data-vl-page="task"] .tk-cell-placeholder {
+    opacity: 1;
+  }
+
+  /* Su touch la selezione multipla non serve finché non c'è: righe più pulite */
+  [data-vl-page="task"] .tk-table:not([data-selezione]) .tk-row {
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      "titolo titolo titolo"
+      "assegnatari scadenza priorita";
+  }
+
+  [data-vl-page="task"] .tk-table:not([data-selezione]) :is(.tk-row .tk-c-sel, .tk-thead .tk-c-sel) {
+    display: none;
+  }
+
+  [data-vl-page="task"] .tk-table:not([data-selezione]) .tk-row .tk-c-assegnatari {
+    padding-left: 2.1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  [data-vl-page="task"] .tk-hero .vl-hero {
+    padding: 1rem 1.1rem;
+    border-radius: 1.15rem;
+  }
+
+  [data-vl-page="task"] .tk-hero .vl-hero .vl-title {
+    margin-top: 0.5rem;
+    font-size: 1.5rem;
+  }
+
+  [data-vl-page="task"] .tk-hero .vl-hero-grid,
+  [data-vl-page="task"] .tk-hero .vl-hero-actions {
+    display: none;
+  }
+
+  [data-vl-page="task"] .tk-frase {
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  [data-vl-page="task"] .tk-search kbd {
+    display: none;
+  }
+
+  [data-vl-page="task"] .tk-search {
+    max-width: none;
+  }
+
+  [data-vl-page="task"] .tk-main > .tk-toolbar {
+    flex-wrap: nowrap;
+  }
+
+  [data-vl-page="task"] .tk-main > .tk-toolbar .tk-search {
+    min-width: 0;
+    flex: 1;
+  }
+
+  [data-vl-page="task"] .tk-toolbar-right {
+    flex-wrap: nowrap;
+  }
+
+  [data-vl-page="task"] .tk-toolbar-right .tk-btn > span:not(.tk-btn-count),
+  [data-vl-page="task"] .tk-segmented button span {
+    display: none;
+  }
+
+  [data-vl-page="task"] .tk-riga {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.75rem;
+    padding: 0.7rem 0.75rem 0.7rem 0.85rem;
+  }
+
+  [data-vl-page="task"] .tk-riga-main {
+    flex-basis: calc(100% - 2.6rem);
+  }
+
+  [data-vl-page="task"] .tk-riga-title b {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  [data-vl-page="task"] .tk-riga-side {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding-left: 2.35rem;
+  }
+
+  [data-vl-page="task"] .tk-riga-side .tk-counters {
+    margin-right: auto;
+  }
+
+  [data-vl-page="task"] .tk-riga-when {
+    min-width: 0;
+  }
+
+  [data-vl-page="task"] .tk-fab {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    z-index: 50;
+    display: inline-grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--vl-cta-bg);
+    color: var(--vl-cta-ink);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset, 0 14px 30px -10px var(--vl-cta-glow);
+    transition: transform 180ms var(--tk-ease);
+  }
+
+  [data-vl-page="task"] .tk-fab:active {
+    transform: scale(0.94);
+  }
+
+  [data-vl-page="task"] .tk-fab svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    stroke-width: 2.75;
+  }
+
+  [data-vl-page="task"] .tk-main {
+    padding-bottom: 4.5rem;
+  }
+
+  [data-vl].tk-bulk {
+    left: 0.75rem;
+    right: 0.75rem;
+    max-width: none;
+    transform: none;
+    animation: none;
+  }
+
+}
+
+/* ───────────────────────── Archivio di completati e annullati ─────────────────────────
+   Un riquadro per stato sotto l'elenco: tutto lo storico, a pagine, ritrovabile con la ricerca. */
+[data-vl-page="task"] .tk-archivio {
+  margin-top: 1.5rem;
+  overflow: clip;
+  border: 1px solid var(--vl-line);
+  border-radius: var(--tk-radius);
+  background: var(--vl-surface);
+  box-shadow: var(--vl-shadow);
+}
+
+[data-vl-page="task"] .tk-archivio-head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border: 0;
+  background: transparent;
+  color: var(--vl-ink);
+  font-size: 14px !important;
+  text-align: left;
+}
+
+[data-vl-page="task"] .tk-archivio-head:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="task"] .tk-archivio[aria-label] .tk-archivio-head[aria-expanded="true"] {
+  border-bottom: 1px solid var(--vl-line);
+}
+
+[data-vl-page="task"] .tk-archivio-head b {
+  font-weight: 700;
+}
+
+[data-vl-page="task"] .tk-archivio-head em {
+  min-width: 1.5rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: var(--vl-muted-bg);
+  color: var(--vl-muted-fg);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.35rem;
+  text-align: center;
+}
+
+[data-vl-page="task"] .tk-archivio-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+  color: var(--vl-ink-3);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+[data-vl-page="task"] .tk-archivio-hint svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* Dentro il riquadro le righe non hanno una seconda cornice */
+[data-vl-page="task"] .tk-archivio .tk-righe {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+[data-vl-page="task"] .tk-archivio-quando {
+  color: var(--vl-ink-3);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+[data-vl-page="task"] .tk-archivio-vuoto {
+  margin: 0;
+  padding: 1rem;
+  color: var(--vl-ink-3);
+  font-size: 13px;
+}
+
+[data-vl-page="task"] .tk-archivio-altri {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-top: 1px solid var(--vl-line);
+  background: transparent;
+  color: var(--vl-accent-strong);
+  font-size: 13px !important;
+  font-weight: 600;
+}
+
+[data-vl-page="task"] .tk-archivio-altri:hover:not(:disabled) {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="task"] .tk-archivio .tk-spin {
+  width: 0.9rem;
+  height: 0.9rem;
+  animation: tk-archivio-giro 0.8s linear infinite;
+}
+
+@keyframes tk-archivio-giro {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  [data-vl-page="task"] .tk-archivio-hint {
+    display: none;
+  }
+}
+
+/* ───────────────────────── EdoDoc: niente assegnatari né "aggiornato", i tipi fanno da liste ───────────────────────── */
+
+[data-vl-page="task"] .tk-table {
+  --tk-cols: 2rem minmax(0, 1fr) 7.5rem 6.25rem;
+}
+
+[data-vl-page="task"] .tk-table[data-con-lista] {
+  --tk-cols: 2rem minmax(0, 1fr) 7.5rem 6.25rem 9.5rem;
+}
+
+[data-vl-page="task"] .tk-rail-section-title {
+  margin: 0.8rem 0 0.25rem;
+  padding: 0 0.55rem;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-rail-section-title {
+  display: none;
+}
+
+[data-vl-page="task"].tk-albero-sheet .tk-rail-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+[data-vl-page="task"] .tk-quick-add-input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--vl-ink);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1023px) {
+  [data-vl-page="task"] .tk-row,
+  [data-vl-page="task"] .tk-table[data-con-lista] .tk-row {
+    grid-template-columns: 2rem auto 1fr;
+    grid-template-areas:
+      "sel titolo titolo"
+      ". scadenza priorita";
+  }
+
+  [data-vl-page="task"] .tk-table:not([data-selezione]) .tk-row {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "titolo titolo"
+      "scadenza priorita";
+  }
+
+  [data-vl-page="task"] .tk-table:not([data-selezione]) .tk-row .tk-c-scadenza {
+    padding-left: 2.1rem;
+  }
+}

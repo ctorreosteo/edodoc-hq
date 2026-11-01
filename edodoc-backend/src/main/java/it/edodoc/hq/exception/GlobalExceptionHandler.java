@@ -45,6 +45,11 @@ public class GlobalExceptionHandler {
         return risposta(HttpStatus.CONFLICT, e.getMessage(), e.getMessage());
     }
 
+    @ExceptionHandler(GoogleRifiutoException.class)
+    public ResponseEntity<ApiResponseDto<Object>> rifiutoGoogle(GoogleRifiutoException e) {
+        return risposta(e.getStato(), e.getMessage(), e.getMessage());
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponseDto<Object>> nonValido(IllegalArgumentException e) {
         return risposta(HttpStatus.BAD_REQUEST, e.getMessage(), e.getMessage());

@@ -39,6 +39,7 @@ Stack completo in container, backend compreso: `cd edodoc-backend && docker comp
 | Corsi | Corso, moduli e lezioni (video o testo in Markdown). Tutto nasce in bozza. Il paziente vede una lezione solo se è pubblicata, completa e sta in un corso pubblicato; tutti i pazienti con l'app vedono tutti i corsi pubblicati |
 | Fatture | Solo a pagamento ricevuto. Numero progressivo senza buchi, che non riparte a inizio anno. Una fattura emessa non si modifica: si annulla e il numero resta occupato |
 | Finance | Righe del foglio Cassa calcolate da pagamenti e movimenti. Candidature da chiudere quando il margine del Livello 1 scende sotto il valore di un cliente |
+| Calendario | Il Google Calendar del dottore in diretta, senza copie nel gestionale: viste giorno, settimana, mese, anno ed elenco, eventi ricorrenti, inviti e Meet. Gli eventi delle visite aprono la scheda del paziente; spostarli o cancellarli torna sulla visita al giro successivo del job |
 | Email | Dal menu contestuale: sollecito pagamento, richiesta dati fatturazione, fattura con PDF. Il popup propone il modello di `config` e si può modificare prima dell'invio |
 | Task | Tipi preimpostati in `task_tipi`. I job creano i promemoria di Tessera Sanitaria e scadenze fiscali |
 
@@ -56,15 +57,16 @@ Tutte spente: si accendono dalla pagina Impostazioni o dalla tabella `config`, s
 
 ### Collegare Google Workspace
 
-Stesso schema di Mobilitas: Service Account con domain-wide delegation.
+Stesso schema di Mobilitas: Service Account con domain-wide delegation, sull'account `supporto@edodoc.it` (`GOOGLE_ACCOUNT_EMAIL`, impostato dalla migrazione V8 insieme ai due interruttori). In produzione non esistono chiavi: l'organizzazione le vieta, e `GOOGLE_SENZA_CHIAVE=true` fa firmare l'asserzione a IAM. Calendar API e Gmail API sono già abilitate.
 
-1. In Google Cloud abilita Calendar API e Gmail API e crea un Service Account con chiave JSON.
-2. In Google Workspace Admin, sotto Domain-wide delegation, autorizza il suo client ID con questi scope:
-   `https://www.googleapis.com/auth/calendar` e `https://www.googleapis.com/auth/gmail.modify` (lettura della casella e invio).
-3. Imposta `GOOGLE_CREDENTIALS_PATH` sul percorso assoluto del JSON.
-4. In Impostazioni compila l'account del dottore e abilita le integrazioni.
+1. Dai a `edodoc-backend@endless-grail-513417-e7.iam.gserviceaccount.com` il ruolo Service Account Token Creator su se stesso:
+   `gcloud iam service-accounts add-iam-policy-binding edodoc-backend@endless-grail-513417-e7.iam.gserviceaccount.com --project endless-grail-513417-e7 --member serviceAccount:edodoc-backend@endless-grail-513417-e7.iam.gserviceaccount.com --role roles/iam.serviceAccountTokenCreator`
+2. In Google Workspace Admin, sotto Domain-wide delegation, autorizza il client ID `117822787658752297703` con questi scope:
+   `https://www.googleapis.com/auth/calendar,https://www.googleapis.com/auth/gmail.modify`
 
-Le visite create prima dell'accensione aspettano: quelle future si pubblicano da sole al primo giro del job, ogni 5 minuti.
+Finché manca uno dei due, le pagine Email e Calendario mostrano la guida di collegamento. In locale serve invece `GOOGLE_CREDENTIALS_PATH` con il percorso assoluto di un JSON; senza, le due pagine usano i dati dimostrativi.
+
+Le visite create prima dell'accensione aspettano: quelle future si pubblicano da sole al primo giro del job, ogni 5 minuti, e il paziente riceve l'invito se la visita lo prevede.
 
 ### Collegare le notifiche push
 
@@ -147,6 +149,13 @@ Le push passano da Apple e Google, quindi non contengono mai nomi o dati sanitar
 
 ## Deploy
 
-Backend: immagine da [edodoc-backend/Dockerfile](edodoc-backend/Dockerfile), variabili in [edodoc-backend/env.example](edodoc-backend/env.example). In produzione sono obbligatorie `JWT_SECRET` (l'avvio fallisce senza), `ADMIN_EMAIL` e `ADMIN_PASSWORD` per il primo accesso, e `CORS_ALLOWED_ORIGINS`.
+`./deploy.sh` pubblica backend e frontend sul progetto Google Cloud `endless-grail-513417-e7`, regione `europe-west8`. Non serve il login di gcloud: usa la chiave del service account `edodoc-deploy` in `~/.config/edodoc/edodoc-deploy.json`, fuori dal repo. L'organizzazione blocca la creazione di nuove chiavi: per sostituirla va sospesa la policy `iam.managed.disableServiceAccountKeyCreation` su questo progetto.
 
-Frontend: `VITE_API_BASE_URL=https://.../api npm run build`, poi pubblica `dist/` con redirect delle route su `index.html`.
+| Pezzo | Dove |
+|-------|------|
+| Backend | Cloud Run `edodoc-backend`, sempre acceso perché i job pianificati devono girare anche senza richieste |
+| Database | Cloud SQL `edodoc-db`, PostgreSQL 16. Nessuna rete autorizzata: il backend si collega col suo service account tramite il connettore Cloud SQL |
+| Frontend | Firebase Hosting |
+| Segreti | Secret Manager: `edodoc-db-password`, `edodoc-jwt-secret`, `edodoc-admin-password` |
+
+Le altre variabili sono in [edodoc-backend/env.example](edodoc-backend/env.example). In produzione `JWT_SECRET` è obbligatoria: l'avvio fallisce senza.
