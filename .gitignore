@@ -1,0 +1,21 @@
+# Segreti e ambiente locale
+.env
+.env.local
+.env.*.local
+secrets/
+**/service-account-credentials.json
+
+# Dipendenze e build
+node_modules/
+dist/
+target/
+*.tsbuildinfo
+
+# Log
+logs/
+*.log
+
+# Sistema
+.DS_Store
+.idea/
+.vscode/

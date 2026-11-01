@@ -1,0 +1,1889 @@
+/*
+  Design system del telefono (sotto 640px). Vedi MOBILE-DESIGN.md.
+  Tutto è agganciato ad attributi data-m-*: sopra i 640px non ha alcun effetto.
+  Importato dopo mobile.css e prima dei file di gruppo, così le pagine possono rifinire.
+
+  Ricette (attributi):
+    pagina      [data-m-page-header] [data-m-section-title] [data-m-desc] [data-m-hero]
+    azioni      [data-m-actions] > [data-m-primary|data-m-secondary|data-m-tinted|data-m-danger|data-m-icon-only]
+                [data-m-textbtn][data-tone] [data-m-iconbtn][data-tone]
+    ricerca     [data-m-search] > input + [data-slot=select-trigger] (pillola "cerca per" sotto il campo)
+    filtri      [data-m-filterbar][data-open] > [data-m-filterbar-toggle] (icona · [data-m-summary] · [data-m-count] · chevron)
+                + [data-m-filterbar-body] > [data-m-filterbar-stack] > righe [data-m-fields] > [data-m-field][data-m-wide]
+                + [data-m-filterbar-foot] (Applica a tutta larghezza alla FINE, reset come [data-m-textbtn])
+    campi       [data-m-fields] griglia 2 colonne · [data-m-field] etichetta [data-m-label] sopra il controllo
+                [data-m-field-group] campo composto in colonna · [data-m-field-value] valore selezionato
+    KPI         [data-m-kpis] > [data-m-kpi][data-tone] > [data-m-label] [data-m-value] [data-m-hint]
+    schede      [data-m-cards] > [data-m-card][data-tone] > [data-m-card-head] [data-m-title] [data-m-sub] [data-m-amount]
+                [data-m-meta] [data-m-chips] [data-m-inset] [data-m-card-foot] [data-m-menu] [data-m-avatar]
+    chip        [data-m-chip][data-tone=ok|warn|danger|info|violet|muted|accent|solid|outline]
+    liste       [data-m-list] > [data-m-item] > [data-m-grow] [data-m-chevron] · [data-m-kv] righe etichetta/valore
+    controlli   [data-m-seg] [data-m-chiprow] > [data-m-pill][data-active]
+    elenchi     [data-m-listing=header|card|section|scroll] (directory-listing-ui)
+    paginazione [data-m-pagebar] > [data-m-pagebar-info] [data-m-pagebar-nav] > [data-m-pagebar-buttons] > [data-m-pagebar-goto]
+    stati       [data-m-empty] [data-m-skeleton] · barra fissa [data-m-sticky-bottom][data-fixed]
+    nascondi    [data-m-hide]
+*/
+
+@media (max-width: 639px) {
+  :root {
+    --m-gutter: 16px;
+    --m-radius-card: 20px;
+    --m-radius-control: 14px;
+    --m-radius-sm: 10px;
+    --m-accent: var(--brand-blue);
+    --m-on-accent: var(--brand-orange);
+    --m-tint: color-mix(in srgb, var(--brand-blue) 8%, transparent);
+    --m-tint-strong: color-mix(in srgb, var(--brand-blue) 14%, transparent);
+    --m-surface: var(--card);
+    --m-surface-2: color-mix(in srgb, var(--brand-blue) 4%, var(--card));
+    --m-border: color-mix(in srgb, var(--border) 70%, transparent);
+    --m-hairline: color-mix(in srgb, var(--border) 55%, transparent);
+    --m-shadow: 0 1px 2px rgba(31, 58, 99, 0.04), 0 8px 24px -16px rgba(31, 58, 99, 0.22);
+    --m-text: var(--foreground);
+    --m-muted: var(--muted-foreground);
+    --m-glass: color-mix(in srgb, var(--background) 90%, transparent);
+    --m-tone-ok-bg: color-mix(in srgb, #10b981 14%, transparent);
+    --m-tone-ok-fg: #047857;
+    --m-tone-warn-bg: color-mix(in srgb, #f59e0b 16%, transparent);
+    --m-tone-warn-fg: #b45309;
+    --m-tone-danger-bg: color-mix(in srgb, #f43f5e 13%, transparent);
+    --m-tone-danger-fg: #be123c;
+    --m-tone-info-bg: color-mix(in srgb, #0ea5e9 14%, transparent);
+    --m-tone-info-fg: #0369a1;
+    --m-tone-violet-bg: color-mix(in srgb, #8b5cf6 14%, transparent);
+    --m-tone-violet-fg: #6d28d9;
+    --m-tone-muted-bg: color-mix(in srgb, var(--foreground) 7%, transparent);
+    --m-tone-muted-fg: var(--muted-foreground);
+    --m-tone-accent-bg: var(--m-tint);
+    --m-tone-accent-fg: var(--brand-blue);
+  }
+
+  .dark {
+    --m-accent: var(--brand-orange);
+    --m-on-accent: var(--brand-blue);
+    --m-tint: color-mix(in srgb, var(--brand-orange) 10%, transparent);
+    --m-tint-strong: color-mix(in srgb, var(--brand-orange) 18%, transparent);
+    --m-surface-2: color-mix(in srgb, white 5%, var(--card));
+    --m-border: color-mix(in srgb, white 11%, transparent);
+    --m-hairline: color-mix(in srgb, white 9%, transparent);
+    --m-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+    --m-tone-ok-fg: #6ee7b7;
+    --m-tone-warn-fg: #fcd34d;
+    --m-tone-danger-fg: #fda4af;
+    --m-tone-info-fg: #7dd3fc;
+    --m-tone-violet-fg: #c4b5fd;
+    --m-tone-accent-fg: var(--brand-orange);
+  }
+
+  /* —— Pagina —— */
+  [data-app-page] {
+    padding-left: var(--m-gutter);
+    padding-right: var(--m-gutter);
+    gap: 16px;
+  }
+
+  [data-m-page-header] {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 4px;
+  }
+
+  [data-m-page-header] h1,
+  [data-m-page-header] [data-m-h1] {
+    font-size: 26px !important;
+    line-height: 1.15 !important;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  [data-m-page-header] p,
+  [data-m-page-header] [data-m-subtitle] {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--m-muted);
+  }
+
+  [data-m-section-title] {
+    display: block;
+    margin: 8px 0 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--m-muted);
+  }
+
+  /* —— Azioni —— */
+  [data-m-actions] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  [data-m-actions] > * {
+    flex: 1 1 auto;
+    min-height: 44px;
+    height: auto;
+    padding: 0 14px;
+    border-radius: var(--m-radius-control);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  [data-m-actions] > [data-m-primary],
+  [data-m-primary] {
+    flex: 0 0 100%;
+    width: 100%;
+    min-height: 48px;
+    font-size: 15px;
+    border-radius: var(--m-radius-control);
+  }
+
+  /* L'azione principale sta sempre in cima alla riga delle azioni */
+  [data-m-actions] > [data-m-primary] {
+    order: -1;
+  }
+
+  [data-m-actions] > [data-m-icon-only] {
+    flex: 0 0 44px;
+    width: 44px;
+    padding: 0;
+  }
+
+  /*
+    Gerarchia dei pulsanti, uguale su tutte le pagine. !important: molti pulsanti hanno
+    colori inline (style={{ backgroundColor }}) o classi bg-emerald/bg-violet diverse per pagina.
+  */
+  [data-m-primary] {
+    background: var(--m-accent) !important;
+    color: var(--m-on-accent) !important;
+    border: 1px solid var(--m-accent) !important;
+    box-shadow: 0 6px 16px -10px color-mix(in srgb, var(--m-accent) 70%, transparent);
+    font-weight: 600;
+  }
+
+  [data-m-primary] svg {
+    color: inherit !important;
+  }
+
+  [data-m-primary]:disabled {
+    opacity: 0.45;
+    box-shadow: none;
+  }
+
+  [data-m-secondary] {
+    background: var(--m-surface) !important;
+    color: var(--m-text) !important;
+    border: 1px solid var(--m-border) !important;
+    box-shadow: none;
+  }
+
+  [data-m-tinted] {
+    background: var(--m-tint) !important;
+    color: var(--m-tone-accent-fg) !important;
+    border: 1px solid transparent !important;
+    box-shadow: none;
+  }
+
+  [data-m-danger] {
+    background: var(--m-tone-danger-bg) !important;
+    color: var(--m-tone-danger-fg) !important;
+    border: 1px solid transparent !important;
+  }
+
+  /* Pulsante "di testo" (reset, annulla): nessuno sfondo, 44px di altezza */
+  [data-m-textbtn] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0 !important;
+    border-radius: var(--m-radius-control);
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--m-muted) !important;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  [data-m-textbtn][data-tone="danger"] {
+    color: var(--m-tone-danger-fg) !important;
+  }
+
+  [data-m-textbtn][data-tone="accent"] {
+    color: var(--m-tone-accent-fg) !important;
+  }
+
+  [data-m-textbtn] svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* —— Testi descrittivi e hero —— */
+  [data-m-desc] {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--m-muted);
+  }
+
+  [data-m-hero] {
+    padding: 16px !important;
+    border-radius: var(--m-radius-card) !important;
+    gap: 6px;
+  }
+
+  [data-m-hero] [data-m-eyebrow] {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+
+  [data-m-hero] h1,
+  [data-m-hero] [data-m-h1] {
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.02em;
+  }
+
+  [data-m-hero] p,
+  [data-m-hero] [data-m-desc] {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  /* —— Ricerca: campo a tutta larghezza, "cerca per" come pillola sotto —— */
+  [data-m-search] {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    max-width: none;
+  }
+
+  [data-m-search] > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  [data-m-search] [data-slot="input"],
+  [data-m-search] input:not([type="checkbox"]):not([type="radio"]) {
+    width: 100%;
+    min-height: 48px;
+    border-radius: var(--m-radius-control);
+    font-size: 16px;
+    box-shadow: none;
+  }
+
+  [data-m-search] > [data-slot="select-trigger"],
+  [data-m-search] [data-m-search-type] {
+    order: 1;
+    align-self: flex-start;
+    width: auto;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    flex-wrap: nowrap !important;
+  }
+
+  [data-m-search] [data-slot="select-trigger"] [data-slot="select-value"] {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Icona della lente: centrata sul campo da 48px */
+  [data-m-search] .relative > .absolute svg,
+  [data-m-search] .relative > svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* —— Filtri —— */
+  [data-m-filterbar] {
+    border-radius: var(--m-radius-card);
+    border: 1px solid var(--m-border);
+    background: var(--m-surface);
+    box-shadow: var(--m-shadow);
+  }
+
+  /* Su una Card il padding verticale lo mettono il toggle e il corpo */
+  [data-slot="card"][data-m-filterbar],
+  [data-m-filterbar] {
+    padding: 0;
+    gap: 0;
+  }
+
+  [data-m-filterbar] > [data-m-search] {
+    padding: 12px 16px 4px;
+  }
+
+  [data-m-filterbar-toggle] {
+    display: flex;
+    width: 100%;
+    min-height: 52px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--m-radius-card);
+    background: transparent;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--m-text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  [data-m-filterbar-toggle]:active {
+    background: var(--m-tint);
+  }
+
+  [data-m-filterbar-toggle] > svg:first-child {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--m-tone-accent-fg);
+  }
+
+  [data-m-filterbar-toggle] > svg:last-child {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--m-muted);
+    transition: transform 0.2s ease;
+  }
+
+  [data-m-filterbar][data-open] [data-m-filterbar-toggle] > svg:last-child {
+    transform: rotate(180deg);
+  }
+
+  [data-m-filterbar-toggle] [data-m-summary] {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--m-text);
+  }
+
+  [data-m-filterbar-toggle] [data-m-count] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--m-accent);
+    color: var(--m-on-accent);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-m-filterbar-body],
+  [data-slot="card-content"][data-m-filterbar-body] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    padding: 12px 16px 16px;
+    border-top: 1px solid var(--m-hairline);
+  }
+
+  [data-m-filterbar-body] > * {
+    min-width: 0;
+    margin: 0;
+  }
+
+  [data-m-filterbar-body] > [data-m-wide] {
+    grid-column: 1 / -1;
+  }
+
+  [data-m-filterbar]:not([data-open]) [data-m-filterbar-body] {
+    display: none;
+  }
+
+  /* Pila di righe-filtro dentro il corpo (sostituisce space-y-*) */
+  [data-m-filterbar-stack] {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  [data-m-filterbar-stack] > * {
+    margin: 0;
+    min-width: 0;
+  }
+
+  [data-m-filterbar-stack] > [data-m-first] {
+    order: -1;
+  }
+
+  /* Piè del pannello filtri: Applica a tutta larghezza, reset come testo */
+  [data-m-filterbar-foot] {
+    order: 99;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  [data-m-filterbar-foot] > * {
+    width: 100%;
+  }
+
+  /* —— Campi —— */
+  /* Griglia di campi: due per riga, [data-m-wide] a tutta riga */
+  [data-m-fields] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: end;
+    width: 100%;
+    min-width: 0;
+  }
+
+  [data-m-fields] > * {
+    min-width: 0;
+    margin: 0;
+  }
+
+  [data-m-fields] > [data-m-wide],
+  [data-m-fields] > :only-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Riga con contenuto allineato a destra (es. toggle tipo data): va sotto, a tutta larghezza */
+  [data-m-fields-row] {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  [data-m-fields-row] > * {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  [data-m-field] {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  [data-m-field] > label,
+  [data-m-field] > [data-m-label] {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--m-text);
+  }
+
+  [data-m-field] > :not(label):not([data-m-label]) {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  [data-m-field] [data-slot="select-trigger"],
+  [data-m-field] [data-slot="input"],
+  [data-m-field] > [data-slot="button"],
+  [data-m-field] > .relative > [data-slot="input"],
+  [data-m-field] > .relative > input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 48px;
+    border-radius: var(--m-radius-control);
+    font-size: 16px;
+    box-shadow: none;
+  }
+
+  [data-m-field] [data-slot="select-trigger"] [data-slot="select-value"] {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-m-field] > [data-slot="button"] {
+    justify-content: flex-start;
+    padding-left: 14px;
+    padding-right: 12px;
+  }
+
+  /* Campo composto (es. "Paziente": tipo di ricerca + campo di testo) */
+  [data-m-field-group] {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+  }
+
+  [data-m-field-group] > * {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  [data-m-field-group] [data-slot="input"],
+  [data-m-field-group] input:not([type="checkbox"]):not([type="radio"]) {
+    width: 100%;
+    min-height: 48px;
+    border-radius: var(--m-radius-control);
+    font-size: 16px;
+    box-shadow: none;
+  }
+
+  /* Valore selezionato mostrato come controllo (es. paziente scelto con X) */
+  [data-m-field-value] {
+    min-height: 48px;
+    padding: 0 10px 0 16px;
+    border-radius: var(--m-radius-control);
+    border: 1px solid var(--m-border);
+    background: var(--m-surface);
+    box-shadow: none;
+  }
+
+  [data-m-field-value] > span {
+    font-size: 15px;
+  }
+
+  [data-m-field-value] > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+  }
+
+  /* —— KPI —— */
+  [data-m-kpis] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  [data-m-kpis] > [data-m-kpi]:last-child:nth-child(odd),
+  [data-m-kpi][data-m-wide] {
+    grid-column: 1 / -1;
+  }
+
+  [data-m-kpi] {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding: 14px 16px 14px;
+    border-radius: var(--m-radius-card);
+    border: 1px solid var(--m-border);
+    background: var(--m-surface);
+    box-shadow: var(--m-shadow);
+  }
+
+  [data-m-kpi][data-tone]::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: var(--m-kpi-bar, var(--m-accent));
+  }
+
+  [data-m-kpi][data-tone="ok"] { --m-kpi-bar: #10b981; }
+  [data-m-kpi][data-tone="warn"] { --m-kpi-bar: #f59e0b; }
+  [data-m-kpi][data-tone="danger"] { --m-kpi-bar: #f43f5e; }
+  [data-m-kpi][data-tone="info"] { --m-kpi-bar: #0ea5e9; }
+  [data-m-kpi][data-tone="violet"] { --m-kpi-bar: #8b5cf6; }
+
+  [data-m-kpi] [data-m-label],
+  [data-m-kpi-label] {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--m-muted);
+  }
+
+  [data-m-kpi] [data-m-value],
+  [data-m-kpi-value] {
+    font-size: 26px;
+    line-height: 1.1;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+
+  [data-m-kpi] [data-m-hint],
+  [data-m-kpi-hint] {
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--m-muted);
+  }
+
+  /* —— Card —— */
+  [data-m-card] {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    padding: 16px;
+    border-radius: var(--m-radius-card);
+    border: 1px solid var(--m-border);
+    background: var(--m-surface);
+    box-shadow: var(--m-shadow);
+    color: var(--m-text);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  [data-m-card][data-tone]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--m-card-stripe, var(--m-accent));
+  }
+
+  [data-m-card][data-tone="ok"] { --m-card-stripe: #10b981; }
+  [data-m-card][data-tone="warn"] { --m-card-stripe: #f59e0b; }
+  [data-m-card][data-tone="danger"] { --m-card-stripe: #f43f5e; }
+  [data-m-card][data-tone="info"] { --m-card-stripe: #0ea5e9; }
+  [data-m-card][data-tone="violet"] { --m-card-stripe: #8b5cf6; }
+
+  [data-m-cards] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  [data-m-card-head] {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  [data-m-card-head] > :first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  [data-m-card-head] > :last-child:not(:first-child) {
+    flex: 0 0 auto;
+  }
+
+  [data-m-title] {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 16px;
+    line-height: 1.3;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+
+  [data-m-sub] {
+    margin-top: 2px;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--m-muted);
+  }
+
+  [data-m-meta] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--m-muted);
+  }
+
+  [data-m-meta] > strong {
+    color: var(--m-text);
+    font-weight: 600;
+  }
+
+  [data-m-amount] {
+    font-size: 17px;
+    line-height: 1.2;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  [data-m-amount][data-tone="ok"] { color: var(--m-tone-ok-fg); }
+  [data-m-amount][data-tone="danger"] { color: var(--m-tone-danger-fg); }
+  [data-m-amount][data-tone="muted"] { color: var(--m-muted); font-weight: 600; }
+
+  [data-m-inset] {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--m-surface-2);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  [data-m-inset] pre,
+  [data-m-inset] code {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre;
+    font-size: 13px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-m-card-foot] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 2px;
+    padding-top: 12px;
+    border-top: 1px solid var(--m-hairline);
+  }
+
+  [data-m-card-foot] [data-m-actions] {
+    width: auto;
+    flex-wrap: nowrap;
+    margin-left: auto;
+  }
+
+  [data-m-card-foot] [data-m-actions] > * {
+    flex: 0 0 auto;
+    min-height: 40px;
+  }
+
+  [data-m-menu] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: -6px -8px -6px 0;
+    border-radius: 12px;
+    color: var(--m-text);
+  }
+
+  [data-m-menu]:active {
+    background: var(--m-tint);
+  }
+
+  [data-m-pressable] {
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  [data-m-pressable]:active {
+    transform: scale(0.985);
+  }
+
+  [data-m-avatar] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: var(--m-tint);
+    color: var(--m-tone-accent-fg);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  [data-m-avatar][data-size="sm"] {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  /* —— Chip —— */
+  [data-m-chip] {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--m-tone-muted-bg);
+    color: var(--m-tone-muted-fg);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+
+  [data-m-chip] svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+  }
+
+  [data-m-chip][data-tone="ok"] { background: var(--m-tone-ok-bg); color: var(--m-tone-ok-fg); }
+  [data-m-chip][data-tone="warn"] { background: var(--m-tone-warn-bg); color: var(--m-tone-warn-fg); }
+  [data-m-chip][data-tone="danger"] { background: var(--m-tone-danger-bg); color: var(--m-tone-danger-fg); }
+  [data-m-chip][data-tone="info"] { background: var(--m-tone-info-bg); color: var(--m-tone-info-fg); }
+  [data-m-chip][data-tone="violet"] { background: var(--m-tone-violet-bg); color: var(--m-tone-violet-fg); }
+  [data-m-chip][data-tone="accent"] { background: var(--m-tone-accent-bg); color: var(--m-tone-accent-fg); }
+  [data-m-chip][data-tone="solid"] { background: var(--m-accent); color: var(--m-on-accent); }
+  [data-m-chip][data-tone="outline"] { background: transparent; box-shadow: inset 0 0 0 1px var(--m-border); color: var(--m-text); }
+
+  [data-m-chips] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* —— Riga di chip che scorre —— */
+  [data-m-chiprow] {
+    display: flex;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    margin-left: calc(-1 * var(--m-gutter));
+    margin-right: calc(-1 * var(--m-gutter));
+    padding-left: var(--m-gutter);
+    padding-right: var(--m-gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  [data-m-chiprow]::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-m-chiprow] > * {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
+
+  [data-m-chiprow] > [data-m-pill],
+  [data-m-pill] {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--m-border);
+    background: var(--m-surface);
+    color: var(--m-text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  [data-m-pill][data-active],
+  [data-m-pill][aria-pressed="true"],
+  [data-m-pill][data-state="active"] {
+    background: var(--m-accent);
+    border-color: var(--m-accent);
+    color: var(--m-on-accent);
+  }
+
+  /* —— Segmented control —— */
+  [data-m-seg] {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 4px;
+    width: 100%;
+    padding: 4px;
+    border-radius: var(--m-radius-control);
+    background: var(--m-surface-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  [data-m-seg]::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-m-seg] > * {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 11px;
+    border: 0;
+    background: transparent;
+    color: var(--m-muted);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  [data-m-seg] > [data-active],
+  [data-m-seg] > [aria-pressed="true"],
+  [data-m-seg] > [data-state="active"],
+  [data-m-seg] > [aria-selected="true"] {
+    background: var(--m-surface);
+    color: var(--m-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 2px 8px -4px rgba(31, 58, 99, 0.25);
+  }
+
+  /* —— Lista raggruppata —— */
+  [data-m-list] {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0 !important;
+  }
+
+  [data-m-list] > * {
+    margin: 0;
+  }
+
+  /* Dentro una Card la lista arriva fino ai bordi */
+  [data-slot="card-content"] > [data-m-list] {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+
+  [data-m-item] {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 12px 16px;
+    border: 0;
+    border-top: 1px solid var(--m-hairline);
+    border-radius: 0;
+    box-shadow: none;
+    text-align: left;
+    color: var(--m-text);
+    font-size: 15px;
+  }
+
+  [data-m-item]:first-child {
+    border-top: 0;
+  }
+
+  [data-m-item] > [data-m-grow] {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Riga "da leggere" / evidenziata: tinta dell'accento, uguale in tutti i temi */
+  [data-m-item][data-unread] {
+    background: var(--m-tint);
+  }
+
+  [data-m-item] [data-m-chevron] {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--m-muted);
+    opacity: 0.7;
+  }
+
+  [data-m-kv] {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0;
+    padding: 10px 0;
+    border-top: 1px solid var(--m-hairline);
+    font-size: 15px;
+  }
+
+  /* Griglia di campi in sola lettura: diventa una pila di righe etichetta/valore */
+  [data-m-kv-list] {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  [data-m-kv-list] > * {
+    margin: 0;
+  }
+
+  /* Le righe possono stare dentro un contenitore ciascuna (display: contents): il filo lo decide la lista */
+  [data-m-kv-list] [data-m-kv] {
+    border-top: 1px solid var(--m-hairline);
+  }
+
+  [data-m-kv-list] > :first-child [data-m-kv],
+  [data-m-kv-list] > [data-m-kv]:first-child {
+    border-top: 0;
+  }
+
+  [data-m-kv]:first-child {
+    border-top: 0;
+  }
+
+  [data-m-kv] > :first-child {
+    flex: 0 1 auto;
+    max-width: 45%;
+    font-size: 13px;
+    color: var(--m-muted);
+  }
+
+  [data-m-kv] > :last-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: right;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  /* —— Barra fissa in basso —— */
+  [data-m-sticky-bottom] {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    gap: 10px;
+    margin: 8px calc(-1 * var(--m-gutter)) calc(-1.35rem - env(safe-area-inset-bottom));
+    padding: 12px var(--m-gutter) calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--m-hairline);
+    background: color-mix(in srgb, var(--background) 86%, transparent);
+    backdrop-filter: saturate(1.4) blur(18px);
+    -webkit-backdrop-filter: saturate(1.4) blur(18px);
+  }
+
+  [data-m-sticky-bottom][data-fixed] {
+    position: fixed;
+    left: 0;
+    right: 0;
+    margin: 0;
+  }
+
+  [data-m-sticky-bottom] > * {
+    flex: 1 1 auto;
+    min-height: 48px;
+    height: auto;
+    border-radius: var(--m-radius-control);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  [data-m-sticky-bottom] > [data-m-secondary] {
+    flex: 0 1 44%;
+  }
+
+  /* —— Stato vuoto / caricamento —— */
+  [data-m-empty] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 48px 24px;
+    text-align: center;
+  }
+
+  [data-m-empty] > * {
+    align-self: stretch;
+    min-width: 0;
+    text-align: center;
+  }
+
+  [data-m-empty] [data-slot="card-header"] {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0;
+  }
+
+  [data-m-empty] > svg,
+  [data-m-empty] > [data-m-icon] {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 8px;
+    border-radius: 18px;
+    background: var(--m-tint);
+    color: var(--m-tone-accent-fg);
+  }
+
+  [data-m-empty] > svg {
+    padding: 14px;
+  }
+
+  [data-m-empty] [data-m-title] {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  [data-m-empty] p,
+  [data-m-empty] > span,
+  [data-m-empty] [data-slot="card-description"] {
+    max-width: 28ch;
+    margin: 0 auto;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--m-muted);
+  }
+
+  [data-m-empty] [data-m-primary] {
+    width: auto;
+    flex: none;
+    margin-top: 8px;
+    padding: 0 20px;
+  }
+
+  @keyframes m-shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+
+  [data-m-skeleton] {
+    border-radius: var(--m-radius-sm);
+    background: linear-gradient(90deg, var(--m-surface-2) 25%, color-mix(in srgb, var(--m-surface-2) 60%, var(--m-surface)) 50%, var(--m-surface-2) 75%);
+    background-size: 200% 100%;
+    animation: m-shimmer 1.4s ease-in-out infinite;
+    color: transparent;
+  }
+
+  /* —— Pulsanti icona —— */
+  [data-m-iconbtn] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--m-radius-control);
+    border: 1px solid var(--m-border);
+    background: var(--m-surface);
+    color: var(--m-text);
+  }
+
+  [data-m-iconbtn][data-tone="accent"] {
+    background: var(--m-accent);
+    border-color: var(--m-accent);
+    color: var(--m-on-accent);
+  }
+
+  [data-m-iconbtn] svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* —— Elenchi "directory" (directory-listing-ui: pazienti, candidati, colloqui, dipendenti, utenti) —— */
+  [data-m-listing="header"] {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* La card contenitore sparisce: le schede stanno direttamente sulla pagina */
+  [data-m-listing="card"] {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  [data-m-listing="section"],
+  [data-m-listing="scroll"] {
+    overflow: visible;
+    min-height: 0;
+    flex: none;
+  }
+
+  /* —— Paginazione (directory-listing-ui e ui/pagination.tsx) —— */
+  [data-m-pagebar] {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    margin: 0;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--m-hairline);
+    background: transparent;
+  }
+
+  [data-m-pagebar] > div:not([data-m-pagebar-buttons]):not([data-m-pagebar-nav]) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 0;
+  }
+
+  [data-m-pagebar-info] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin: 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--m-muted);
+  }
+
+  [data-m-pagebar-info] > * {
+    margin: 0;
+    justify-content: center;
+  }
+
+  [data-m-pagebar-nav] {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  [data-m-pagebar-nav] > p {
+    margin: 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--m-muted);
+  }
+
+  [data-m-pagebar-buttons] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 60px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+    width: 100%;
+    margin: 0;
+  }
+
+  [data-m-pagebar-buttons] > * {
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  [data-m-pagebar-goto] {
+    display: contents;
+  }
+
+  [data-m-pagebar-goto] > span {
+    display: none;
+  }
+
+  [data-m-pagebar] [data-m-pagebar-buttons] button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 4px;
+    border: 1px solid var(--m-border);
+    border-radius: var(--m-radius-control);
+    background: var(--m-surface);
+    color: var(--m-text);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  [data-m-pagebar] [data-m-pagebar-buttons] button:disabled {
+    opacity: 0.4;
+  }
+
+  [data-m-pagebar] [data-m-pagebar-buttons] input[type="number"] {
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 4px;
+    border: 1px solid var(--m-border);
+    border-radius: var(--m-radius-control);
+    background: var(--m-surface);
+    color: var(--m-text);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  [data-m-pagebar-buttons] input::-webkit-outer-spin-button,
+  [data-m-pagebar-buttons] input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* —— Tabelle generiche → schede: aspetto di sistema (la struttura sta in mobile.css) —— */
+  table[data-mobile-cards="on"] tbody tr {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--m-border);
+    border-radius: var(--m-radius-card);
+    box-shadow: var(--m-shadow);
+    background-color: var(--m-surface);
+    color: var(--m-text);
+  }
+
+  table[data-mobile-cards="on"] tbody tr:has(> td[colspan]) {
+    display: block;
+    box-shadow: none;
+    border-style: dashed;
+  }
+
+  table[data-mobile-cards="on"] tbody td {
+    padding: 5px 0;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  table[data-mobile-cards="on"] tbody td::before {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--m-muted);
+  }
+
+  /* Riga "nessun risultato" / "caricamento": contenuto centrato, stile stato vuoto */
+  table[data-mobile-cards="on"] tbody td[colspan] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 28px 12px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--m-muted);
+  }
+
+  table[data-mobile-cards="on"] tbody td[colspan] > .flex,
+  table[data-mobile-cards="on"] tbody td[colspan] > .inline-flex {
+    justify-content: center;
+    text-align: center;
+  }
+
+  table[data-mobile-cards="on"] tbody td[colspan] > * {
+    justify-self: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Titolo della scheda: la prima cella significativa */
+  table[data-mobile-cards="on"] tbody td[data-m-role="title"] {
+    order: -1;
+    display: block;
+    margin-bottom: 4px;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--m-hairline);
+    font-size: 16px;
+    font-weight: 650;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--m-text);
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="title"]::before {
+    content: none;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="title"] > * {
+    max-width: 100%;
+  }
+
+  /* Casella di spunta in alto a destra */
+  table[data-mobile-cards="on"] tbody td[data-m-role="check"] {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px !important;
+    height: 32px;
+    padding: 0;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="check"]::before {
+    content: none;
+  }
+
+  table[data-mobile-cards="on"] tbody tr:has(> td[data-m-role="check"]) > td[data-m-role="title"] {
+    padding-right: 40px;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="check"] [role="checkbox"] {
+    width: 22px;
+    height: 22px;
+    transform: none;
+  }
+
+  /* Azioni: riga in fondo, allineata a destra, comoda per il pollice */
+  table[data-mobile-cards="on"] tbody td[data-m-role="actions"] {
+    order: 50;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--m-hairline);
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="actions"]::before {
+    content: none;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="actions"] > .flex,
+  table[data-mobile-cards="on"] tbody td[data-m-role="actions"] > .inline-flex {
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="actions"] button,
+  table[data-mobile-cards="on"] tbody td[data-m-role="actions"] a[data-slot="button"] {
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 12px;
+  }
+
+  /* Un solo pulsante-icona: in alto a destra della scheda */
+  table[data-mobile-cards="on"] tbody td[data-m-role="menu"] {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto !important;
+    padding: 0;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="menu"]::before {
+    content: none;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="menu"] > * {
+    margin: 0;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-m-role="menu"] button,
+  table[data-mobile-cards="on"] tbody td[data-m-role="menu"] a {
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 12px;
+  }
+
+  table[data-mobile-cards="on"] tbody tr:has(> td[data-m-role="menu"]) > td[data-m-role="title"] {
+    padding-right: 44px;
+  }
+
+  table[data-mobile-cards="on"] tbody tr:has(> td[data-m-role="menu"]):not(:has(> td[data-m-role="title"])) {
+    padding-top: 48px;
+  }
+
+  /* Spunta + menu: la spunta si sposta a sinistra del menu */
+  table[data-mobile-cards="on"] tbody tr:has(> td[data-m-role="menu"]) > td[data-m-role="check"] {
+    right: 52px;
+  }
+
+  table[data-mobile-cards="on"] tbody tr:has(> td[data-m-role="menu"]):has(> td[data-m-role="check"]) > td[data-m-role="title"] {
+    padding-right: 80px;
+  }
+
+  /* Tabella-schede dentro una card: la card contenitore non aggiunge un secondo bordo */
+  [data-slot="card-content"]:has(> [data-slot="table-container"] > table[data-mobile-cards="on"]),
+  [data-slot="card-content"]:has(> table[data-mobile-cards="on"]) {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  /* Numeri leggibili e allineati */
+  table[data-mobile-cards="on"] tbody td.text-right,
+  table[data-mobile-cards="on"] tbody td.tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+    Tema scuro/silvia: index.css forza il bianco su ogni cella (`.dark td { color:#fff !important }`).
+    Dentro le schede il testo segue i token: le parti secondarie restano grigie.
+  */
+  .dark table[data-mobile-cards="on"] tbody td,
+  .dark table tbody td[data-m-cell] {
+    color: var(--m-text) !important;
+  }
+
+  .dark table tbody td [data-m-sub],
+  .dark table tbody td [data-m-meta],
+  .dark table tbody td .text-muted-foreground,
+  .dark table tbody td .text-gray-500,
+  .dark table tbody td .text-gray-400 {
+    color: var(--m-muted) !important;
+  }
+
+  /* —— Dialoghi: foglio che sale dal basso —— */
+  [data-slot="dialog-content"] {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: min(92dvh, 100%);
+    translate: none;
+    border-radius: 24px 24px 0 0;
+    border-bottom: 0;
+    box-shadow: 0 -16px 48px -20px rgb(0 0 0 / 0.5);
+    --tw-enter-translate-x: 0;
+    --tw-enter-translate-y: 100%;
+    --tw-enter-scale: 1;
+    --tw-exit-translate-x: 0;
+    --tw-exit-translate-y: 100%;
+    --tw-exit-scale: 1;
+    animation-duration: 280ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  [data-slot="dialog-content"]:not(.p-0) {
+    padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+
+  [data-slot="dialog-content"]:not(.p-0):not(.overflow-hidden) {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-slot="dialog-content"].p-0 {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  [data-slot="dialog-content"] > button.absolute {
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--muted) 85%, transparent);
+    opacity: 1;
+  }
+
+  [data-slot="dialog-content"] > button.absolute svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  [data-slot="dialog-content"] [data-slot="dialog-title"] {
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 650;
+  }
+
+  [data-slot="dialog-content"] [data-slot="dialog-description"] {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  [data-slot="dialog-footer"] {
+    gap: 8px;
+  }
+
+  /* Pulsanti del piè: pieni, uno sotto l'altro (il principale in cima), alti per il pollice */
+  [data-slot="dialog-footer"]:not(.flex-row):not(.justify-between) > [data-slot="button"],
+  [data-slot="dialog-footer"]:not(.flex-row):not(.justify-between) > button {
+    width: 100%;
+    min-height: 48px;
+    height: auto;
+    border-radius: var(--m-radius-control);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /*
+    Regole "morbide" in @layer components: le classi Tailwind del singolo componente
+    (px-*, text-*) restano più forti e vincono.
+  */
+  @layer components {
+    /* Titolo a sinistra, spazio a destra per la X da 44px */
+    [data-slot="dialog-header"] {
+      padding-right: 44px;
+      text-align: left;
+    }
+
+    /* Nei dialoghi che scorrono, il piè resta visibile */
+    [data-slot="dialog-content"]:not(.p-0):not(.overflow-hidden) > [data-slot="dialog-footer"] {
+      position: sticky;
+      bottom: calc(-16px - env(safe-area-inset-bottom));
+      z-index: 2;
+      margin: 0 -16px calc(-16px - env(safe-area-inset-bottom));
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      background: var(--background);
+      border-top: 1px solid var(--m-hairline);
+    }
+  }
+
+  /* —— Pannelli (sheet): schermo intero, intestazione e piè fissi, X rotonda da 44px —— */
+  [data-slot="sheet-content"]:not([data-mobile="true"]) > button.absolute {
+    position: fixed;
+    top: calc(8px + env(safe-area-inset-top));
+    right: 12px;
+    z-index: 12;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--muted) 85%, transparent);
+    opacity: 1;
+  }
+
+  [data-slot="sheet-content"]:not([data-mobile="true"]) > button.absolute svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  [data-slot="sheet-header"]:not(.sr-only) {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    gap: 2px;
+    background: var(--m-glass);
+    backdrop-filter: saturate(1.2) blur(16px);
+    -webkit-backdrop-filter: saturate(1.2) blur(16px);
+    border-bottom: 1px solid var(--m-hairline);
+  }
+
+  [data-slot="sheet-content"]:not(.p-0) > [data-slot="sheet-header"]:not(.sr-only) {
+    margin: calc(-0.85rem - env(safe-area-inset-top)) -2.75rem 0 -1rem;
+    padding: calc(10px + env(safe-area-inset-top)) 64px 10px 16px;
+  }
+
+  [data-slot="sheet-content"].p-0 > [data-slot="sheet-header"]:not(.sr-only) {
+    padding: calc(10px + env(safe-area-inset-top)) 64px 10px 16px;
+  }
+
+  [data-slot="sheet-title"] {
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 650;
+  }
+
+  [data-slot="sheet-description"] {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  [data-slot="sheet-footer"] {
+    position: sticky;
+    bottom: 0;
+    z-index: 6;
+    gap: 8px;
+    background: var(--m-glass);
+    backdrop-filter: saturate(1.2) blur(16px);
+    -webkit-backdrop-filter: saturate(1.2) blur(16px);
+    border-top: 1px solid var(--m-hairline);
+  }
+
+  [data-slot="sheet-content"]:not(.p-0) > [data-slot="sheet-footer"] {
+    margin: 0 -2.75rem calc(-1rem - env(safe-area-inset-bottom)) -1rem;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  [data-slot="sheet-content"].p-0 > [data-slot="sheet-footer"] {
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  [data-slot="sheet-footer"] > [data-slot="button"],
+  [data-slot="sheet-footer"] > button {
+    min-height: 48px;
+    height: auto;
+    border-radius: var(--m-radius-control);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* —— Nascondi su telefono (quando l'informazione è già altrove) —— */
+  [data-m-hide] {
+    display: none !important;
+  }
+}
+
+/* —— Barra in alto: il titolo compare solo quando il titolo grande della pagina è scorso via —— */
+@media (max-width: 639px) {
+  [data-slot="sidebar-inset"] > header[data-m-title] [data-app-topbar] [data-slot="breadcrumb-page"] {
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  [data-slot="sidebar-inset"] > header[data-m-title="hidden"] [data-app-topbar] [data-slot="breadcrumb-page"] {
+    opacity: 0;
+    transform: translateY(4px);
+    pointer-events: none;
+  }
+
+  /* Sotto-pagine (Dipendenti › Nome): col titolo nascosto sparisce anche il separatore */
+  [data-slot="sidebar-inset"] > header[data-m-title="hidden"] [data-app-topbar] [data-slot="breadcrumb-separator"]:has(+ [data-slot="breadcrumb-item"]:last-child) {
+    opacity: 0;
+  }
+}
+
+/*
+  Tema silvia (solo telefono). index.css, in @layer base e con !important, ridipinge di grigio i pulsanti
+  con colore inline brand-blue e rende bianco ogni <span> dell'app ([class*="sidebar"] span). Gli !important
+  dentro un layer battono quelli fuori layer: queste regole stanno nello stesso layer, con specificità più alta
+  (:not(#m-silvia) conta come un id), così azione principale ed elementi pieni d'accento restano uguali ovunque.
+*/
+@layer base {
+}
+
+/*
+  —— Pannelli (sheet) sul telefono: struttura definitiva ——
+  1. Il pannello occupa lo schermo visibile con inset: 0. Niente height: 100dvh: su Safari 26 (barra flottante)
+     100dvh lascia un buco in basso, mentre bottom: 0 si ferma sopra la barra di Safari, così le azioni restano toccabili.
+  2. Intestazione agganciata al bordo superiore (top negativo = padding del pannello): niente fascia in cui il
+     contenuto scorre sopra il titolo. Piè agganciato al bordo inferiore allo stesso modo.
+  3. Il pannello scorre sempre (anche se il componente non lo chiede) e lo scroll resta dentro (overscroll contenuto).
+  4. I figli diretti non si restringono: in una colonna flex alta quanto lo schermo, una card con overflow:hidden
+     verrebbe schiacciata e taglierebbe il proprio contenuto invece di far scorrere il pannello.
+  5. Barre fisse con fondo pieno, senza sfocatura: su iOS il backdrop-filter dentro un contenitore che scorre
+     rende lo scroll a scatti.
+  6. Il separatore decorativo (manina) del desktop sparisce.
+  7. Mentre un pannello è aperto, la pagina sotto viene nascosta (dopo l'animazione di entrata) e il fondo del
+     documento prende il colore del pannello: su Safari 26 la zona sotto la barra flottante non mostra la pagina.
+*/
+@media (max-width: 639px) {
+  [data-slot="sheet-content"]:not([data-mobile="true"]) {
+    inset: 0;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-slot="sheet-content"]:not(.p-0):not([data-mobile="true"]) {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  [data-slot="sheet-content"]:not([data-mobile="true"]) :is(.overflow-y-auto, .overflow-auto, .overflow-y-scroll) {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-slot="sheet-content"]:not(.p-0):not([data-mobile="true"]) > :not(button.absolute) {
+    flex-shrink: 0;
+  }
+
+  [data-slot="sheet-content"]:not(.p-0) > [data-slot="sheet-header"]:not(.sr-only) {
+    top: calc(-0.85rem - env(safe-area-inset-top));
+  }
+
+  [data-slot="sheet-content"]:not(.p-0) > [data-slot="sheet-footer"] {
+    bottom: calc(-1rem - env(safe-area-inset-bottom));
+  }
+
+  [data-slot="sheet-content"] > :is([data-slot="sheet-header"], [data-slot="sheet-footer"]) {
+    background-color: inherit;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-slot="sheet-content"] :is([data-m-sticky-bottom], [data-m-cal-actions]) {
+    background-color: var(--background);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-slot="sheet-content"] .relative.my-32 {
+    display: none;
+  }
+
+  [data-slot="sidebar-wrapper"] {
+    transition: visibility 0s linear 0s;
+  }
+
+  body:has([data-slot="sheet-content"][data-state="open"]:not([data-mobile="true"])) [data-slot="sidebar-wrapper"] {
+    visibility: hidden;
+    transition-delay: 0.5s;
+  }
+
+  html:has([data-slot="sheet-content"][data-state="open"]:not([data-mobile="true"])),
+  html:has([data-slot="sheet-content"][data-state="open"]:not([data-mobile="true"])) body {
+    background-color: var(--background);
+  }
+}

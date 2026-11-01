@@ -1,0 +1,930 @@
+/*
+  Solo telefono: sotto i 640px (Tailwind sm).
+  iPad, tablet e desktop non entrano in questa media query.
+*/
+
+@media (max-width: 639px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  button,
+  a,
+  label,
+  input,
+  textarea,
+  select,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Il tocco lascia il focus sul pulsante: niente anello arancione (resta per la tastiera) */
+  button:focus:not(:focus-visible),
+  [role="button"]:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Pannelli e dialoghi mettono il focus sul primo pulsante all'apertura: sul telefono niente anello */
+  [data-slot="sheet-content"] button:focus-visible,
+  [data-slot="dialog-content"] button:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  h1 {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Titoli di pagina: da 3.2em (51px) a una misura da telefono. */
+  [data-app-page] h1 {
+    font-size: 1.7rem;
+    line-height: 1.2;
+  }
+
+  /* —— Barra in alto —— */
+  [data-slot="sidebar-inset"] > header {
+    background: color-mix(in srgb, var(--background) 94%, transparent);
+    backdrop-filter: saturate(1.2) blur(16px);
+    -webkit-backdrop-filter: saturate(1.2) blur(16px);
+  }
+
+  [data-app-topbar] {
+    height: 3.25rem;
+    gap: 0.35rem;
+    padding-left: 0.5rem;
+    padding-right: 0.65rem;
+  }
+
+  [data-app-topbar] [data-slot="sidebar-trigger"],
+  [data-app-topbar] [data-slot="button"] {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.8rem;
+  }
+
+  [data-app-topbar] .mr-3 {
+    margin-right: 0.35rem;
+  }
+
+  [data-app-topbar] > :not([data-slot="breadcrumb"]) {
+    flex-shrink: 0;
+  }
+
+  [data-app-topbar] [data-slot="breadcrumb"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  [data-app-topbar] [data-slot="breadcrumb-list"] {
+    flex-wrap: nowrap;
+    min-width: 0;
+    gap: 0.35rem;
+  }
+
+  [data-app-topbar] [data-slot="breadcrumb-item"] {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  [data-app-topbar] [data-slot="breadcrumb-item"]:last-child {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  [data-app-topbar] [data-slot="breadcrumb-page"] {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* —— Pagina —— */
+  [data-slot="sidebar-inset"] {
+    scroll-padding-top: 3.5rem;
+  }
+
+  [data-app-page] {
+    gap: 0.9rem;
+    padding: 0.8rem 0.7rem calc(1.35rem + env(safe-area-inset-bottom));
+    overflow-x: clip;
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  [data-app-page] > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /*
+    Solo i blocchi larghi possono restringersi, così la tabella interna scorre.
+    Icone, pulsanti e etichette tengono la loro larghezza.
+  */
+  [data-app-page] > *:not(table),
+  [data-app-page] [data-slot="card"],
+  [data-app-page] .w-full:not(table),
+  [data-app-page] .overflow-x-auto,
+  [data-app-page] .overflow-auto,
+  [data-app-page] [data-slot="table-container"],
+  [data-slot="sheet-content"] .w-full:not(table),
+  [data-slot="dialog-content"] .w-full:not(table) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  [data-app-page] .flex.justify-between:not(.flex-col):not(.flex-nowrap),
+  [data-app-page] .flex.gap-2:not(.flex-col):not(.flex-nowrap):not([class*="min-w-["]):not(.overflow-x-auto),
+  [data-app-page] .flex.gap-3:not(.flex-col):not(.flex-nowrap):not([class*="min-w-["]):not(.overflow-x-auto),
+  [data-app-page] .flex.gap-4:not(.flex-col):not(.flex-nowrap):not([class*="min-w-["]):not(.overflow-x-auto),
+  [data-app-page] .flex.gap-6:not(.flex-col):not(.flex-nowrap):not([class*="min-w-["]):not(.overflow-x-auto),
+  [data-slot="sheet-content"] .flex.items-center.gap-2:not(.flex-col):not(.flex-nowrap),
+  [data-slot="dialog-content"] .flex.items-center.gap-2:not(.flex-col):not(.flex-nowrap) {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  [data-app-page] .w-40,
+  [data-app-page] .w-48,
+  [data-app-page] .w-52,
+  [data-app-page] .w-56,
+  [data-app-page] .w-64,
+  [data-app-page] .w-72,
+  [data-app-page] .w-80,
+  [data-app-page] .w-96,
+  [data-slot="sheet-content"] .w-40,
+  [data-slot="sheet-content"] .w-48,
+  [data-slot="sheet-content"] .w-56,
+  [data-slot="sheet-content"] .w-64,
+  [data-slot="sheet-content"] .w-72,
+  [data-slot="dialog-content"] .w-40,
+  [data-slot="dialog-content"] .w-48,
+  [data-slot="dialog-content"] .w-56,
+  [data-slot="dialog-content"] .w-64,
+  [data-slot="dialog-content"] .w-72 {
+    max-width: 100%;
+  }
+
+  /* (le righe marcate dal sistema — [data-m-field], [data-m-search] — hanno le loro regole in system.css) */
+  [data-app-page] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > [data-slot="select-trigger"],
+  [data-app-page] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > .w-40,
+  [data-app-page] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > .w-48,
+  [data-app-page] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > .w-56,
+  [data-slot="sheet-content"] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > [data-slot="select-trigger"],
+  [data-slot="sheet-content"] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > .w-40,
+  [data-slot="sheet-content"] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > .w-48 {
+    flex: 1 1 8rem;
+    min-width: min(100%, 8rem);
+    width: auto;
+    max-width: 100%;
+  }
+
+  /* Campo di ricerca accanto a un select: va a capo invece di stringersi */
+  [data-app-page] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > .relative:has(> [data-slot="input"]),
+  [data-app-page] .flex.items-center.gap-2:not([data-m-field]):not([data-m-search]) > .relative:has(> input) {
+    flex: 1 1 10rem;
+    min-width: min(100%, 10rem);
+  }
+
+  /* Colonna su telefono, riga da sm: "items-end" allineerebbe tutto a destra */
+  [data-app-page] .flex-col.items-end.sm\:flex-row,
+  [data-app-page] .flex-col.items-end.md\:flex-row,
+  [data-app-page] .flex-col.items-center.sm\:flex-row:has(label),
+  [data-app-page] .flex-col.items-center.md\:flex-row:has(label) {
+    align-items: stretch;
+  }
+
+  /* Il main ha già il suo padding: non raddoppiarlo sul contenitore della pagina. */
+  [data-app-page] > .p-4,
+  [data-app-page] > .p-6,
+  [data-app-page] > .p-8 {
+    padding: 0;
+  }
+
+  /* Testi microscopici: illeggibili su un telefono */
+  .text-\[7px\],
+  .text-\[8px\],
+  .text-\[9px\],
+  .text-\[10px\],
+  .text-\[11px\] {
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+
+  [role="tablist"] {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 2.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.25rem;
+  }
+
+  [role="tab"] {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 2.25rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* —— Card: stessa geometria della scheda di sistema (raggio 20, padding 16) —— */
+  /* (una pagina che mette max-sm:rounded-x, max-sm:border-x o max-sm:shadow-x sulla Card vince) */
+  [data-slot="card"]:not([class*="max-sm:rounded"]) {
+    border-radius: 20px;
+  }
+
+  [data-slot="card"]:not([class*="max-sm:border"]) {
+    border-color: color-mix(in srgb, var(--border) 70%, transparent);
+  }
+
+  [data-slot="card"]:not([class*="max-sm:shadow"]) {
+    box-shadow: 0 1px 2px rgba(31, 58, 99, 0.04), 0 8px 24px -16px rgba(31, 58, 99, 0.22);
+  }
+
+  [data-slot="card"]:not(.p-0) {
+    gap: 14px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  [data-slot="card-header"]:not(.p-0),
+  [data-slot="card-content"]:not(.p-0),
+  [data-slot="card-footer"]:not(.p-0) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  [data-slot="card-header"]:has([data-slot="card-action"]) {
+    grid-template-columns: 1fr;
+  }
+
+  [data-slot="card-action"] {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  [data-slot="card-action"] [data-slot="button"] {
+    width: 100%;
+  }
+
+  [data-app-page] section.rounded-3xl {
+    padding: 1.15rem 1.05rem;
+    border-radius: 1.25rem;
+  }
+
+  [data-app-page] .grid-cols-2 > * {
+    min-width: 0;
+  }
+
+  /* —— Agenda, vista giorno: una colonna leggibile per persona, si scorre di lato —— */
+  [data-day-grid-scroller] {
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  [data-day-grid] {
+    /* !important: vince sulla regola generica .w-full { min-width: 0 } qui sopra */
+    min-width: calc(56px + var(--day-columns, 1) * 7.25rem) !important;
+  }
+
+  /* Colonna degli orari ferma mentre si scorre */
+  [data-day-grid] > .absolute.left-0.right-0 > .absolute.left-0 {
+    position: sticky;
+    left: 0;
+    z-index: 40;
+    background: var(--card);
+  }
+
+  /* Riquadri: nome, orario e stanza leggibili (le misure inline sono 5–9px) */
+  [data-day-grid] > .absolute.rounded,
+  [data-day-grid] > .absolute.rounded * {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  [data-day-grid] > .absolute.rounded {
+    padding: 3px 5px !important;
+    border-radius: 0.5rem;
+  }
+
+  [data-app-page] .grid-cols-2 .p-1\.5 {
+    padding: 0.55rem 0.5rem;
+  }
+
+  /* —— Controlli: dito, niente zoom iOS —— */
+  [data-slot="input"],
+  textarea,
+  [data-slot="select-trigger"] {
+    min-height: 2.75rem;
+    height: auto;
+    max-width: 100%;
+    font-size: 16px;
+    border-radius: 0.8rem;
+    scroll-margin-bottom: 30vh;
+  }
+
+  table [data-slot="input"],
+  table textarea,
+  table [data-slot="select-trigger"] {
+    min-height: 2.25rem;
+    font-size: 14px;
+    border-radius: 0.6rem;
+  }
+
+  [data-app-page] [data-slot="button"].h-9,
+  [data-app-page] [data-slot="button"].h-8:not(.rounded-full):not(.w-10) {
+    height: auto;
+    min-height: 2.75rem;
+    border-radius: 0.8rem;
+  }
+
+  [data-slot="select-item"] {
+    min-height: 2.75rem;
+    font-size: 0.95rem;
+  }
+
+  /* Menu a tendina e contestuali: src/style/menus.css */
+  [data-slot="select-content"] {
+    max-height: min(70dvh, 24rem);
+    max-width: calc(100vw - 1rem);
+    overflow-y: auto;
+  }
+
+  [data-slot="popover-content"] {
+    max-width: calc(100vw - 1rem);
+    max-height: 85dvh;
+  }
+
+  /* —— Tabelle: il contenitore scorre, la tabella tiene la sua larghezza —— */
+  [data-app-page] :where(div):has(> table),
+  [data-app-page] [data-slot="table-container"],
+  [data-app-page] pre {
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    max-width: 100%;
+    scrollbar-width: thin;
+  }
+
+  /*
+    Tabelle generiche (3+ colonne): una scheda per riga, con "etichetta / valore"
+    per ogni cella. Le etichette arrivano da src/lib/mobile-table-cards.ts.
+  */
+  table[data-mobile-cards="on"] {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0 !important;
+    max-width: 100%;
+    height: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  table[data-mobile-cards="on"] caption {
+    display: block;
+    order: 3;
+    margin-top: 0.35rem;
+    text-align: center;
+  }
+
+  table[data-mobile-cards="on"] tfoot {
+    order: 2;
+  }
+
+  table[data-mobile-cards="on"] tbody td > * {
+    justify-self: start;
+    max-width: 100%;
+  }
+
+  table[data-mobile-cards="on"] tbody td > .w-full {
+    justify-self: stretch;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-label="Avatar" i] {
+    display: none;
+  }
+
+  table[data-mobile-cards="on"] thead {
+    display: none;
+  }
+
+  table[data-mobile-cards="on"] tbody {
+    display: block;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  table[data-mobile-cards="on"] tbody tr {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 0 0.6rem;
+    padding: 0.55rem 0.9rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+    border-radius: 1rem;
+  }
+
+  table[data-mobile-cards="on"] tbody td {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 34%) minmax(0, 1fr);
+    column-gap: 0.65rem;
+    align-items: center;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto;
+    padding: 0.32rem 0;
+    border: 0;
+    text-align: left;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    position: static;
+  }
+
+  table[data-mobile-cards="on"] tbody td::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    line-height: 1.25;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-label=""] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-label=""]::before {
+    content: none;
+  }
+
+  table[data-mobile-cards="on"] tbody td[data-empty] {
+    display: none;
+  }
+
+  table[data-mobile-cards="on"] tbody td[colspan] {
+    display: block;
+    text-align: center;
+    padding: 1.1rem 0.5rem;
+  }
+
+  table[data-mobile-cards="on"] tbody td .truncate,
+  table[data-mobile-cards="on"] tbody td [class*="max-w-"] {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: none;
+  }
+
+  table[data-mobile-cards="on"] tbody td > .flex,
+  table[data-mobile-cards="on"] tbody td > .inline-flex {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: 0.35rem;
+  }
+
+  table[data-mobile-cards="on"] tbody td.text-right > *,
+  table[data-mobile-cards="on"] tbody td.text-center > * {
+    justify-content: flex-start;
+    text-align: left;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  table[data-mobile-cards="on"] tfoot {
+    display: block;
+    position: static;
+    width: 100%;
+  }
+
+  table[data-mobile-cards="on"] tfoot tr {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.9rem 0.25rem 0.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  }
+
+  table[data-mobile-cards="on"] tfoot td {
+    display: block;
+    width: 100%;
+    padding: 0 !important;
+    text-align: left;
+    white-space: normal;
+  }
+
+  table[data-mobile-cards="on"] tfoot .flex {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0;
+  }
+
+  table[data-mobile-cards="on"] tfoot .flex > p {
+    flex-basis: 100%;
+    margin: 0;
+    text-align: center;
+  }
+
+  table[data-mobile-cards="on"] tfoot [class*="space-x-"] {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+  }
+
+  table[data-mobile-cards="on"] tfoot [class*="space-x-"] > * {
+    margin: 0;
+  }
+
+  table[data-mobile-cards="on"] tfoot button {
+    min-height: 2.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.7rem;
+  }
+
+  table[data-mobile-cards="on"] tfoot input[type="number"] {
+    min-height: 2.5rem;
+    width: 3.75rem;
+    font-size: 16px;
+    border-radius: 0.7rem;
+  }
+
+  /* Visite: una scheda per riga, non una tabella schiacciata */
+  .visite-mobile-compact-table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .visite-mobile-compact-table caption {
+    display: block;
+    order: 3;
+    margin-top: 0.35rem;
+    text-align: center;
+  }
+
+  .visite-mobile-compact-table tfoot {
+    order: 2;
+  }
+
+  .visite-mobile-compact-table thead {
+    display: none;
+  }
+
+  .visite-mobile-compact-table tbody {
+    display: block;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /*
+    Colonne della tabella: 1 data, 2 ora, 3 trattamento, 4 paziente, 5 osteopata,
+    6 stanza, 7 prezzo, 8 pagamento, 9 status, 10 azioni.
+    Scheda: nome + menu / data + ora / osteopata + trattamento / stanza + prezzo / badge.
+  */
+  .visite-mobile-compact-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.45rem 0.6rem;
+    align-items: center;
+    width: 100%;
+    margin: 0 0 0.6rem;
+    padding: 0.85rem 0.9rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+    border-radius: 1rem;
+    background: var(--card);
+  }
+
+  .visite-mobile-compact-table tbody td {
+    display: block;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
+    text-align: left;
+    white-space: normal;
+    overflow: visible;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(4) {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 1.05rem;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(10) {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(1):not([colspan]) {
+    grid-column: 1;
+    grid-row: 2;
+    opacity: 0.8;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(2) {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(5) {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(3) {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: end;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(6) {
+    grid-column: 1;
+    grid-row: 4;
+    opacity: 0.85;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(7) {
+    grid-column: 2;
+    grid-row: 4;
+    justify-self: end;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(8) {
+    grid-column: 1;
+    grid-row: 5;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(9) {
+    grid-column: 2;
+    grid-row: 5;
+    justify-self: end;
+  }
+
+  .visite-mobile-compact-table tbody td:nth-child(8) > *,
+  .visite-mobile-compact-table tbody td:nth-child(9) > * {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .visite-mobile-compact-table .visite-table-hamburger-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+  }
+
+  /* Riga vuota / caricamento (una sola cella con colspan) */
+  .visite-mobile-compact-table tbody tr:has(td[colspan]) {
+    display: block;
+  }
+
+  .visite-mobile-compact-table tbody td[colspan] {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 1.4rem 0.5rem;
+  }
+
+  /* Piè di tabella: totale + paginazione in colonna */
+  .visite-mobile-compact-table tfoot {
+    display: block;
+    position: static;
+    width: 100%;
+  }
+
+  .visite-mobile-compact-table tfoot tr {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.9rem 0.25rem 0.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  }
+
+  .visite-mobile-compact-table tfoot td {
+    display: block;
+    width: 100%;
+    padding: 0 !important;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  .visite-mobile-compact-table tfoot .flex.justify-end {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0;
+  }
+
+  .visite-mobile-compact-table tfoot .flex.justify-end > p {
+    flex-basis: 100%;
+    margin: 0;
+    text-align: center;
+  }
+
+  .visite-mobile-compact-table tfoot .space-x-2,
+  .visite-mobile-compact-table tfoot .space-x-1 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+  }
+
+  .visite-mobile-compact-table tfoot .space-x-2 > *,
+  .visite-mobile-compact-table tfoot .space-x-1 > * {
+    margin: 0;
+  }
+
+  .visite-mobile-compact-table tfoot button {
+    min-height: 2.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.7rem;
+  }
+
+  .visite-mobile-compact-table tfoot input[type="number"] {
+    min-height: 2.5rem;
+    width: 3.75rem;
+    font-size: 16px;
+    border-radius: 0.7rem;
+  }
+
+  /* —— Pannelli e dialoghi —— */
+  [data-slot="sheet-content"] {
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  [data-slot="sheet-content"]:not(.p-0) {
+    padding-top: calc(0.85rem + env(safe-area-inset-top));
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    padding-left: 1rem;
+    padding-right: 2.75rem;
+  }
+
+  [data-slot="sheet-content"].p-0 {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Dialoghi (foglio dal basso), X e piè di pannelli e dialoghi: src/style/mobile/system.css */
+
+  /* —— WhatsApp: la chat riempie lo spazio sotto la barra, senza tagliare il compositore —— */
+  [data-slot="sidebar-inset"]:has([data-chat-shell]) {
+    overflow: hidden;
+  }
+
+  [data-app-page]:has([data-chat-shell]) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0.4rem 0.45rem calc(0.4rem + env(safe-area-inset-bottom));
+    gap: 0;
+  }
+
+  [data-chat-shell] {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
+    gap: 0.5rem;
+  }
+
+  [data-chat-shell] > .flex-1 {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  [data-chat-shell] > header p {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  [data-chat-shell] .rounded-xl {
+    border-radius: 1rem;
+  }
+
+  /* —— Accesso —— */
+  .min-h-screen:has(form) {
+    padding: 0.85rem 0.8rem;
+    padding-top: calc(1rem + env(safe-area-inset-top));
+    padding-bottom: calc(1.1rem + env(safe-area-inset-bottom));
+    overflow-x: clip;
+  }
+
+  .min-h-screen:has(form) > *,
+  .min-h-screen [data-slot="card"],
+  .min-h-screen [data-slot="card-content"],
+  .min-h-screen form,
+  .min-h-screen h1,
+  .min-h-screen p {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .min-h-screen h1 {
+    font-size: 1.7rem !important;
+    line-height: 1.15 !important;
+    text-wrap: balance;
+  }
+
+  .min-h-screen form {
+    padding: 1.45rem 1.1rem 1.25rem;
+  }
+
+  .min-h-screen .grid > * {
+    min-width: 0;
+  }
+
+  .min-h-screen button svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: none;
+  }
+
+  .min-h-screen [data-slot="input"] {
+    min-height: 3rem;
+  }
+
+  .min-h-screen [data-slot="button"].h-9,
+  .min-h-screen form > div > [data-slot="button"],
+  .min-h-screen form [data-slot="button"][type="submit"],
+  .min-h-screen form button[type="submit"] {
+    min-height: 3rem;
+    height: auto;
+    border-radius: 0.9rem;
+  }
+
+  /* —— Toast a tutta larghezza, sotto la notch —— */
+  [data-sonner-toaster] {
+    left: 0.7rem !important;
+    right: 0.7rem !important;
+    width: auto !important;
+    transform: none !important;
+  }
+
+  [data-sonner-toaster][data-y-position="top"] {
+    top: calc(0.55rem + env(safe-area-inset-top)) !important;
+  }
+
+  [data-sonner-toast] {
+    width: 100% !important;
+    margin-inline: 0 !important;
+  }
+}

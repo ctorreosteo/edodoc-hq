@@ -1,0 +1,782 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  font-family: 'Montserrat', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: var(--brand-blue);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --radius: 0.625rem;
+  --brand-blue: #1F3A63;
+  --brand-orange: #F0944E;
+  --brand-light-gray: #F4F4F4;
+  --grafico-blu: #3A6098;
+  --grafico-arancione: #E27A2C;
+  --heading-foreground: var(--brand-blue);
+  --background: oklch(1 0 0);
+  --foreground: var(--brand-blue);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--brand-blue);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--brand-blue);
+  --primary: #3A6098;
+  --primary-foreground: oklch(0.985 0 0);
+  /* Giorno scelto nei date picker: in .dark --primary coincide col fondo del calendario */
+  --calendario-scelto: var(--primary);
+  --calendario-scelto-foreground: var(--primary-foreground);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: var(--brand-blue);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: var(--brand-blue);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+          --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+#root {
+  width: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: visible;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  display: flex;
+}
+
+a {
+  font-weight: 500;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+html.dark a:hover {
+  color: var(--brand-orange);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100%;
+}
+
+/* Evita flash bianco: sfondo dark subito per .dark (backup allo script in index.html) */
+html.dark {
+  background-color: #1F3A63;
+  color-scheme: dark;
+}
+
+/* Chrome/Safari: l'autofill dipinge lo input di bianco. Copri con lo stesso blu/grigio del tema. */
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+  transition: background-color 99999s ease-out;
+  box-shadow: 0 0 0 1000px color-mix(in srgb, var(--card) 90%, white) inset;
+  -webkit-box-shadow: 0 0 0 1000px color-mix(in srgb, var(--card) 90%, white) inset;
+}
+
+html.dark input:-webkit-autofill:focus-visible {
+  box-shadow:
+    0 0 0 1000px color-mix(in srgb, var(--card) 90%, white) inset,
+    0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+  -webkit-box-shadow:
+    0 0 0 1000px color-mix(in srgb, var(--card) 90%, white) inset,
+    0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+/* Telefono: scala titoli e ritmo in src/style/mobile.css (solo sotto 640px). */
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Trigger storici nello sheet visita: niente riquadro focus/hover */
+.storico-collapsible-trigger,
+.storico-collapsible-trigger:hover,
+.storico-collapsible-trigger:focus,
+.storico-collapsible-trigger:focus-visible,
+.storico-collapsible-trigger:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: var(--brand-blue);
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: var(--brand-blue);
+  }
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.dark {
+  /* Background: blu aziendale */
+  --background: var(--brand-blue);
+  /* Testi normali: bianco */
+  --foreground: #ffffff;
+  /* Titoli: verde aziendale */
+  --heading-foreground: var(--brand-orange);
+  --grafico-blu: #6496E0;
+  --grafico-arancione: #D67428;
+  --brand-blue: #1F3A63;
+  --brand-orange: #F0944E;
+  --brand-light-gray: #F4F4F4;
+  --card: var(--brand-blue);
+  --card-foreground: #ffffff;
+  --popover: var(--brand-blue);
+  --popover-foreground: #ffffff;
+  --primary: var(--brand-orange);
+  --primary-foreground: var(--brand-blue);
+  --calendario-scelto: var(--brand-orange);
+  --calendario-scelto-foreground: var(--brand-blue);
+  --secondary: var(--brand-blue);
+  --secondary-foreground: #ffffff;
+  --muted: var(--brand-blue);
+  --muted-foreground: rgba(255, 255, 255, 0.7);
+  --accent: var(--brand-blue);
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: rgba(255, 255, 255, 0.3);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+          --sidebar: var(--brand-blue);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: var(--brand-blue);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--brand-blue);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: rgba(255, 255, 255, 0.3);
+}
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Dark mode: titoli verdi (priorità alta) - anche se hanno text-brand-blue */
+  /* Queste regole DEVONO essere molto specifiche per sovrascrivere text-brand-blue */
+  .dark h1, 
+  .dark h2, 
+  .dark h3, 
+  .dark h4, 
+  .dark h5, 
+  .dark h6 {
+    color: var(--heading-foreground) !important;
+  }
+  
+  /* CardTitle e altri titoli devono essere verdi */
+  .dark [data-slot="card-title"],
+  .dark [class*="CardTitle"],
+  .dark [class*="card-title"],
+  .dark div[data-slot="card-title"] {
+    color: var(--heading-foreground) !important;
+  }
+  
+  /* Dark mode: testi bianchi per elementi comuni (ma non nella sidebar né bolle WA) */
+  .dark p:not([class*="sidebar"]):not([class*="Sidebar"]):not([class*="whatsapp-bolla"]):not(:is([data-wa-bolla] *)),
+  .dark span:not([class*="sidebar"]):not([class*="Sidebar"]):not(.text-brand-blue):not(.text-brand-orange):not(.dark\\:text-white):not(.dark\\:text-\\[var\\(--brand-orange\\)\\]):not([class*="whatsapp-bolla"]):not(:is([data-wa-bolla] *)),
+  .dark div:not([class*="sidebar"]):not([class*="Sidebar"]):not([class*="whatsapp-bolla"]):not([data-wa-bolla]):not(:is([data-wa-bolla] *)),
+  .dark td, .dark th, .dark label, .dark input, .dark select, .dark textarea {
+    color: var(--foreground);
+  }
+  
+  /* Override per la vera sidebar (.app-sidebar), NON group/sidebar-wrapper:
+     [class*=sidebar] matchava tutto il layout e forzava bianco sulle bolle WA. */
+  .dark .app-sidebar span:not(.text-brand-blue):not(.text-brand-orange):not(svg):not([class*="svg"]),
+  .dark .app-sidebar p {
+    color: #ffffff !important;
+  }
+  
+  .dark .text-brand-orange {
+    color: var(--brand-orange) !important;
+  }
+
+  /* Titoli di sezione form (Anagrafica, Contatti, …) */
+  .dark p.form-section-title,
+  html.dark p.form-section-title {
+    color: var(--brand-orange) !important;
+  }
+  
+  /* Override per elementi con text-brand-blue - ESCLUDI i titoli */
+  /* I titoli h1-h6 e CardTitle devono essere verdi, non blu */
+  .dark .text-brand-blue:not([class*="sidebar"]):not([class*="Sidebar"]) {
+    color: var(--brand-blue) !important;
+  }
+  
+  /* Override per icone con text-brand-blue nella sidebar - devono essere BIANCHE */
+  .dark .app-sidebar .text-brand-blue svg,
+  .dark .app-sidebar svg.text-brand-blue {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  /* Override per testi con text-brand-blue nella sidebar - devono essere BIANCHI */
+  .dark .app-sidebar .text-brand-blue,
+  .dark .app-sidebar a.text-brand-blue,
+  .dark .app-sidebar span.text-brand-blue,
+  .dark .app-sidebar [class*="SidebarMenuButton"] .text-brand-blue,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a.text-brand-blue,
+  .dark .app-sidebar [class*="SidebarMenuButton"] span.text-brand-blue {
+    color: #ffffff !important;
+  }
+  
+  /* FORZA i titoli ad essere verdi anche se hanno text-brand-blue - MASSIMA SPECIFICITÀ */
+  /* Questa regola DEVE venire dopo text-brand-blue per sovrascriverla */
+  .dark h1.text-brand-blue.text-brand-blue,
+  .dark h2.text-brand-blue.text-brand-blue,
+  .dark h3.text-brand-blue.text-brand-blue,
+  .dark h4.text-brand-blue.text-brand-blue,
+  .dark h5.text-brand-blue.text-brand-blue,
+  .dark h6.text-brand-blue.text-brand-blue,
+  .dark [data-slot="card-title"].text-brand-blue.text-brand-blue {
+    color: var(--heading-foreground) !important;
+  }
+  
+  /* Backup: regole ancora più specifiche per i titoli */
+  html.dark h1.text-brand-blue,
+  html.dark h2.text-brand-blue,
+  html.dark h3.text-brand-blue,
+  html.dark h4.text-brand-blue,
+  html.dark h5.text-brand-blue,
+  html.dark h6.text-brand-blue,
+  html.dark [data-slot="card-title"].text-brand-blue {
+    color: var(--heading-foreground) !important;
+  }
+  
+  /* FORZA ASSOLUTA: tutti gli h1 in dark mode devono essere verdi */
+  html.dark h1,
+  html.dark h1.text-[var\(--brand-blue\)],
+  html.dark h1[class*="text-brand"],
+  .dark h1[class*="text-\[var\(--brand-blue\)\]"] {
+    color: var(--brand-orange) !important;
+  }
+  
+  /* Forza bianco nella sidebar per elementi con dark:text-white */
+  .dark [class*="sidebar"] .dark\\:text-white,
+  .dark [class*="Sidebar"] .dark\\:text-white,
+  .dark [class*="sidebar"] span.dark\\:text-white,
+  .dark [class*="Sidebar"] span.dark\\:text-white {
+    color: #ffffff !important;
+  }
+
+  /* Campi in sola lettura negli sheet (Fonte, Status, Data, ecc.): testo e bordo sempre visibili in dark */
+  .dark .sheet-read-only-value {
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+  }
+
+  /* Override for muted text in dark mode */
+  .dark .text-muted-foreground {
+    color: var(--muted-foreground) !important;
+  }
+  
+  /* Override for gray text classes in dark mode */
+  .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800, .dark .text-gray-900 {
+    color: var(--foreground) !important;
+  }
+  
+  /* Regole specifiche per la sidebar in dark mode */
+  /* Titoli delle sezioni in bianco */
+  .dark .app-sidebar [class*="SidebarGroupLabel"],
+  .dark .app-sidebar [class*="SidebarGroupLabel"] * {
+    color: #ffffff !important;
+  }
+  
+  /* Testi nella sezione logout in bianco */
+  .dark .app-sidebar p:not([class*="SidebarMenuButton"]),
+  .dark .app-sidebar span:not([class*="SidebarMenuButton"]):not([class*="text-red"]):not([class*="text-orange"]):not([class*="text-brand"]) {
+    color: #ffffff !important;
+  }
+  
+  /* Override finale per assicurarsi che tutto sia leggibile */
+  .dark .app-sidebar {
+    --sidebar-foreground: #ffffff !important;
+    --sidebar-accent-foreground: #ffffff !important;
+  }
+  
+  /* Silvia mode: titoli bianchi (monocromatico) */
+  
+  /* CardTitle e altri titoli devono essere bianchi */
+  
+  /* Silvia mode: testi bianchi per elementi comuni */
+  
+  /* Override per sidebar: testi bianchi */
+  
+  /* Override per elementi con text-brand-blue */
+  
+  /* Override per icone con text-brand-blue nella sidebar - devono essere azzurre */
+  
+  
+  
+  /* Colori tabella per modalità Silvia */
+  
+  /* Colori tabella per dark mode */
+  .dark [data-slot="table-head"],
+  .dark th {
+    color: #ffffff !important;
+  }
+  
+  .dark [data-slot="table-cell"],
+  .dark td {
+    color: #ffffff !important;
+  }
+  
+  /* Bordi per modalità Silvia */
+  
+  /* Bordi specifici per Silvia */
+  
+  /* Titoli delle sezioni in bianco */
+  
+  /* Menu items testo bianco, icone azzurre */
+  
+  /* Icone dei menu items in bianco - regole molto specifiche */
+  
+  /* Forza il colore anche per gli elementi interni delle icone */
+  
+  /* Regola ancora più specifica per le icone dentro i link */
+  
+  /* Regola ultra-specifica per sovrascrivere qualsiasi altra regola */
+  
+  /* Regola ancora più specifica usando selettori diretti */
+  
+  /* Forza il colore per tutte le icone SVG nella sidebar in modalità Silvia */
+  
+  /* Override per pulsanti Giorno/Settimana e Plus nella pagina Calendario */
+  
+  /* Testi nella sezione logout in bianco */
+  
+  /* Override finale per assicurarsi che tutto sia leggibile */
+  
+  /* Dark mode: menu items testo bianco, icone azzurre */
+  .dark .app-sidebar [class*="SidebarMenuButton"] span,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a span:not(svg) {
+    color: #ffffff !important;
+  }
+  
+  /* Icone dei menu items in BIANCO per dark mode - regole molto specifiche */
+  .dark .app-sidebar [class*="SidebarMenuButton"] svg,
+  .dark .app-sidebar [class*="SidebarMenuButton"] svg.text-brand-blue,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.text-brand-blue,
+  .dark .app-sidebar [class*="SidebarMenuButton"] path,
+  .dark .app-sidebar [class*="SidebarMenuButton"] circle,
+  .dark .app-sidebar [class*="SidebarMenuButton"] line,
+  .dark .app-sidebar [class*="SidebarMenuButton"] * svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  /* Forza il colore anche per gli elementi interni delle icone */
+  .dark .app-sidebar [class*="SidebarMenuButton"] svg *,
+  .dark .app-sidebar [class*="SidebarMenuButton"] svg path,
+  .dark .app-sidebar [class*="SidebarMenuButton"] svg circle,
+  .dark .app-sidebar [class*="SidebarMenuButton"] svg line {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  /* Regola ancora più specifica per le icone dentro i link in dark mode */
+  .dark .app-sidebar a[class*="flex"] svg,
+  .dark .app-sidebar a[class*="flex"] svg *,
+  .dark .app-sidebar a[class*="flex"] svg path,
+  .dark .app-sidebar a[class*="flex"] svg circle,
+  .dark .app-sidebar a[class*="flex"] svg line {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  /* Regola ultra-specifica per sovrascrivere qualsiasi altra regola in dark mode */
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4 *,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4 path,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4 circle,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4 line,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"],
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"] *,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"] path,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"] circle,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"] line {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  /* Regola ancora più specifica usando selettori diretti in dark mode */
+  .dark .app-sidebar [class*="SidebarMenuButton"] > a > svg,
+  .dark .app-sidebar [class*="SidebarMenuButton"] > a > svg > *,
+  .dark .app-sidebar [class*="SidebarMenuButton"] > a > svg > path,
+  .dark .app-sidebar [class*="SidebarMenuButton"] > a > svg > circle,
+  .dark .app-sidebar [class*="SidebarMenuButton"] > a > svg > line {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  /* Forza il colore per tutte le icone SVG nella sidebar in modalità dark - DEVE essere alla fine */
+  .dark .app-sidebar svg,
+  .dark .app-sidebar svg * {
+    color: #ffffff !important;
+  }
+  
+  .dark .app-sidebar svg path,
+  .dark .app-sidebar svg circle,
+  .dark .app-sidebar svg line,
+  .dark .app-sidebar svg polyline,
+  .dark .app-sidebar svg polygon,
+  .dark .app-sidebar svg rect {
+    stroke: #ffffff !important;
+    fill: none !important;
+    color: #ffffff !important;
+  }
+  
+  .dark .app-sidebar svg[fill="currentColor"] path,
+  .dark .app-sidebar svg[fill="currentColor"] circle,
+  .dark .app-sidebar svg[fill="currentColor"] rect {
+    fill: #ffffff !important;
+    stroke: none !important;
+    color: #ffffff !important;
+  }
+  
+  /* Override finale per assicurarsi che le icone siano BIANCHE in dark mode */
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"],
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4.h-4 {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"] *,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4.h-4 *,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"] path,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4.h-4 path,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"] circle,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4.h-4 circle,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"][class*="h-4"] line,
+  .dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4.h-4 line {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+
+  /*
+    Bolle in dark: testo blu su fondo chiaro.
+    In @layer base (dopo le regole sidebar) così le !important layered non
+    vengono battute da regole unlayered inefficaci.
+  */
+  html.dark [data-wa-bolla="out"],
+  html.dark [data-wa-bolla="out"] *,
+  .dark [data-wa-bolla="out"],
+  .dark [data-wa-bolla="out"] * {
+    color: #1F3A63 !important;
+    -webkit-text-fill-color: #1F3A63 !important;
+  }
+  html.dark [data-wa-bolla="out"] .text-destructive,
+  html.dark [data-wa-bolla="out"] .text-destructive *,
+  .dark [data-wa-bolla="out"] .text-destructive,
+  .dark [data-wa-bolla="out"] .text-destructive * {
+    color: var(--destructive) !important;
+    -webkit-text-fill-color: var(--destructive) !important;
+  }
+  html.dark [data-wa-bolla="in"],
+  html.dark [data-wa-bolla="in"] *,
+  .dark [data-wa-bolla="in"],
+  .dark [data-wa-bolla="in"] * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+}
+
+/* Regole dark mode per sidebar - fuori dal layer per massima priorità - ULTIMA PRIORITÀ */
+/* Forza i testi dei link a essere bianchi in dark mode */
+html.dark .app-sidebar [class*="SidebarMenuButton"] a,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a.text-brand-blue,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a span,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a span.text-brand-blue,
+html.dark .app-sidebar [class*="SidebarMenuButton"] span.text-brand-blue,
+html.dark .app-sidebar a.text-brand-blue,
+html.dark .app-sidebar span.text-brand-blue {
+  color: #ffffff !important;
+}
+
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg *,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg path,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg circle,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg line,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg polyline,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg polygon,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg rect {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"],
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="h-4"],
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg.h-4 {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"] *,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4 *,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"] path,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4 path,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"] circle,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4 circle,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg[class*="w-4"] line,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a svg.w-4 line {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Regola ancora più specifica per tutte le icone nella sidebar dark */
+html.dark .app-sidebar svg,
+html.dark .app-sidebar svg * {
+  color: #ffffff !important;
+}
+
+html.dark .app-sidebar svg path,
+html.dark .app-sidebar svg circle,
+html.dark .app-sidebar svg line,
+html.dark .app-sidebar svg polyline,
+html.dark .app-sidebar svg polygon,
+html.dark .app-sidebar svg rect {
+  stroke: #ffffff !important;
+  fill: none !important;
+  color: #ffffff !important;
+}
+
+html.dark .app-sidebar svg[fill="currentColor"] path,
+html.dark .app-sidebar svg[fill="currentColor"] circle,
+html.dark .app-sidebar svg[fill="currentColor"] rect {
+  fill: #ffffff !important;
+  stroke: none !important;
+  color: #ffffff !important;
+}
+
+/* FORZA ASSOLUTA: tutti i testi nella sidebar dark devono essere bianchi */
+html.dark .app-sidebar [class*="SidebarMenuButton"] a,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a *,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a span,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a span *,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a.text-brand-blue,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a.text-brand-blue *,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a span.text-brand-blue,
+html.dark .app-sidebar [class*="SidebarMenuButton"] span.text-brand-blue,
+html.dark .app-sidebar [class*="SidebarMenuButton"] .text-brand-blue,
+html.dark .app-sidebar [class*="SidebarMenuButton"] .text-brand-blue * {
+  color: #ffffff !important;
+}
+
+/* Nome e cognome utente in sidebar: sempre bianco in dark */
+html.dark .app-sidebar .sidebar-user-name {
+  color: #ffffff !important;
+}
+
+/* Forza anche gli elementi con dark:!text-white */
+html.dark .app-sidebar [class*="SidebarMenuButton"] a[class*="dark:!text-white"],
+html.dark .app-sidebar [class*="SidebarMenuButton"] a span[class*="dark:!text-white"],
+html.dark .app-sidebar [class*="SidebarMenuButton"] span[class*="dark:!text-white"] {
+  color: #ffffff !important;
+}
+
+/* REGOLA ULTRA-SPECIFICA: forza il bianco su TUTTI gli span dentro i link nella sidebar dark */
+html.dark .app-sidebar [class*="SidebarMenuButton"] > a > span,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a > span,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a span.text-brand-blue.dark\:text-white,
+html.dark .app-sidebar [class*="SidebarMenuButton"] a span[class*="text-brand-blue"][class*="dark:text-white"] {
+  color: #ffffff !important;
+}
+
+@layer utilities {
+  .text-brand-blue {
+    color: var(--brand-blue);
+  }
+  
+  /* Override per text-brand-blue nella sidebar dark - deve essere dopo la definizione */
+  html.dark .app-sidebar .text-brand-blue,
+  html.dark .app-sidebar a.text-brand-blue,
+  html.dark .app-sidebar span.text-brand-blue,
+  html.dark .app-sidebar [class*="SidebarMenuButton"] .text-brand-blue,
+  html.dark .app-sidebar [class*="SidebarMenuButton"] a.text-brand-blue,
+  html.dark .app-sidebar [class*="SidebarMenuButton"] span.text-brand-blue,
+  html.dark .app-sidebar [class*="SidebarMenuButton"] a span.text-brand-blue {
+    color: #ffffff !important;
+  }
+  .text-brand-blue-light {
+    color: var(--brand-blue-light);
+  }
+  .text-brand-blue-lighter {
+    color: var(--brand-blue-lighter);
+  }
+  .text-brand-blue-dark {
+    color: var(--brand-blue-dark);
+  }
+  .bg-brand-blue {
+    background-color: var(--brand-blue);
+  }
+  .bg-brand-blue-light {
+    background-color: var(--brand-blue-light);
+  }
+  .border-brand-blue {
+    border-color: var(--brand-blue);
+  }
+  /* Utility class per titoli in dark mode */
+  .text-heading {
+    color: var(--heading-foreground);
+  }
+  /* Utility class per testi in dark mode */
+  .text-foreground-custom {
+    color: var(--foreground);
+  }
+}
+
+/* ========== SELECT (menu a tendina) in dark mode - FUORI DA OGNI LAYER ========== */
+/* Applicato per ultimo così sovrascrive utility Tailwind. html.dark perché il tema è su documentElement. */
+html.dark [data-slot="select-trigger"] {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+html.dark [data-slot="select-trigger"] *,
+html.dark [data-slot="select-trigger"] [data-slot="select-value"],
+html.dark [data-slot="select-trigger"] span {
+  color: #ffffff !important;
+}
+html.dark [data-slot="select-content"] {
+  background-color: var(--brand-blue) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+html.dark [data-slot="select-content"] *,
+html.dark [data-slot="select-content"] [data-slot="select-item"],
+html.dark [data-slot="select-content"] span,
+html.dark [data-slot="select-content"] [data-slot="select-item"] span {
+  color: #ffffff !important;
+}
+html.dark [data-slot="select-content"] [data-slot="select-item"]:hover,
+html.dark [data-slot="select-content"] [data-slot="select-item"][data-highlighted] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+html.dark [data-slot="select-content"] .text-gray-500,
+html.dark [data-slot="select-content"] .text-gray-600 {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Bolle WhatsApp dark: regole in @layer base (fine blocco) — non ripetere unlayered. */

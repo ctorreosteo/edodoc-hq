@@ -1,0 +1,767 @@
+/*
+  Menu contestuali (tasto destro / pressione lunga) e menu a tendina.
+
+  Un solo linguaggio per tutti i menu dell'app, per data-slot (i componenti in ui/ portano solo il layout):
+  - desktop e tablet: pannello in vetro smerigliato, voce evidenziata piena nel colore del tema
+    (blu brand in chiaro, verde brand in dark), animazione a molla dal punto d'origine;
+  - telefono (sotto 768px, come il drawer della sidebar): i menu contestuali diventano un foglio dal basso
+    con maniglia e sfondo velato; i sottomenu si impilano sopra con "Indietro".
+
+  Le regole stanno fuori dai layer: battono le utility Tailwind e le regole di tema in @layer base
+  senza !important. Gli !important rimasti servono solo contro gli stili inline di Radix (posizione).
+*/
+
+:root {
+  --mn-bg: rgb(255 255 255 / 0.84);
+  --mn-bg-solid: #ffffff;
+  --mn-border: rgb(31 58 99 / 0.09);
+  --mn-shadow:
+    0 0 0 0.5px rgb(31 58 99 / 0.05),
+    0 2px 4px -1px rgb(31 58 99 / 0.06),
+    0 12px 28px -6px rgb(31 58 99 / 0.18),
+    0 32px 64px -20px rgb(22 42 72 / 0.3);
+  --mn-fg: var(--brand-blue);
+  --mn-muted: rgb(31 58 99 / 0.52);
+  --mn-icon: rgb(31 58 99 / 0.5);
+  --mn-hl-bg: linear-gradient(180deg, #3A6098 0%, #1F3A63 100%);
+  --mn-hl-fg: #ffffff;
+  --mn-hl-icon: var(--brand-orange);
+  --mn-hl-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 14px -6px rgb(31 58 99 / 0.55);
+  --mn-tint: rgb(31 58 99 / 0.07);
+  --mn-sep: rgb(31 58 99 / 0.09);
+  --mn-check: var(--brand-blue);
+  --mn-on-check: #ffffff;
+  --mn-danger: #dc2626;
+  --mn-danger-hl-bg: linear-gradient(180deg, #f05252 0%, #dc2626 100%);
+  --mn-danger-hl-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 6px 14px -6px rgb(220 38 38 / 0.55);
+  --mn-handle: rgb(31 58 99 / 0.18);
+  --mn-scrim: rgb(22 42 72 / 0.32);
+  --mn-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --mn-ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.dark {
+  --mn-bg: rgb(10 50 104 / 0.86);
+  --mn-bg-solid: #2A4A78;
+  --mn-border: rgb(255 255 255 / 0.12);
+  --mn-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    0 0 0 1px rgb(0 8 24 / 0.35),
+    0 18px 40px -10px rgb(0 0 0 / 0.55),
+    0 40px 80px -24px rgb(0 8 24 / 0.75);
+  --mn-fg: #ffffff;
+  --mn-muted: rgb(255 255 255 / 0.56);
+  --mn-icon: rgb(255 255 255 / 0.62);
+  --mn-hl-bg: linear-gradient(180deg, #F6AE75 0%, #EC8438 100%);
+  --mn-hl-fg: var(--brand-blue);
+  --mn-hl-icon: var(--brand-blue);
+  --mn-hl-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), 0 8px 20px -8px rgb(240 148 78 / 0.6);
+  --mn-tint: rgb(255 255 255 / 0.08);
+  --mn-sep: rgb(255 255 255 / 0.1);
+  --mn-check: var(--brand-orange);
+  --mn-on-check: var(--brand-blue);
+  --mn-danger: #ff8f8f;
+  --mn-danger-hl-bg: linear-gradient(180deg, #f87171 0%, #e5484d 100%);
+  --mn-danger-hl-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 8px 20px -8px rgb(229 72 77 / 0.6);
+  --mn-handle: rgb(255 255 255 / 0.28);
+  --mn-scrim: rgb(0 6 20 / 0.5);
+}
+
+/* ——————————————————————————————————————————————
+   Pannello
+   —————————————————————————————————————————————— */
+:is(
+  [data-slot="context-menu-content"],
+  [data-slot="context-menu-sub-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"]
+) {
+  padding: 5px;
+  border-radius: 14px;
+  border: 1px solid var(--mn-border);
+  background: var(--mn-bg);
+  color: var(--mn-fg);
+  box-shadow: var(--mn-shadow);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.3;
+  outline: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mn-sep) transparent;
+  overscroll-behavior: contain;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :is(
+    [data-slot="context-menu-content"],
+    [data-slot="context-menu-sub-content"],
+    [data-slot="dropdown-menu-content"],
+    [data-slot="dropdown-menu-sub-content"]
+  ) {
+    background: var(--mn-bg-solid);
+  }
+}
+
+:is(
+  [data-slot="context-menu-content"],
+  [data-slot="context-menu-sub-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"]
+)[data-state="open"] {
+  animation: mn-pop-in 200ms var(--mn-ease-spring);
+}
+
+:is(
+  [data-slot="context-menu-content"],
+  [data-slot="context-menu-sub-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"]
+)[data-state="closed"] {
+  animation: mn-pop-out 120ms ease-in forwards;
+}
+
+@keyframes mn-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes mn-pop-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+/* ——————————————————————————————————————————————
+   Voci
+   —————————————————————————————————————————————— */
+:is(
+  [data-slot="context-menu-item"],
+  [data-slot="context-menu-sub-trigger"],
+  [data-slot="context-menu-checkbox-item"],
+  [data-slot="context-menu-radio-item"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-sub-trigger"],
+  [data-slot="dropdown-menu-checkbox-item"],
+  [data-slot="dropdown-menu-radio-item"]
+) {
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  color: var(--mn-fg);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition:
+    background-color 90ms ease,
+    color 90ms ease,
+    box-shadow 120ms ease,
+    transform 120ms var(--mn-ease-spring);
+  scroll-margin: 6px;
+}
+
+/* Icone in testa alla voce: la spaziatura la dà il gap, non il mr-2 di chi le usa */
+:is(
+  [data-slot="context-menu-item"],
+  [data-slot="context-menu-sub-trigger"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-sub-trigger"]
+) > svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 0;
+  color: var(--mn-icon);
+  transition: color 90ms ease, transform 160ms var(--mn-ease-spring);
+}
+
+:is(
+  [data-slot="context-menu-item"],
+  [data-slot="context-menu-sub-trigger"],
+  [data-slot="context-menu-checkbox-item"],
+  [data-slot="context-menu-radio-item"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-sub-trigger"],
+  [data-slot="dropdown-menu-checkbox-item"],
+  [data-slot="dropdown-menu-radio-item"]
+)[data-inset] {
+  padding-left: 36px;
+}
+
+/* Evidenziata (passaggio del mouse, tastiera, dito): piena, nel colore del tema */
+:is(
+  [data-slot="context-menu-item"],
+  [data-slot="context-menu-sub-trigger"],
+  [data-slot="context-menu-checkbox-item"],
+  [data-slot="context-menu-radio-item"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-sub-trigger"],
+  [data-slot="dropdown-menu-checkbox-item"],
+  [data-slot="dropdown-menu-radio-item"]
+)[data-highlighted] {
+  background: var(--mn-hl-bg);
+  color: var(--mn-hl-fg);
+  box-shadow: var(--mn-hl-shadow);
+}
+
+/* Il tema dark colora span e div direttamente (index.css): sulla voce evidenziata seguono la voce */
+:is(
+  [data-slot="context-menu-item"],
+  [data-slot="context-menu-sub-trigger"],
+  [data-slot="context-menu-checkbox-item"],
+  [data-slot="context-menu-radio-item"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-sub-trigger"],
+  [data-slot="dropdown-menu-checkbox-item"],
+  [data-slot="dropdown-menu-radio-item"]
+)[data-highlighted] :is(span, div, p, small, strong, b, em) {
+  color: inherit;
+}
+
+:is(
+  [data-slot="context-menu-item"],
+  [data-slot="context-menu-sub-trigger"],
+  [data-slot="context-menu-checkbox-item"],
+  [data-slot="context-menu-radio-item"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-sub-trigger"],
+  [data-slot="dropdown-menu-checkbox-item"],
+  [data-slot="dropdown-menu-radio-item"]
+)[data-highlighted] svg {
+  color: var(--mn-hl-icon);
+}
+
+:is(
+  [data-slot="context-menu-item"],
+  [data-slot="context-menu-sub-trigger"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-sub-trigger"]
+)[data-highlighted] > svg:first-child {
+  transform: scale(1.08);
+}
+
+:is(
+  [data-slot="context-menu-item"],
+  [data-slot="context-menu-checkbox-item"],
+  [data-slot="context-menu-radio-item"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="dropdown-menu-checkbox-item"],
+  [data-slot="dropdown-menu-radio-item"]
+):active {
+  transform: scale(0.985);
+}
+
+/* Voce che ha aperto un sottomenu, quando il puntatore è già dentro al sottomenu */
+:is([data-slot="context-menu-sub-trigger"], [data-slot="dropdown-menu-sub-trigger"])[data-state="open"]:not([data-highlighted]) {
+  background: var(--mn-tint);
+}
+
+[data-slot="menu-chevron"] {
+  width: 14px;
+  height: 14px;
+  margin-right: -3px;
+  color: var(--mn-muted);
+  transition: transform 160ms var(--mn-ease-spring), color 90ms ease;
+}
+
+[data-state="open"] > [data-slot="menu-chevron"] {
+  transform: translateX(2px);
+}
+
+/* Azioni distruttive */
+:is([data-slot="context-menu-item"], [data-slot="dropdown-menu-item"])[data-variant="destructive"] {
+  color: var(--mn-danger);
+}
+
+:is([data-slot="context-menu-item"], [data-slot="dropdown-menu-item"])[data-variant="destructive"] svg {
+  color: var(--mn-danger);
+}
+
+/* index.css (dark) colora gli span direttamente: il testo segue il rosso della voce */
+:is([data-slot="context-menu-item"], [data-slot="dropdown-menu-item"])[data-variant="destructive"] :is(span, div, p) {
+  color: inherit;
+}
+
+:is([data-slot="context-menu-item"], [data-slot="dropdown-menu-item"])[data-variant="destructive"][data-highlighted] {
+  background: var(--mn-danger-hl-bg);
+  color: #ffffff;
+  box-shadow: var(--mn-danger-hl-shadow);
+}
+
+:is([data-slot="context-menu-item"], [data-slot="dropdown-menu-item"])[data-variant="destructive"][data-highlighted] svg {
+  color: #ffffff;
+}
+
+/* Spunte e scelte singole */
+[data-slot="menu-indicator"] {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1.5px solid var(--mn-sep);
+  background: transparent;
+  pointer-events: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+[data-slot="menu-indicator"][data-radio] {
+  border-radius: 999px;
+}
+
+[data-slot="menu-indicator"] svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
+}
+
+[data-state="checked"] > [data-slot="menu-indicator"] {
+  background: var(--mn-check);
+  border-color: var(--mn-check);
+}
+
+[data-state="checked"] > [data-slot="menu-indicator"][data-radio] {
+  background: transparent;
+}
+
+[data-state="checked"] > [data-slot="menu-indicator"] svg,
+[data-highlighted][data-state="checked"] > [data-slot="menu-indicator"] svg {
+  color: var(--mn-on-check);
+}
+
+[data-slot="menu-radio-dot"] {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--mn-check);
+}
+
+[data-highlighted] > [data-slot="menu-indicator"] {
+  border-color: currentColor;
+}
+
+[data-highlighted][data-state="checked"] > [data-slot="menu-indicator"] {
+  background: var(--mn-hl-fg);
+  border-color: var(--mn-hl-fg);
+}
+
+[data-highlighted][data-state="checked"] > [data-slot="menu-indicator"] svg {
+  color: var(--mn-hl-icon);
+}
+
+[data-highlighted] [data-slot="menu-radio-dot"] {
+  background: currentColor;
+}
+
+/* Titoli di sezione, separatori, scorciatoie */
+:is([data-slot="context-menu-label"], [data-slot="dropdown-menu-label"]) {
+  padding: 8px 10px 4px;
+  color: var(--mn-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+:is([data-slot="context-menu-label"], [data-slot="dropdown-menu-label"])[data-inset] {
+  padding-left: 36px;
+}
+
+:is([data-slot="context-menu-separator"], [data-slot="dropdown-menu-separator"]) {
+  height: 1px;
+  margin: 5px 8px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--mn-sep) 14%, var(--mn-sep) 86%, transparent);
+}
+
+:is([data-slot="context-menu-shortcut"], [data-slot="dropdown-menu-shortcut"]) {
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--mn-sep);
+  color: var(--mn-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-highlighted] :is([data-slot="context-menu-shortcut"], [data-slot="dropdown-menu-shortcut"]) {
+  border-color: currentColor;
+  opacity: 0.75;
+}
+
+/* "Indietro" del sottomenu: solo nel foglio del telefono */
+[data-slot="menu-back"] {
+  display: none;
+}
+
+/* Cosa si è cliccato col destro resta segnato mentre il menu è aperto */
+[data-slot="context-menu-trigger"][data-state="open"]:not(span) {
+  outline: 2px solid color-mix(in srgb, var(--mn-check) 55%, transparent);
+  outline-offset: -2px;
+}
+
+/* ——————————————————————————————————————————————
+   Touch: pressione lunga pulita (niente lente/selezione di iOS)
+   —————————————————————————————————————————————— */
+@media (pointer: coarse) {
+  [data-slot="context-menu-trigger"] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  [data-slot="context-menu-trigger"] :is(input, textarea, [contenteditable="true"]) {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  :is(
+    [data-slot="context-menu-item"],
+    [data-slot="context-menu-sub-trigger"],
+    [data-slot="context-menu-checkbox-item"],
+    [data-slot="context-menu-radio-item"],
+    [data-slot="dropdown-menu-item"],
+    [data-slot="dropdown-menu-sub-trigger"],
+    [data-slot="dropdown-menu-checkbox-item"],
+    [data-slot="dropdown-menu-radio-item"]
+  ) {
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 11px;
+    font-size: 15px;
+    gap: 12px;
+  }
+
+  :is(
+    [data-slot="context-menu-item"],
+    [data-slot="context-menu-sub-trigger"],
+    [data-slot="dropdown-menu-item"],
+    [data-slot="dropdown-menu-sub-trigger"]
+  ) > svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  :is(
+    [data-slot="context-menu-content"],
+    [data-slot="context-menu-sub-content"],
+    [data-slot="dropdown-menu-content"],
+    [data-slot="dropdown-menu-sub-content"]
+  ) {
+    padding: 6px;
+    border-radius: 17px;
+  }
+}
+
+/* ——————————————————————————————————————————————
+   Telefono: i menu contestuali sono un foglio dal basso
+   —————————————————————————————————————————————— */
+@media (max-width: 767px) {
+  [data-radix-popper-content-wrapper]:has(> :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"])) {
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    transform: none !important;
+    will-change: auto !important;
+    min-width: 0 !important;
+    padding: 0 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Velo sulla pagina (il wrapper ha già z-index alto: lo pseudo-elemento sta sotto al foglio, sopra alla pagina) */
+  [data-radix-popper-content-wrapper]:has(> :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"]))::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--mn-scrim);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    pointer-events: none;
+    animation: mn-fade-in 260ms ease-out;
+  }
+
+  [data-radix-popper-content-wrapper]:has(> [data-slot="context-menu-sub-content"])::before {
+    background: color-mix(in srgb, var(--mn-scrim) 60%, transparent);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  [data-radix-popper-content-wrapper]:has(> :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"])[data-state="closed"])::before {
+    animation: mn-fade-out 220ms ease-in forwards;
+  }
+
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"]) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 560px !important;
+    max-height: min(74dvh, 620px) !important;
+    margin: 0 auto;
+    padding: 0 8px 8px;
+    border-radius: 26px;
+    background: var(--mn-bg-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    font-size: 16px;
+  }
+
+  /* Maniglia */
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"])::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: block;
+    height: 22px;
+    margin: 0 -8px 2px;
+    background:
+      radial-gradient(closest-side, var(--mn-handle) 98%, transparent) center 9px / 38px 5px no-repeat;
+  }
+
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"])[data-state="open"] {
+    animation: mn-sheet-in 420ms var(--mn-ease-sheet);
+  }
+
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"])[data-state="closed"] {
+    animation: mn-sheet-out 220ms ease-in forwards;
+  }
+
+  :is(
+    [data-slot="context-menu-content"],
+    [data-slot="context-menu-sub-content"]
+  ) :is(
+    [data-slot="context-menu-item"],
+    [data-slot="context-menu-sub-trigger"],
+    [data-slot="context-menu-checkbox-item"],
+    [data-slot="context-menu-radio-item"]
+  ) {
+    min-height: 50px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    font-size: 16px;
+    gap: 14px;
+  }
+
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"]) :is(
+    [data-slot="context-menu-item"],
+    [data-slot="context-menu-sub-trigger"]
+  ) > svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"]) [data-slot="context-menu-separator"] {
+    margin: 6px 12px;
+  }
+
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"]) [data-slot="context-menu-label"] {
+    padding: 10px 14px 6px;
+    font-size: 12px;
+  }
+
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"]) [data-slot="menu-indicator"] {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+  }
+
+  [data-slot="menu-back"] {
+    position: sticky;
+    top: 22px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 46px;
+    margin: -2px 0 6px;
+    padding: 6px 10px 10px 6px;
+    border: 0;
+    border-bottom: 1px solid var(--mn-sep);
+    border-radius: 0;
+    background: transparent;
+    color: var(--mn-fg);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  [data-slot="menu-back"] > svg {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--mn-tint);
+    color: var(--mn-fg);
+  }
+
+  [data-slot="menu-back"]:active > svg {
+    transform: scale(0.92);
+  }
+
+  [data-slot="menu-back-title"] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: inherit;
+  }
+
+  [data-slot="menu-back-title"] svg {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    color: var(--mn-icon);
+  }
+
+  /* Maniglia e "Indietro" restano fermi in alto: lo sfondo pieno copre le voci che scorrono sotto */
+  :is([data-slot="context-menu-content"], [data-slot="context-menu-sub-content"])::before,
+  [data-slot="context-menu-sub-content"] [data-slot="menu-back"] {
+    background-color: var(--mn-bg-solid);
+  }
+
+  /* Menu a tendina: restano ancorati al pulsante, solo più ariosi */
+  :is([data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-sub-content"]) {
+    max-width: calc(100vw - 16px);
+    max-height: min(70dvh, 26rem);
+    border-radius: 18px;
+  }
+}
+
+@keyframes mn-sheet-in {
+  from {
+    transform: translateY(calc(100% + 24px));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes mn-sheet-out {
+  to {
+    transform: translateY(calc(100% + 24px));
+  }
+}
+
+@keyframes mn-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes mn-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(
+    [data-slot="context-menu-content"],
+    [data-slot="context-menu-sub-content"],
+    [data-slot="dropdown-menu-content"],
+    [data-slot="dropdown-menu-sub-content"]
+  )[data-state] {
+    animation-duration: 1ms !important;
+  }
+
+  [data-radix-popper-content-wrapper]::before {
+    animation: none !important;
+  }
+}
+
+/* —— "Chiudi tutte" sopra la pila delle notifiche (src/components/app-toaster.tsx) —— */
+.toast-chiudi-tutte {
+  position: fixed;
+  top: calc(76px + env(safe-area-inset-top));
+  right: 24px;
+  z-index: 2147483000;
+  display: inline-flex;
+  height: 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 14px;
+  border: 1px solid rgb(240 148 78 / 0.35);
+  border-radius: 999px;
+  background:
+    radial-gradient(120% 160% at 0% 0%, rgb(240 148 78 / 0.22), transparent 55%),
+    linear-gradient(145deg, #24406B 0%, #3A6098 100%);
+  color: #ffffff;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 16px 34px -14px rgb(22 42 72 / 0.7);
+  cursor: pointer;
+  animation: toast-chiudi-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.2s;
+}
+
+.toast-chiudi-tutte:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 40px -14px rgb(22 42 72 / 0.8);
+}
+
+.toast-chiudi-tutte:focus-visible {
+  outline: 2px solid #F0944E;
+  outline-offset: 2px;
+}
+
+.toast-chiudi-tutte svg {
+  width: 15px;
+  height: 15px;
+  color: #F0944E;
+}
+
+.toast-chiudi-tutte b {
+  display: grid;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #F6AE75, #F0944E);
+  color: #1F3A63;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .toast-chiudi-tutte {
+    top: calc(70px + env(safe-area-inset-top));
+    right: 16px;
+  }
+}
+
+@keyframes toast-chiudi-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-chiudi-tutte {
+    animation: none;
+  }
+}

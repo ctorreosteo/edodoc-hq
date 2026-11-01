@@ -1,0 +1,11 @@
+target/
+logs/
+.git/
+.idea/
+.vscode/
+**/*.iml
+.DS_Store
+
+# Local/secret files (never bake into image)
+secrets/
+.env

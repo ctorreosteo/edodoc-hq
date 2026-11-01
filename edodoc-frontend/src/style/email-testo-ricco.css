@@ -1,0 +1,371 @@
+/*
+  Editor dei corpi email: barra di formattazione (pagina Email e popup di invio) e campo dei popup.
+  I popup vivono fuori da [data-vl-page="email"]: niente token lux qui, i colori seguono il tema da currentColor.
+  Il foglio resta bianco anche nei temi scuri: i colori scelti si vedono come li vedrà chi riceve.
+*/
+
+.te-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.7rem;
+}
+
+.te-tb-gruppo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.05rem;
+}
+
+.te-tb-btn {
+  display: inline-grid;
+  flex: none;
+  grid-auto-flow: column;
+  place-items: center;
+  min-width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.72;
+  transition: background 120ms ease, opacity 120ms ease;
+}
+
+.te-tb-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor 9%, transparent);
+  opacity: 1;
+}
+
+.te-tb-btn:focus-visible {
+  outline: 2px solid var(--brand-orange, #E27A2C);
+  outline-offset: 1px;
+}
+
+.te-tb-btn[data-attivo] {
+  background: color-mix(in srgb, var(--brand-orange, #E27A2C) 26%, transparent);
+  opacity: 1;
+}
+
+.te-tb-btn:disabled {
+  cursor: default;
+  opacity: 0.28;
+}
+
+.te-tb-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+@media (pointer: coarse) {
+  .te-tb-btn {
+    min-width: 2.3rem;
+    height: 2.3rem;
+  }
+
+  .te-tb-valore {
+    line-height: 2.3rem;
+  }
+}
+
+.te-tb-tendina {
+  gap: 0.1rem;
+  padding: 0 0.25rem 0 0.35rem;
+}
+
+.te-tb-btn svg.te-tb-freccia {
+  width: 0.7rem;
+  height: 0.7rem;
+  opacity: 0.6;
+}
+
+.te-tb-valore {
+  max-width: 5.6rem;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.te-tb-colore {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  height: 1.2rem;
+}
+
+.te-tb-colore svg {
+  margin-top: -0.2rem;
+}
+
+.te-tb-colore i {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 0.17rem;
+  border-radius: 1px;
+}
+
+.te-pop {
+  width: auto;
+  min-width: 10.5rem;
+  max-width: min(18rem, calc(100vw - 2rem));
+  padding: 0.3rem;
+}
+
+.te-pop-voce {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.te-pop-voce:hover,
+.te-pop-voce:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.te-pop-voce svg {
+  flex: none;
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.te-pop-voce-testo {
+  min-width: 0;
+}
+
+.te-pop-voce [data-stile="2"] {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.te-pop-voce [data-stile="3"] {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.te-pop-riga {
+  display: flex;
+  gap: 0.1rem;
+}
+
+.te-tavolozza {
+  display: grid;
+  grid-template-columns: repeat(6, 1.65rem);
+  gap: 0.3rem;
+  padding: 0.3rem 0.3rem 0.45rem;
+}
+
+.te-colore {
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.te-colore:hover,
+.te-colore:focus-visible {
+  outline: none;
+  transform: scale(1.14);
+}
+
+.te-colore[data-scelto] {
+  outline: 2px solid var(--brand-orange, #E27A2C);
+  outline-offset: 2px;
+}
+
+.te-pop-link {
+  width: min(21rem, calc(100vw - 2rem));
+  max-width: none;
+  padding: 0.5rem;
+}
+
+.te-link-form {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.te-link-input {
+  flex: 1;
+  min-width: 0;
+  height: 2.1rem;
+  padding: 0 0.6rem;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 0.45rem;
+  background: transparent;
+  color: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.te-link-input:focus {
+  border-color: var(--brand-orange, #E27A2C);
+}
+
+.te-link-ok {
+  height: 2.1rem;
+  padding: 0 0.8rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: var(--brand-orange, #E27A2C);
+  color: var(--brand-blue, #1F3A63);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.te-link-togli {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.te-pop-link .te-pop-voce {
+  margin-top: 0.3rem;
+}
+
+/* Campo nei popup */
+
+.te-campo {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  border-radius: 0.65rem;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.te-campo:focus-within {
+  border-color: var(--brand-orange, #E27A2C);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-orange, #E27A2C) 22%, transparent);
+}
+
+.te-campo[data-disabilitato] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.te-campo .te-toolbar {
+  padding: 0.3rem 0.4rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background: color-mix(in srgb, currentColor 3%, transparent);
+}
+
+.te-carta {
+  background: #ffffff;
+}
+
+.te-carta .tiptap {
+  min-height: 11rem;
+  max-height: 42vh;
+  overflow-y: auto;
+  padding: 0.8rem 0.95rem;
+  color: #1f2933;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  overflow-wrap: anywhere;
+}
+
+.te-carta .te-prose p {
+  margin: 0 0 12px;
+}
+
+.te-carta .te-prose li p {
+  margin: 0;
+}
+
+.te-carta .te-prose :is(ul, ol) {
+  margin: 0 0 12px;
+  padding-left: 24px;
+}
+
+.te-carta .te-prose ul {
+  list-style: disc;
+}
+
+.te-carta .te-prose ol {
+  list-style: decimal;
+}
+
+.te-carta .te-prose blockquote {
+  margin: 0 0 12px;
+  padding-left: 12px;
+  border-left: 3px solid #d0d7de;
+  color: #57606a;
+}
+
+.te-carta .te-prose a {
+  color: #0b63ce;
+  text-decoration: underline;
+}
+
+/* I temi colorano direttamente p e span: sul foglio il testo eredita, e i colori scelti restano inline */
+.te-carta .te-prose :is(p, li, span, strong, em, u, s) {
+  color: inherit;
+}
+
+.te-carta .te-prose p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: #9aa5b1;
+  pointer-events: none;
+}
+
+/* Comuni: anche nel composer della pagina Email */
+
+.te-prose h2 {
+  margin: 18px 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.te-prose h3 {
+  margin: 14px 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.te-prose hr {
+  margin: 16px 0;
+  border: 0;
+  border-top: 1px solid #d0d7de;
+}
+
+.te-prose hr.ProseMirror-selectednode {
+  border-top-color: var(--brand-orange, #E27A2C);
+}
+
+/* I temi forzano i titoli con !important in @layer base: un !important fuori dal layer perderebbe */
+@layer base {
+  .te-carta .te-prose :is(h2, h3) {
+    color: #1f2933 !important;
+  }
+
+  [data-vl-page="email"] .te-prose :is(h2, h3) {
+    color: var(--vl-ink) !important;
+  }
+}

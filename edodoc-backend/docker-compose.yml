@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: edodochq
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      # 5433 sull'host: la 5432 serve a Mobilitas, così i due gestionali convivono in locale
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d edodochq"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: .
+    image: edodoc-hq-backend:local
+    profiles: ["completo"]
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8081
+
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: edodochq
+      DB_USERNAME: admin
+      DB_PASSWORD: admin
+
+      JWT_SECRET: solo-per-docker-locale-non-usare-in-produzione
+      ADMIN_EMAIL: edoardo@edodoc.it
+      ADMIN_PASSWORD: admin
+      APP_INIT_DEMO_ENABLED: "true"
+
+      # --- Optional (Google Workspace, Service Account con domain-wide delegation) ---
+      # GOOGLE_CREDENTIALS_PATH: /app/config/service-account-credentials.json
+    # volumes:
+    #   - ./secrets/service-account-credentials.json:/app/config/service-account-credentials.json:ro
+
+volumes:
+  postgres_data:
