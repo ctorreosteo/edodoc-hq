@@ -8,6 +8,7 @@ import it.edodoc.hq.exception.RisorsaNonTrovataException;
 import it.edodoc.hq.models.Pagamento;
 import it.edodoc.hq.models.Paziente;
 import it.edodoc.hq.models.Percorso;
+import it.edodoc.hq.models.Task;
 import it.edodoc.hq.models.Visita;
 import it.edodoc.hq.repositories.FatturaRepository;
 import it.edodoc.hq.repositories.PagamentoRepository;
@@ -134,7 +135,8 @@ public class PercorsoService {
 
         paziente.setStato(tipo == Percorso.Tipo.MANTENIMENTO ? Paziente.Stato.MANTENIMENTO : Paziente.Stato.ATTIVO);
         if (tipo == Percorso.Tipo.METODO_BUSSOLA) {
-            taskService.creaAutomatico("esami-percorso-" + percorso.getId(), "RICHIESTA_ESAMI", null, null, paziente);
+            taskService.creaAutomatico("esami-percorso-" + percorso.getId(), "PIANI", "Chiedere gli esami del sangue",
+                    Task.Priorita.MEDIA, LocalDate.now().plusDays(1), paziente);
         }
         return sintesi(percorso, List.of());
     }

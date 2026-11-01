@@ -2505,3 +2505,460 @@
     padding-left: 2.1rem;
   }
 }
+
+/* ───────────────────────── Albero di cartelle e liste (come mobilitas-hq) ───────────────────────── */
+
+[data-vl-page="task"] .tk-rail-empty {
+  padding: 0.5rem 0.55rem;
+  color: var(--vl-ink-3);
+  font-size: 0.8rem;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] :is(.tk-rail-label, .tk-rail-empty) {
+  display: none;
+}
+
+
+[data-vl-page="task"] .tk-albero-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+[data-vl-page="task"] .tk-albero-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding-right: 0.2rem;
+}
+
+[data-vl-page="task"] .tk-albero-head .tk-rail-section-title {
+  flex: 1;
+}
+
+[data-vl-page="task"] .tk-albero {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Gruppi annidati: una guida verticale per livello, allineata al chevron della cartella */
+[data-vl-page="task"] .tk-albero .tk-albero {
+  margin: 1px 0 2px 0.95rem;
+  padding-left: 0.3rem;
+  border-left: 1px solid var(--vl-line);
+}
+
+[data-vl-page="task"] .tk-albero-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  min-height: 2.25rem;
+  border-radius: 0.65rem;
+  transition: background 140ms var(--tk-ease), box-shadow 140ms var(--tk-ease), opacity 140ms var(--tk-ease);
+}
+
+[data-vl-page="task"] .tk-albero-row:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="task"] .tk-albero-row[data-active] {
+  background: color-mix(in srgb, var(--tk-c) 13%, transparent);
+}
+
+[data-vl-page="task"] .tk-albero-row[data-active] .tk-albero-item {
+  color: var(--vl-ink);
+  font-weight: 700;
+}
+
+[data-vl-page="task"] .tk-albero-chevron-btn {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-left: 0.15rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] button.tk-albero-chevron-btn:hover:not(:disabled) {
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] button.tk-albero-chevron-btn:disabled {
+  opacity: 0.25;
+}
+
+[data-vl-page="task"] .tk-albero-chevron {
+  width: 0.85rem;
+  height: 0.85rem;
+  transition: transform 160ms var(--tk-ease);
+}
+
+[data-vl-page="task"] .tk-albero-chevron[data-open] {
+  transform: rotate(90deg);
+}
+
+[data-vl-page="task"] .tk-albero-item {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.1rem;
+  padding: 0.2rem 0.4rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--vl-ink-2);
+  font-size: 14px !important;
+  font-weight: 560;
+  text-align: left;
+}
+
+[data-vl-page="task"] .tk-albero-item:focus-visible {
+  outline: 2px solid var(--vl-accent-strong);
+  outline-offset: -2px;
+}
+
+[data-vl-page="task"] .tk-albero-folder {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  color: var(--tk-c);
+}
+
+[data-vl-page="task"] .tk-albero-folder svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+[data-vl-page="task"] .tk-albero-item .tk-lista-icona {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+[data-vl-page="task"] .tk-albero-vis {
+  width: 0.8rem;
+  height: 0.8rem;
+  flex: none;
+  color: var(--vl-ink-3);
+  opacity: 0.75;
+}
+
+/* Azioni (+ e ⋯): sovrapposte a destra solo al passaggio o al focus, così il nome usa tutta la larghezza.
+   Su touch e nello sheet mobile restano sempre visibili, nel flusso. */
+[data-vl-page="task"] .tk-albero-actions {
+  position: absolute;
+  top: 50%;
+  right: 0.15rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding-left: 1.25rem;
+  border-radius: 0 0.65rem 0.65rem 0;
+  background: linear-gradient(90deg, transparent, var(--tk-row-bg, var(--vl-surface)) 1.1rem);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity 120ms var(--tk-ease);
+}
+
+[data-vl-page="task"] .tk-albero-row:hover {
+  --tk-row-bg: color-mix(in srgb, var(--vl-surface) 100%, var(--vl-ink) 0%);
+}
+
+[data-vl-page="task"] .tk-albero-row:hover .tk-albero-actions,
+[data-vl-page="task"] .tk-albero-row:focus-within .tk-albero-actions,
+[data-vl-page="task"] .tk-albero-actions:has([data-state="open"]) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-vl-page="task"] .tk-albero-actions[data-sempre] {
+  position: static;
+  padding-left: 0;
+  background: none;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+@media (hover: none) {
+  [data-vl-page="task"] .tk-albero-actions {
+    position: static;
+    padding-left: 0;
+    background: none;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+[data-vl-page="task"] .tk-albero-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] .tk-albero-btn:hover,
+[data-vl-page="task"] .tk-albero-btn[data-state="open"] {
+  background: color-mix(in srgb, var(--vl-ink) 8%, transparent);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-albero-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl-page="task"] .tk-albero-input {
+  min-width: 0;
+  flex: 1;
+  height: 1.9rem;
+  margin: 0.1rem 0.25rem 0.1rem 0.1rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--vl-accent-strong);
+  border-radius: 0.5rem;
+  background: var(--vl-surface);
+  color: var(--vl-ink);
+  font-size: 14px !important;
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--vl-accent-strong) 18%, transparent);
+}
+
+[data-vl-page="task"] .tk-albero-section {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+[data-vl-page="task"] .tk-albero-section svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Archiviate: in fondo, attenuate */
+[data-vl-page="task"] .tk-albero-archivio {
+  margin-top: 0.5rem;
+}
+
+[data-vl-page="task"] .tk-albero-archivio-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0 0.55rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--vl-ink-3);
+  font-size: 12px !important;
+  font-weight: 650;
+}
+
+[data-vl-page="task"] .tk-albero-archivio-toggle:hover {
+  background: var(--vl-hover);
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="task"] .tk-albero-archivio-toggle > svg:not(.tk-albero-chevron) {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+[data-vl-page="task"] .tk-albero-archivio-toggle em {
+  margin-left: auto;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="task"] .tk-albero--archiviate {
+  margin-top: 0.15rem;
+}
+
+[data-vl-page="task"] .tk-albero-row--archiviata {
+  opacity: 0.72;
+}
+
+[data-vl-page="task"] .tk-albero-row--archiviata:hover {
+  opacity: 1;
+}
+
+[data-vl-page="task"] .tk-albero-row--archiviata .tk-albero-item {
+  cursor: default;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="task"] .tk-albero-ripristina {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--vl-line);
+  border-radius: 999px;
+  background: var(--vl-surface);
+  color: var(--vl-ink-2);
+  font-size: 12px !important;
+  font-weight: 600;
+}
+
+[data-vl-page="task"] .tk-albero-ripristina:hover:not(:disabled) {
+  border-color: var(--vl-accent-strong);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-albero-ripristina svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* Trascinamento */
+[data-vl-page="task"] .tk-albero-row[data-dragging] {
+  opacity: 0.35;
+}
+
+[data-vl-page="task"] .tk-albero-row[data-drop="dentro"] {
+  background: color-mix(in srgb, var(--vl-accent-strong) 14%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--vl-accent-strong);
+}
+
+[data-vl-page="task"] .tk-albero-row[data-drop="prima"] {
+  box-shadow: inset 0 2px 0 var(--vl-accent-strong);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+[data-vl-page="task"] .tk-albero-row[data-drop="dopo"] {
+  box-shadow: inset 0 -2px 0 var(--vl-accent-strong);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+[data-vl-page="task"] .tk-albero-wrap[data-trascinando] .tk-albero-actions {
+  display: none;
+}
+
+[data-vl-page="task"] .tk-albero-radice {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.1rem 0 0.25rem;
+  padding: 0.5rem 0.6rem;
+  border: 1.5px dashed var(--vl-line-strong);
+  border-radius: 0.65rem;
+  color: var(--vl-ink-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[data-vl-page="task"] .tk-albero-radice[data-over] {
+  border-color: var(--vl-accent-strong);
+  background: color-mix(in srgb, var(--vl-accent-strong) 12%, transparent);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="task"] .tk-albero-radice svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.tk-albero-overlay {
+  display: inline-flex;
+  max-width: 15rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem 0.4rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--tk-c, #6366f1) 45%, transparent);
+  border-radius: 0.7rem;
+  background: var(--vl-surface, #fff);
+  color: var(--vl-ink, inherit);
+  font-size: 14px;
+  font-weight: 650;
+  box-shadow: 0 18px 40px -12px rgba(0, 20, 50, 0.45);
+  transform: rotate(-1.5deg);
+  cursor: grabbing;
+}
+
+.tk-albero-overlay span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tk-albero-overlay .tk-albero-folder {
+  display: inline-grid;
+  color: var(--tk-c);
+}
+
+.tk-albero-overlay .tk-albero-folder svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* Menu dell'albero (montati fuori dalla pagina): sfondo pieno, si aprono sopra contenuti fitti */
+.tk-menu-solido[data-slot] {
+  background: var(--mn-bg-solid);
+}
+
+/* Nota sugli accessi nel dialog "Sposta in…" (montato fuori dalla pagina) */
+[data-vl] .tk-albero-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.65rem;
+  background: var(--vl-info-bg, rgba(14, 165, 233, 0.1));
+  color: var(--vl-info-fg, inherit);
+  font-size: 13px;
+}
+
+[data-vl] .tk-albero-nota svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+/* Barra ridotta: solo icone del primo livello */
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-albero-head,
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-albero-section {
+  display: none;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-albero-row {
+  justify-content: center;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] .tk-albero-item {
+  flex: none;
+  justify-content: center;
+  padding: 0.25rem;
+}
+
+[data-vl-page="task"] .tk-rail[data-compatta] :is(.tk-albero-vis, .tk-albero-item .tk-rail-count) {
+  display: none;
+}

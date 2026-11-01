@@ -86,18 +86,25 @@ export type EmettiFattura = {
 
 export type RigaTessera = { fatturaId: number; numero: number; data: string; codiceFiscale: string; importo: number }
 
-export type TipoTask = {
-  id: number; codice: string; etichetta: string; titoloDefault: string; giorniDefault: number; priorita: string; icona: string
+export type TaskCartella = { id: number; nome: string; parentId: number | null; colore: string; ordine: number; archiviata: boolean }
+
+/** codice: solo le liste di sistema, dove scrivono i job; non si archiviano e non si eliminano. */
+export type TaskLista = {
+  id: number; nome: string; cartellaId: number | null; codice: string | null; colore: string; icona: string; ordine: number; archiviata: boolean
 }
 
+export type TaskStruttura = { cartelle: TaskCartella[]; liste: TaskLista[] }
+
+export type TaskTipoStruttura = "LISTA" | "CARTELLA"
+
 export type Task = {
-  id: number; titolo: string; descrizione: string | null; tipo: TipoTask; stato: string; priorita: string
+  id: number; titolo: string; descrizione: string | null; lista: TaskLista; stato: string; priorita: string
   scadenza: string | null; pazienteId: number | null; pazienteNome: string | null; automatico: boolean
   completatoIl: string | null; inRitardo: boolean
 }
 
 export type TaskForm = {
-  tipoCodice: string; titolo?: string | null; descrizione?: string | null; scadenza?: string | null
+  listaId: number; titolo: string; descrizione?: string | null; scadenza?: string | null
   priorita?: string | null; pazienteId?: number | null
 }
 

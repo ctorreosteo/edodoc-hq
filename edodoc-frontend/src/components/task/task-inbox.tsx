@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { MenuTask } from "@/components/menu-contestuali"
 import type { Task } from "@/types"
 import { TaskEmpty } from "./task-empty"
-import { TaskAutomaticoTag, TaskPazienteTag, TaskPrioritaIcon, TaskRigaCheck, TaskRigaPosticipa, TaskScadenzaLabel, TaskTipoDot } from "./task-riga-meta"
+import { TaskAutomaticoTag, TaskPazienteTag, TaskPrioritaIcon, TaskRigaCheck, TaskRigaPosticipa, TaskScadenzaLabel, TaskListaDot } from "./task-riga-meta"
 import { eFatto, GRUPPI_SCADENZA, gruppoScadenza, inFiltroRapido, ordina, tastiRiga, type GruppoScadenza, type TaskFiltroRapido } from "./task-utils"
 
 /** Quanto resta visibile (in uscita) una riga appena completata. */
@@ -127,7 +127,7 @@ function InboxRiga({ task, uscente, onApri, onToggle, onPosticipa }: {
           <span className="tk-riga-main">
             <span className="tk-riga-title"><b>{task.titolo}</b></span>
             <span className="tk-riga-sub">
-              <TaskTipoDot task={task} />
+              <TaskListaDot task={task} />
               <TaskPazienteTag task={task} />
               <TaskAutomaticoTag task={task} />
             </span>

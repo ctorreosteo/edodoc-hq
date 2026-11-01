@@ -6,7 +6,7 @@ import { useMemo, useState, type ReactNode } from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { Task } from "@/types"
 import { TaskPosticipaMenu } from "./task-posticipa"
-import { coloreTipo, eFatto, giorniDa, gruppoScadenza, intervalloCalendario, isoGiorno, type TaskCalendarioModo } from "./task-utils"
+import { eFatto, giorniDa, gruppoScadenza, intervalloCalendario, isoGiorno, type TaskCalendarioModo } from "./task-utils"
 
 const GIORNI = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]
 const MAX_CHIP_MESE = 3
@@ -183,7 +183,7 @@ function GiornoMese({ iso, data, fuoriMese, items, selezionato, onSeleziona, onA
       ) : null}
       {items.length ? (
         <span className="tkb-day-dots" aria-hidden>
-          {items.slice(0, 6).map((r) => <i key={r.id} style={{ ["--tk-c" as string]: coloreTipo(r.tipo) }} />)}
+          {items.slice(0, 6).map((r) => <i key={r.id} style={{ ["--tk-c" as string]: r.lista.colore }} />)}
         </span>
       ) : null}
     </div>
@@ -247,7 +247,7 @@ function Chip({ task, onApri }: { task: Task; onApri: (t: Task) => void }) {
 function ChipBody({ task, onClick, overlay }: { task: Task; onClick?: () => void; overlay?: boolean }) {
   const fatto = eFatto(task)
   return (
-    <button type="button" className="tkb-chip" style={{ ["--tk-c" as string]: coloreTipo(task.tipo) }} data-chiuso={fatto ? "" : undefined}
+    <button type="button" className="tkb-chip" style={{ ["--tk-c" as string]: task.lista.colore }} data-chiuso={fatto ? "" : undefined}
       data-late={!fatto && gruppoScadenza(task) === "ritardo" ? "" : undefined} data-overlay={overlay ? "" : undefined} onClick={onClick} title={task.titolo}>
       <span className="tkb-chip-title">{task.titolo}</span>
     </button>

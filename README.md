@@ -41,7 +41,7 @@ Stack completo in container, backend compreso: `cd edodoc-backend && docker comp
 | Finance | Righe del foglio Cassa calcolate da pagamenti e movimenti. Candidature da chiudere quando il margine del Livello 1 scende sotto il valore di un cliente |
 | Calendario | Il Google Calendar del dottore in diretta, senza copie nel gestionale: viste giorno, settimana, mese, anno ed elenco, eventi ricorrenti, inviti e Meet. Gli eventi delle visite aprono la scheda del paziente; spostarli o cancellarli torna sulla visita al giro successivo del job |
 | Email | Dal menu contestuale: sollecito pagamento, richiesta dati fatturazione, fattura con PDF. Il popup propone il modello di `config` e si può modificare prima dell'invio |
-| Task | Tipi preimpostati in `task_tipi`. I job creano i promemoria di Tessera Sanitaria e scadenze fiscali |
+| Task | Organizzati in cartelle annidate e liste. I job creano i promemoria (rinnovi, esami, Tessera Sanitaria, scadenze fiscali) nelle liste di sistema (`task_liste.codice`), che non si archiviano né si eliminano |
 
 ## Integrazioni
 
@@ -146,6 +146,18 @@ Con `inviaEmail: true` il testo parte anche con Gmail, usando i modelli `EMAIL_F
 I messaggi arrivano sempre dal più vecchio al più recente. Senza parametri `GET .../messaggi` dà gli ultimi 50 (`limite`, massimo 100), `primaDiId` la pagina precedente, `dopoId` solo i nuovi. A chat aperta l'app chiede `dopoId` ogni pochi secondi, a chat chiusa arriva la push. `clientId` è un UUID generato dall'app per ogni messaggio: reinviare lo stesso `clientId` dopo una rete caduta non crea doppioni. Solo testo, massimo 4.000 caratteri.
 
 Le push passano da Apple e Google, quindi non contengono mai nomi o dati sanitari: solo un testo generico e, in `data`, `tipo` (`MESSAGGIO` o `FEEDBACK`) con `checkId` o `pazienteId` per aprire la schermata giusta. Su iOS `data` è una chiave del payload accanto ad `aps`; su Android è il campo `data` di FCM, dove i valori sono sempre stringhe. Il telefono registra il token di APNs o FCM: il backend sceglie il canale da `piattaforma`, e cancella il token quando Apple risponde 410 o Google 404.
+
+## Account per Apple e Google
+
+`prova.dottore@edodoc.it` e `prova.paziente@edodoc.it` servono a chi revisiona le app. Vivono solo su un server demo con database proprio: il dottore vede tutti i pazienti, quindi non devono mai stare accanto a dati reali. Il backend rifiuta di crearli senza `APP_INIT_DEMO_ENABLED=true` e la partita IVA finta dei dati demo.
+
+1. Pubblica una seconda istanza del backend con un database vuoto e `APP_INIT_DEMO_ENABLED=true`. Lascia spente tutte le integrazioni.
+2. Imposta `APP_PROVA_DOTTORE_EMAIL`, `APP_PROVA_DOTTORE_PASSWORD`, `APP_PROVA_PAZIENTE_EMAIL` e `APP_PROVA_PAZIENTE_PASSWORD`.
+3. Compila le app con l'URL di questa istanza: `API_DEMO_URL` su iOS, `-PEDODOC_API_DEMO_URL` su Android. Chi accede con un account di prova finisce qui, tutti gli altri sul server reale.
+
+All'avvio e ogni ora il backend ripristina password, accessi, paziente archiviata, visita futura e corso. Il cambio password di questi account è rifiutato.
+
+In locale gli stessi account esistono con le password `prova-dottore-locale` e `prova-paziente-locale`.
 
 ## Deploy
 

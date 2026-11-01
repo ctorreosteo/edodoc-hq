@@ -3,6 +3,7 @@ package it.edodoc.hq.controllers;
 import it.edodoc.hq.dto.ApiResponseDto;
 import it.edodoc.hq.dto.TaskDto;
 import it.edodoc.hq.services.TaskService;
+import it.edodoc.hq.services.TaskStrutturaService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,19 +22,16 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
+    private final TaskStrutturaService strutturaService;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, TaskStrutturaService strutturaService) {
         this.taskService = taskService;
+        this.strutturaService = strutturaService;
     }
 
     @GetMapping
     public ApiResponseDto<List<TaskDto.Riga>> lista(@RequestParam(defaultValue = "false") boolean completati) {
         return ApiResponseDto.success(taskService.lista(completati));
-    }
-
-    @GetMapping("/tipi")
-    public ApiResponseDto<List<TaskDto.Tipo>> tipi() {
-        return ApiResponseDto.success(taskService.tipi());
     }
 
     @PostMapping
@@ -55,5 +53,57 @@ public class TaskController {
     public ApiResponseDto<Void> elimina(@PathVariable Long id) {
         taskService.elimina(id);
         return ApiResponseDto.success("Task eliminato", null);
+    }
+
+    @GetMapping("/struttura")
+    public ApiResponseDto<TaskDto.Struttura> struttura() {
+        return ApiResponseDto.success(strutturaService.struttura());
+    }
+
+    @PostMapping("/cartelle")
+    public ApiResponseDto<TaskDto.Cartella> creaCartella(@Valid @RequestBody TaskDto.SalvaCartella richiesta) {
+        return ApiResponseDto.success("Cartella creata", strutturaService.creaCartella(richiesta));
+    }
+
+    @PutMapping("/cartelle/{id}")
+    public ApiResponseDto<TaskDto.Cartella> modificaCartella(@PathVariable Long id, @Valid @RequestBody TaskDto.ModificaStruttura richiesta) {
+        return ApiResponseDto.success(strutturaService.modificaCartella(id, richiesta));
+    }
+
+    @PutMapping("/cartelle/{id}/posizione")
+    public ApiResponseDto<TaskDto.Cartella> spostaCartella(@PathVariable Long id, @RequestBody TaskDto.Sposta richiesta) {
+        return ApiResponseDto.success(strutturaService.spostaCartella(id, richiesta));
+    }
+
+    @DeleteMapping("/cartelle/{id}")
+    public ApiResponseDto<Void> eliminaCartella(@PathVariable Long id) {
+        strutturaService.eliminaCartella(id);
+        return ApiResponseDto.success("Cartella eliminata", null);
+    }
+
+    @PostMapping("/liste")
+    public ApiResponseDto<TaskDto.Lista> creaLista(@Valid @RequestBody TaskDto.SalvaLista richiesta) {
+        return ApiResponseDto.success("Lista creata", strutturaService.creaLista(richiesta));
+    }
+
+    @PutMapping("/liste/{id}")
+    public ApiResponseDto<TaskDto.Lista> modificaLista(@PathVariable Long id, @Valid @RequestBody TaskDto.ModificaStruttura richiesta) {
+        return ApiResponseDto.success(strutturaService.modificaLista(id, richiesta));
+    }
+
+    @PutMapping("/liste/{id}/posizione")
+    public ApiResponseDto<TaskDto.Lista> spostaLista(@PathVariable Long id, @RequestBody TaskDto.Sposta richiesta) {
+        return ApiResponseDto.success(strutturaService.spostaLista(id, richiesta));
+    }
+
+    @GetMapping("/liste/{id}/conteggio")
+    public ApiResponseDto<Long> contaTaskLista(@PathVariable Long id) {
+        return ApiResponseDto.success(strutturaService.contaTask(id));
+    }
+
+    @DeleteMapping("/liste/{id}")
+    public ApiResponseDto<Void> eliminaLista(@PathVariable Long id, @RequestParam(required = false) String conferma) {
+        strutturaService.eliminaLista(id, conferma);
+        return ApiResponseDto.success("Lista eliminata", null);
     }
 }

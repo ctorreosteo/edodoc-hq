@@ -5,6 +5,7 @@ import it.edodoc.hq.exception.ConflittoException;
 import it.edodoc.hq.exception.RisorsaNonTrovataException;
 import it.edodoc.hq.models.Paziente;
 import it.edodoc.hq.models.Percorso;
+import it.edodoc.hq.models.Task;
 import it.edodoc.hq.models.Visita;
 import it.edodoc.hq.repositories.PazienteRepository;
 import it.edodoc.hq.repositories.PercorsoRepository;
@@ -180,9 +181,9 @@ public class VisitaService {
         }
         if (percorso.getTipo() != Percorso.Tipo.MANTENIMENTO && valide.size() >= percorso.getVisiteTotali() - 1) {
             Visita penultima = valide.get(percorso.getVisiteTotali() - 2);
-            taskService.creaAutomatico("rinnovo-percorso-" + percorso.getId(), "PROPOSTA_RINNOVO",
+            taskService.creaAutomatico("rinnovo-percorso-" + percorso.getId(), "CONTATTI",
                     "Proporre rinnovo o mantenimento (visita " + (percorso.getVisiteTotali() - 1) + " di " + percorso.getVisiteTotali() + ")",
-                    penultima.getInizio().toLocalDate(), percorso.getPaziente());
+                    Task.Priorita.ALTA, penultima.getInizio().toLocalDate(), percorso.getPaziente());
         }
     }
 

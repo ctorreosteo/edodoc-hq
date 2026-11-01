@@ -77,7 +77,7 @@ class DelegaSenzaChiave extends GoogleCredentials {
         try {
             jwt = asserzione(firmatario, account, scope, Instant.now());
         } catch (ServiceAccountSigner.SigningException e) {
-            throw new DelegaNegataException("IAM non ha firmato l'asserzione: manca il ruolo Service Account Token Creator");
+            throw new DelegaNegataException("IAM non ha firmato l'asserzione: " + e.getCause());
         }
         String corpo = "grant_type=" + URLEncoder.encode(GRANT, StandardCharsets.UTF_8) + "&assertion=" + jwt;
         HttpResponse<String> risposta;

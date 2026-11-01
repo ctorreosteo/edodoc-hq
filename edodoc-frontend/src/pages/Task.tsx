@@ -7,6 +7,7 @@ import { LuxHero } from "@/components/lux"
 import { Caricamento, Errore } from "@/components/stati"
 import { TaskArchivio } from "@/components/task/task-archivio"
 import { TaskBulkBar } from "@/components/task/task-bulk-bar"
+import { TaskCreaStrutturaDialog } from "@/components/task/task-crea-struttura-dialog"
 import { TaskCalendarioView } from "@/components/task/task-calendario-view"
 import { TaskEmpty } from "@/components/task/task-empty"
 import { TaskInbox } from "@/components/task/task-inbox"
@@ -16,15 +17,16 @@ import { TaskNavMobile, TaskRail } from "@/components/task/task-rail"
 import { TaskScorciatoie } from "@/components/task/task-scorciatoie"
 import { TaskFiltriPopover, TaskNuovoButton, TaskNuovoFab, TaskSearch, TaskVistaSwitch } from "@/components/task/task-toolbar"
 import {
-  coloreTipo, corpoTask, eFatto, formatScadenza, gruppoScadenza, spostaFuocoRiga, staScrivendo,
+  corpoTask, eFatto, formatScadenza, gruppoScadenza, spostaFuocoRiga, staScrivendo,
   type TaskCreaRapido, type TaskFiltri, type TaskFiltroRapido, type TaskModifica, type TaskOrdinamento, type TaskVista,
 } from "@/components/task/task-utils"
 import { useAzioni } from "@/contexts/azioni-context"
 import { useDati } from "@/hooks/use-dati"
 import { celebra } from "@/lib/task-festa"
+import { cartellaDaSelezione, listaDaSelezione, listaPredefinita, listeDellaCartella, percorsoCartella } from "@/lib/task-struttura"
 import { toast, toastErrore } from "@/lib/toast"
 import { taskService } from "@/services/gestionale"
-import type { Task as TaskT } from "@/types"
+import type { Task as TaskT, TaskTipoStruttura } from "@/types"
 import "@/style/lux-task.css"
 import "@/style/lux-task-board.css"
 
@@ -51,7 +53,7 @@ const ETICHETTE_FILTRO: Record<Exclude<TaskFiltroRapido, null>, string> = {
 
 export default function Task() {
   const azioni = useAzioni()
-  const { tipiTask } = azioni
+  const { struttura } = azioni
   const { dati, errore, riprova } = useDati(() => taskService.lista(true), [])
   const [righe, setRighe] = useState<TaskT[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
@@ -61,6 +63,7 @@ export default function Task() {
   const [selezionati, setSelezionati] = useState<Set<number>>(new Set())
   const [railCompatta, setRailCompatta] = useState(false)
   const [tastiAperto, setTastiAperto] = useState(false)
+  const [creando, setCreando] = useState<{ tipo: TaskTipoStruttura; parentId: number | null; aperta: boolean }>({ tipo: "LISTA", parentId: null, aperta: false })
   const searchRef = useRef<HTMLInputElement>(null)
 
   // Le modifiche sono ottimistiche: il server riallinea a ogni ricarica
@@ -81,12 +84,17 @@ export default function Task() {
   // ---------- Stato dall'URL (con le preferenze salvate come default) ----------
   const richiesta = searchParams.get("lista") ?? pref.lista
   const fissa = richiesta === "miei" || richiesta === "tutti"
-  const selezione = fissa || !tipiTask.length || tipiTask.some((t) => t.codice === richiesta) ? richiesta : "miei"
-  const tipo = tipiTask.find((t) => t.codice === selezione)
+  const richiestaLista = struttura.liste.find((l) => l.id === listaDaSelezione(richiesta))
+  const richiestaCartella = struttura.cartelle.find((c) => c.id === cartellaDaSelezione(richiesta))
+  // Finché la struttura non arriva la selezione resta com'è; poi quella che non esiste più torna a "miei"
+  const selezione = fissa || !struttura.liste.length || richiestaLista || richiestaCartella ? richiesta : "miei"
+  const lista = selezione === richiesta ? richiestaLista : undefined
+  const cartella = selezione === richiesta ? richiestaCartella : undefined
+  const ambito = lista ?? cartella
   const vistaParam = searchParams.get("vista") as TaskVista | null
   const vista = vistaParam && VISTE.includes(vistaParam) ? vistaParam : pref.vista
   const miei = selezione === "miei"
-  const mostraTipo = selezione === "tutti"
+  const mostraLista = !lista
 
   const setParam = (chiave: string, valore: string) => setSearchParams((prev) => {
     const next = new URLSearchParams(prev)
@@ -111,12 +119,16 @@ export default function Task() {
   const aperti = useMemo(() => righe.filter((t) => !eFatto(t)), [righe])
   const q = ricerca.trim().toLowerCase()
   const { priorita, soloAutomatici } = pref.filtri
+  const listeAmbito = useMemo(() => {
+    if (lista) return new Set([lista.id])
+    return cartella ? new Set(listeDellaCartella(struttura, cartella.id).map((l) => l.id)) : null
+  }, [lista, cartella, struttura])
   const visibili = useMemo(() => righe.filter((t) => {
-    if (selezione !== "miei" && selezione !== "tutti" && tipiTask.length && t.tipo.codice !== selezione) return false
+    if (listeAmbito && !listeAmbito.has(t.lista.id)) return false
     if (priorita && t.priorita !== priorita) return false
     if (soloAutomatici && !t.automatico) return false
-    return !q || [t.titolo, t.descrizione, t.pazienteNome, t.tipo.etichetta].some((v) => v?.toLowerCase().includes(q))
-  }), [righe, selezione, tipiTask.length, priorita, soloAutomatici, q])
+    return !q || [t.titolo, t.descrizione, t.pazienteNome, t.lista.nome].some((v) => v?.toLowerCase().includes(q))
+  }), [righe, listeAmbito, priorita, soloAutomatici, q])
   const visibiliAperti = useMemo(() => visibili.filter((t) => !eFatto(t)), [visibili])
   const visibiliFatti = useMemo(() => visibili.filter(eFatto), [visibili])
   const righeSelezionate = useMemo(() => visibiliAperti.filter((t) => selezionati.has(t.id)), [visibiliAperti, selezionati])
@@ -181,9 +193,14 @@ export default function Task() {
     }
   }
 
+  // Dentro una lista il nuovo task va lì; altrimenti nella prima lista della cartella o in Generale
+  const listaNuovi = lista && !lista.archiviata ? lista : cartella ? listeDellaCartella(struttura, cartella.id)[0] : undefined
+  const listaNuoviId = (listaNuovi ?? listaPredefinita(struttura))?.id
+
   const creaRapido: TaskCreaRapido = async (titolo, extra) => {
+    if (listaNuoviId == null) return false
     try {
-      const creato = await taskService.crea({ tipoCodice: tipo?.codice ?? "ALTRO", titolo, ...extra })
+      const creato = await taskService.crea({ listaId: listaNuoviId, titolo, ...extra })
       setRighe((lista) => [creato, ...lista])
       return true
     } catch (e) {
@@ -193,7 +210,7 @@ export default function Task() {
   }
 
   const { nuovoTask, modificaTask } = azioni
-  const nuovo = useCallback((scadenza?: string) => nuovoTask({ tipoCodice: tipo?.codice, scadenza }), [nuovoTask, tipo?.codice])
+  const nuovo = useCallback((scadenza?: string) => nuovoTask({ listaId: listaNuoviId, scadenza }), [nuovoTask, listaNuoviId])
 
   // ---------- Scorciatoie ----------
   useEffect(() => {
@@ -227,20 +244,26 @@ export default function Task() {
   if (!dati) return <Caricamento />
 
   const cercando = !!q
-  const titolo = tipo ? tipo.etichetta : selezione === "tutti" ? "Tutti i task" : "I miei task"
+  const titolo = ambito ? ambito.nome : selezione === "tutti" ? "Tutti i task" : "I miei task"
   const oggiTesto = format(new Date(), "EEEE d MMMM", { locale: it })
-  const navigazione = { tipi: tipiTask, aperti, selezione, onSeleziona: seleziona }
+  const percorso = lista ? percorsoCartella(struttura, lista.cartellaId).map((c) => c.nome).join(" / ") : ""
+  const occhiello = miei ? `La tua giornata · ${oggiTesto}` : lista ? `${percorso || "Lista"} · ${oggiTesto}`
+    : cartella ? `Cartella · ${oggiTesto}` : `Tutte le liste · ${oggiTesto}`
+  const navigazione = {
+    aperti, selezione,
+    azioni: { onSeleziona: seleziona, onCrea: (tipo: TaskTipoStruttura, parentId: number | null) => setCreando({ tipo, parentId, aperta: true }) },
+  }
 
   return (
     <div data-vl="" data-vl-page="task" className="tk-page" data-rail-compatta={railCompatta ? "" : undefined}
-      style={tipo ? { ["--tk-c" as string]: coloreTipo(tipo) } : undefined}>
+      style={ambito ? { ["--tk-c" as string]: ambito.colore } : undefined}>
       <TaskRail {...navigazione} compatta={railCompatta} onToggleCompatta={() => setRailCompatta((c) => !c)} />
 
       <main className="tk-main">
         <TaskNavMobile {...navigazione} />
 
-        <div className="tk-hero" data-ambito={tipo ? "lista" : selezione}>
-          <LuxHero ariaLabel={titolo} title={titolo} eyebrow={miei ? `La tua giornata · ${oggiTesto}` : tipo ? `Tipo · ${oggiTesto}` : `Tutti i tipi · ${oggiTesto}`}
+        <div className="tk-hero" data-ambito={ambito ? "lista" : selezione}>
+          <LuxHero ariaLabel={titolo} title={titolo} eyebrow={occhiello}
             subtitle={miei ? <FraseRiepilogo aperti={aperti} filtro={filtroRapido} onFiltro={setFiltroRapido} /> : <FraseAmbito aperti={visibiliAperti} />}
             actions={<TaskNuovoButton onClick={() => nuovo()} />} />
         </div>
@@ -269,11 +292,11 @@ export default function Task() {
         ) : !visibili.length && !cercando && vista !== "calendario" ? (
           <TaskEmpty variante="lista" onNuovo={() => nuovo()} />
         ) : vista === "kanban" ? (
-          <TaskKanbanView righe={visibili} mostraTipo={mostraTipo} salva={salva} onToggleCompleta={toggleCompleta} onApri={modificaTask} onCreaRapido={creaRapido} />
+          <TaskKanbanView righe={visibili} mostraLista={mostraLista} salva={salva} onToggleCompleta={toggleCompleta} onApri={modificaTask} onCreaRapido={creaRapido} />
         ) : vista === "calendario" ? (
           <TaskCalendarioView righe={visibili} onApri={modificaTask} onNuovoIl={nuovo} onSposta={(t, s) => void salva(t, { scadenza: s })} />
         ) : (
-          <TaskListaView righe={visibiliAperti} mostraTipo={mostraTipo} ordinamento={pref.ordinamento} onOrdinamento={(o) => aggiornaPref({ ordinamento: o })}
+          <TaskListaView righe={visibiliAperti} mostraLista={mostraLista} ordinamento={pref.ordinamento} onOrdinamento={(o) => aggiornaPref({ ordinamento: o })}
             salva={salva} onToggleCompleta={toggleCompleta} onApri={modificaTask} selezionati={selezionati} onSelezionati={setSelezionati}
             onCreaRapido={creaRapido} cercando={cercando} />
         )}
@@ -286,6 +309,8 @@ export default function Task() {
       <TaskNuovoFab onClick={() => nuovo()} />
       {!miei && vista === "lista" ? <TaskBulkBar righe={righeSelezionate} onClear={() => setSelezionati(new Set())} /> : null}
       <TaskScorciatoie open={tastiAperto} onOpenChange={setTastiAperto} />
+      <TaskCreaStrutturaDialog tipo={creando.tipo} parentId={creando.parentId} open={creando.aperta} onCreata={seleziona}
+        onOpenChange={(aperta) => setCreando((c) => ({ ...c, aperta }))} />
     </div>
   )
 }

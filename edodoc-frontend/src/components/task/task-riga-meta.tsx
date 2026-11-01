@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import type { Task } from "@/types"
 import { TaskCheck } from "./task-check"
 import { TaskPosticipaMenu } from "./task-posticipa"
-import { coloreTipo, eFatto, formatScadenza, gruppoScadenza, parseRapido, PRIORITA_VALORI, type TaskCreaRapido } from "./task-utils"
+import { eFatto, formatScadenza, gruppoScadenza, parseRapido, PRIORITA_VALORI, type TaskCreaRapido } from "./task-utils"
 
 const COLORI_PRIORITA: Record<string, string> = {
   ALTA: "text-rose-600 fill-rose-500 dark:text-rose-400 dark:fill-rose-400",
@@ -72,12 +72,12 @@ export function TaskAutomaticoTag({ task, compatto }: { task: Task; compatto?: b
   )
 }
 
-export function TaskTipoDot({ task }: { task: Task }) {
-  const colore = coloreTipo(task.tipo)
+export function TaskListaDot({ task }: { task: Task }) {
+  const colore = task.lista.colore
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5 text-[13px]">
       <span className="size-2.5 shrink-0 rounded-[4px]" style={{ backgroundColor: colore, boxShadow: `0 0 0 3px color-mix(in srgb, ${colore} 18%, transparent)` }} />
-      <span className="truncate">{task.tipo.etichetta}</span>
+      <span className="truncate">{task.lista.nome}</span>
     </span>
   )
 }

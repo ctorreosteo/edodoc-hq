@@ -1,6 +1,7 @@
 package it.edodoc.hq.jobs;
 
 import it.edodoc.hq.models.ScadenzaFiscale;
+import it.edodoc.hq.models.Task;
 import it.edodoc.hq.repositories.ScadenzaFiscaleRepository;
 import it.edodoc.hq.services.TaskService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,10 +31,10 @@ public class PromemoriaJob {
         LocalDate oggi = LocalDate.now();
         for (ScadenzaFiscale s : scadenzaRepository.findByStatoAndDataScadenzaLessThanEqualOrderByDataScadenza(
                 ScadenzaFiscale.Stato.DA_PAGARE, oggi.plusDays(GIORNI_ANTICIPO_SCADENZE))) {
-            taskService.creaAutomatico("scadenza-" + s.getId(), "SCADENZA_FISCALE", s.getTitolo(), s.getDataScadenza(), null);
+            taskService.creaAutomatico("scadenza-" + s.getId(), "FISCO", s.getTitolo(), Task.Priorita.ALTA, s.getDataScadenza(), null);
         }
         YearMonth meseScorso = YearMonth.from(oggi).minusMonths(1);
-        taskService.creaAutomatico("tessera-" + meseScorso, "TESSERA_SANITARIA",
-                "Inserire nel Sistema TS le fatture di " + meseScorso, oggi.withDayOfMonth(1).plusDays(9), null);
+        taskService.creaAutomatico("tessera-" + meseScorso, "FISCO",
+                "Inserire nel Sistema TS le fatture di " + meseScorso, Task.Priorita.MEDIA, oggi.withDayOfMonth(1).plusDays(9), null);
     }
 }

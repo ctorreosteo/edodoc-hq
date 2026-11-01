@@ -28,8 +28,8 @@ public class Task {
     private String descrizione;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tipo_id")
-    private TaskTipo tipo;
+    @JoinColumn(name = "lista_id")
+    private TaskLista lista;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

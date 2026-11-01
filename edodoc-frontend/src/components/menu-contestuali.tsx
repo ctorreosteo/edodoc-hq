@@ -1,6 +1,6 @@
 import {
-  Banknote, CalendarClock, CalendarPlus, Check, CircleCheck, ClipboardCheck, ClipboardPlus, Copy, ExternalLink, FileText, IdCard, Landmark, Mail,
-  MessageCircle, Pencil, PhoneCall, Plus, Receipt, Repeat, Route, TestTube, Trash2, Undo2, UserPlus, UserRound, Video, X, type LucideIcon,
+  Banknote, CalendarPlus, Check, ClipboardCheck, ClipboardPlus, Copy, ExternalLink, IdCard, Landmark, Mail,
+  MessageCircle, Pencil, Plus, Receipt, Repeat, Route, Trash2, Undo2, UserPlus, UserRound, Video, X, type LucideIcon,
 } from "lucide-react"
 import type { ReactNode } from "react"
 import {
@@ -14,34 +14,9 @@ import { toast, toastErrore } from "@/lib/toast"
 import { fattureService, pagamentiService, pazientiService, percorsiService, taskService, visiteService } from "@/services/gestionale"
 import type { Acquisto, Fattura, Pagamento, Paziente, RigaCheck, Task, Visita } from "@/types"
 
-const ICONE_TASK: Record<string, LucideIcon> = {
-  "phone-call": PhoneCall, "id-card": IdCard, "test-tube": TestTube, "file-text": FileText, pencil: Pencil,
-  "message-circle": MessageCircle, repeat: Repeat, "calendar-plus": CalendarPlus, banknote: Banknote,
-  receipt: Receipt, landmark: Landmark, "calendar-clock": CalendarClock, "circle-check": CircleCheck,
-}
-
-export const iconaTask = (nome: string): LucideIcon => ICONE_TASK[nome] ?? CircleCheck
-
-/** I task base: un clic e il preset è creato, titolo e scadenza compresi. */
-function SottomenuTask({ pazienteId }: { pazienteId?: number | null }) {
-  const { tipiTask, taskRapido, nuovoTask } = useAzioni()
-  return (
-    <ContextMenuSub>
-      <ContextMenuSubTrigger><Plus aria-hidden />Nuovo task</ContextMenuSubTrigger>
-      <ContextMenuSubContent>
-        {tipiTask.filter((t) => t.codice !== "ALTRO").map((tipo) => {
-          const Icona = iconaTask(tipo.icona)
-          return (
-            <ContextMenuItem key={tipo.codice} onSelect={() => void taskRapido(tipo, pazienteId)}>
-              <Icona aria-hidden />{tipo.etichetta}
-            </ContextMenuItem>
-          )
-        })}
-        <ContextMenuSeparator />
-        <ContextMenuItem onSelect={() => nuovoTask({ pazienteId })}><Pencil aria-hidden />Personalizzato…</ContextMenuItem>
-      </ContextMenuSubContent>
-    </ContextMenuSub>
-  )
+function VoceNuovoTask({ pazienteId }: { pazienteId?: number | null }) {
+  const { nuovoTask } = useAzioni()
+  return <ContextMenuItem onSelect={() => nuovoTask({ pazienteId })}><Plus aria-hidden />Nuovo task</ContextMenuItem>
 }
 
 /** Le tre email al paziente. Il popup parte dal riferimento più preciso che il menu conosce. */
@@ -121,7 +96,7 @@ export function MenuPaziente({ paziente, children }: { paziente: Paziente; child
         <ContextMenuItem onSelect={() => a.nuovoPagamento(paziente.id)}><Banknote aria-hidden />Nuovo pagamento</ContextMenuItem>
         <ContextMenuItem onSelect={() => a.nuovaFattura({ pazienteId: paziente.id })}><Receipt aria-hidden />Nuova fattura</ContextMenuItem>
         <ContextMenuItem onSelect={() => a.inserisciCheck(paziente.id)}><ClipboardPlus aria-hidden />Inserisci check</ContextMenuItem>
-        <SottomenuTask pazienteId={paziente.id} />
+        <VoceNuovoTask pazienteId={paziente.id} />
         <ContextMenuSeparator />
         <SottomenuEmail riferimento={{ pazienteId: paziente.id }} disabilitate={{ SOLLECITO_PAGAMENTO: paziente.residuo <= 0 }} />
         <VociContatto cellulare={paziente.cellulare} email={paziente.email} />
@@ -159,7 +134,7 @@ export function MenuVisita({ visita, children }: { visita: Visita; children: Rea
           <ContextMenuItem onSelect={() => void stato("PROGRAMMATA", "Visita riaperta")}><Undo2 aria-hidden />Riporta a programmata</ContextMenuItem>
         ) : null}
         <ContextMenuItem onSelect={() => a.nuovaVisita({ pazienteId: visita.pazienteId })}><CalendarPlus aria-hidden />Fissa la successiva</ContextMenuItem>
-        <SottomenuTask pazienteId={visita.pazienteId} />
+        <VoceNuovoTask pazienteId={visita.pazienteId} />
         <ContextMenuSeparator />
         <SottomenuEmail riferimento={{ pazienteId: visita.pazienteId }} />
         <VociContatto cellulare={visita.pazienteCellulare} email={visita.pazienteEmail} />
@@ -187,7 +162,7 @@ export function MenuAcquisto({ acquisto, children }: { acquisto: Acquisto; child
         <ContextMenuItem onSelect={() => a.nuovoPercorso(percorso.pazienteId)}><Repeat aria-hidden />Rinnovo o mantenimento</ContextMenuItem>
         <ContextMenuItem onSelect={() => a.nuovoPagamento(percorso.pazienteId)}><Banknote aria-hidden />Nuovo pagamento</ContextMenuItem>
         <SottomenuEmail riferimento={{ pazienteId: percorso.pazienteId }} disabilitate={{ SOLLECITO_PAGAMENTO: acquisto.daPagare + acquisto.scaduto <= 0 }} />
-        <SottomenuTask pazienteId={percorso.pazienteId} />
+        <VoceNuovoTask pazienteId={percorso.pazienteId} />
         <ContextMenuSeparator />
         <ContextMenuItem variant="destructive" disabled={percorso.stato !== "ATTIVO"} onSelect={() => a.conferma({
           titolo: "Annullare l'acquisto?",
@@ -232,7 +207,7 @@ export function MenuPagamento({ pagamento, children }: { pagamento: Pagamento; c
           riferimento={{ pazienteId: pagamento.pazienteId, pagamentoId: pagamento.id }}
           disabilitate={{ SOLLECITO_PAGAMENTO: pagamento.stato !== "DA_PAGARE", FATTURA: !pagamento.fatturato }}
         />
-        <SottomenuTask pazienteId={pagamento.pazienteId} />
+        <VoceNuovoTask pazienteId={pagamento.pazienteId} />
         <ContextMenuSeparator />
         <ContextMenuItem variant="destructive" disabled={pagamento.fatturato} onSelect={() => a.conferma({
           titolo: "Annullare il pagamento?",
@@ -273,7 +248,7 @@ export function MenuFattura({ fattura, children }: { fattura: Fattura; children:
         ) : (
           <ContextMenuItem disabled={annullata || fattura.tsOpposizione} onSelect={() => void tessera(true)}><Landmark aria-hidden />Segna inserita in Tessera Sanitaria</ContextMenuItem>
         )}
-        <SottomenuTask pazienteId={fattura.pazienteId} />
+        <VoceNuovoTask pazienteId={fattura.pazienteId} />
         <ContextMenuSeparator />
         <ContextMenuItem variant="destructive" disabled={annullata} onSelect={() => a.conferma({
           titolo: `Annullare la fattura n. ${fattura.numero}?`,
@@ -334,7 +309,7 @@ export function MenuRigaCheck({ riga, children }: { riga: RigaCheck; children: R
         <ContextMenuLabel>{riga.pazienteNome}</ContextMenuLabel>
         <ContextMenuItem onSelect={() => a.apriPaziente(riga.pazienteId)}><UserRound aria-hidden />Apri il paziente</ContextMenuItem>
         <ContextMenuItem onSelect={() => a.inserisciCheck(riga.pazienteId)}><ClipboardPlus aria-hidden />Inserisci check</ContextMenuItem>
-        <SottomenuTask pazienteId={riga.pazienteId} />
+        <VoceNuovoTask pazienteId={riga.pazienteId} />
         <ContextMenuSeparator />
         <SottomenuEmail riferimento={{ pazienteId: riga.pazienteId }} />
         <ContextMenuItem disabled={!riga.cellulare} onSelect={() => apriWhatsapp(riga.cellulare)}><MessageCircle aria-hidden />Scrivi su WhatsApp</ContextMenuItem>
@@ -358,7 +333,7 @@ export function MenuGenerale({ children }: { children: ReactNode }) {
         <ContextMenuItem onSelect={() => a.inserisciCheck()}><ClipboardCheck aria-hidden />Inserisci check</ContextMenuItem>
         <ContextMenuSeparator />
         <SottomenuEmail riferimento={{}} />
-        <SottomenuTask />
+        <VoceNuovoTask />
       </>
     }>{children}</Guscio>
   )

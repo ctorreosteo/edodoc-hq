@@ -1,6 +1,8 @@
-import { CalendarDays, Check, Flag, Loader2, Trash2, X } from "lucide-react"
+import { CalendarDays, Check, Flag, FolderInput, Loader2, Trash2, X } from "lucide-react"
 import { useState } from "react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAzioni } from "@/contexts/azioni-context"
+import { listaDaSelezione, opzioniListe } from "@/lib/task-struttura"
 import { toast, toastErrore } from "@/lib/toast"
 import { taskService } from "@/services/gestionale"
 import type { Task } from "@/types"
@@ -48,6 +50,20 @@ export function TaskBulkBar({ righe, onClear }: { righe: Task[]; onClear: () => 
 
       <TaskPosticipaMenu titolo="Scadenza" align="center" scadenza={null} onPosticipa={(s) => modifica({ scadenza: s })}
         trigger={<button type="button" className="tk-bulk-btn" disabled={lavoro}><CalendarDays aria-hidden /><span>Scadenza</span></button>} />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button type="button" className="tk-bulk-btn" disabled={lavoro}><FolderInput aria-hidden /><span>Sposta</span></button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="center" className="max-h-72 overflow-y-auto">
+          {Object.entries(opzioniListe(azioni.struttura)).map(([chiave, nome]) => (
+            <DropdownMenuItem key={chiave} onSelect={() => {
+              const lista = azioni.struttura.liste.find((l) => l.id === listaDaSelezione(chiave))
+              if (lista) modifica({ lista })
+            }}>{nome}</DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <button type="button" className="tk-bulk-btn tk-bulk-btn--danger" disabled={lavoro}
         onClick={() => azioni.conferma({

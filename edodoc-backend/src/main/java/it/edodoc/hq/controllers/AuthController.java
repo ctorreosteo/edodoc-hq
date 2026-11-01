@@ -3,6 +3,7 @@ package it.edodoc.hq.controllers;
 import it.edodoc.hq.dto.ApiResponseDto;
 import it.edodoc.hq.dto.AuthDto;
 import it.edodoc.hq.security.UtenteDetails;
+import it.edodoc.hq.services.AccountProvaService;
 import it.edodoc.hq.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final AccountProvaService accountProva;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, AccountProvaService accountProva) {
         this.authService = authService;
+        this.accountProva = accountProva;
     }
 
     @PostMapping("/login")
@@ -53,6 +56,9 @@ public class AuthController {
     @PostMapping("/cambia-password")
     public ApiResponseDto<Void> cambiaPassword(@AuthenticationPrincipal UtenteDetails utente,
                                                @Valid @RequestBody AuthDto.CambiaPassword richiesta) {
+        if (accountProva.isAccountProva(utente.getUsername())) {
+            throw new IllegalArgumentException("La password dell'account di prova non si può cambiare");
+        }
         authService.cambiaPassword(utente.getId(), richiesta);
         return ApiResponseDto.success("Password aggiornata", null);
     }

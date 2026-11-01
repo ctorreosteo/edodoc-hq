@@ -1,9 +1,9 @@
 import type React from "react"
 import { addDays, differenceInCalendarDays, endOfMonth, endOfWeek, format, isSameDay, parseISO, startOfMonth, startOfWeek } from "date-fns"
 import { it } from "date-fns/locale"
-import type { Task, TaskForm, TipoTask } from "@/types"
+import type { Task, TaskForm } from "@/types"
 
-/** Cosa mostra la pagina: la giornata ("miei"), tutti i task o un tipo (il suo codice). */
+/** Cosa mostra la pagina: "miei", "tutti", "lista:ID" o "cartella:ID". */
 export type TaskSelezione = string
 export type TaskVista = "lista" | "kanban" | "calendario"
 /** Filtro scelto dalla frase riepilogo dell'intestazione. */
@@ -12,7 +12,7 @@ export type TaskOrdinamentoCampo = "scadenza" | "priorita" | "titolo"
 export type TaskOrdinamento = { campo: TaskOrdinamentoCampo; dir: "asc" | "desc" }
 export type TaskCalendarioModo = "mese" | "settimana"
 export type TaskFiltri = { priorita: string | null; soloAutomatici: boolean }
-export type TaskModifica = Partial<Pick<Task, "scadenza" | "priorita">>
+export type TaskModifica = Partial<Pick<Task, "scadenza" | "priorita" | "lista">>
 export type TaskCreaRapido = (titolo: string, extra?: { scadenza?: string; priorita?: string }) => Promise<boolean>
 
 export const PRIORITA_VALORI = ["ALTA", "MEDIA", "BASSA"]
@@ -22,14 +22,9 @@ export const eFatto = (t: Task) => t.stato === "FATTO"
 export const isoGiorno = (d: Date) => format(d, "yyyy-MM-dd")
 export const giorniDa = (inizio: Date, n: number) => Array.from({ length: n }, (_, i) => addDays(inizio, i))
 
-const COLORI_TIPO = ["#6366f1", "#0ea5e9", "#14b8a6", "#22c55e", "#f59e0b", "#f97316", "#ef4444", "#ec4899", "#a855f7", "#64748b"]
-
-/** Colore stabile del tipo: fa da "colore della lista" in barra laterale e calendario. */
-export const coloreTipo = (tipo: Pick<TipoTask, "id">) => COLORI_TIPO[tipo.id % COLORI_TIPO.length]
-
 /** Il task come lo vuole il PUT: il backend riceve sempre tutti i campi. */
 export const corpoTask = (t: Task): TaskForm => ({
-  tipoCodice: t.tipo.codice, titolo: t.titolo, descrizione: t.descrizione, scadenza: t.scadenza, priorita: t.priorita, pazienteId: t.pazienteId,
+  listaId: t.lista.id, titolo: t.titolo, descrizione: t.descrizione, scadenza: t.scadenza, priorita: t.priorita, pazienteId: t.pazienteId,
 })
 
 export function ordina(righe: Task[], o: TaskOrdinamento): Task[] {

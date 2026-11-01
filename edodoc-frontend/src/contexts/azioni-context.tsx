@@ -11,15 +11,16 @@ import { TaskDialog } from "@/components/forms/task-dialog"
 import { VisitaDialog } from "@/components/forms/visita-dialog"
 import { PazienteSheet } from "@/components/paziente-sheet"
 import type { RichiestaEmail } from "@/lib/email"
-import { toast, toastErrore } from "@/lib/toast"
+import { toastErrore } from "@/lib/toast"
 import { taskService } from "@/services/gestionale"
-import type { Pagamento, Paziente, Task, TaskForm, TipoTask, Visita } from "@/types"
+import type { Pagamento, Paziente, Task, TaskForm, TaskStruttura, Visita } from "@/types"
 
 type Azioni = {
   /** Cresce a ogni salvataggio: le pagine la usano per ricaricare. */
   versione: number
   aggiorna: () => void
-  tipiTask: TipoTask[]
+  /** Cartelle e liste dei task: si ricaricano insieme a tutto il resto con aggiorna() */
+  struttura: TaskStruttura
   apriPaziente: (id: number) => void
   nuovoPaziente: (stato?: string) => void
   modificaPaziente: (paziente: Paziente) => void
@@ -33,7 +34,6 @@ type Azioni = {
   nuovoTask: (dati?: Partial<TaskForm>) => void
   modificaTask: (task: Task) => void
   /** Task del preset senza passare dal form: è l'azione rapida del menu contestuale. */
-  taskRapido: (tipo: TipoTask, pazienteId?: number | null) => Promise<void>
   inserisciCheck: (pazienteId?: number) => void
   conferma: (dati: Conferma) => void
   inviaEmail: (richiesta: RichiestaEmail) => void
@@ -61,7 +61,7 @@ function useFinestra<T>(iniziale: T) {
 
 export function AzioniProvider({ children }: { children: ReactNode }) {
   const [versione, setVersione] = useState(0)
-  const [tipiTask, setTipiTask] = useState<TipoTask[]>([])
+  const [struttura, setStruttura] = useState<TaskStruttura>({ cartelle: [], liste: [] })
   const [pazienteAperto, setPazienteAperto] = useState<number | null>(null)
   const aggiorna = useCallback(() => setVersione((v) => v + 1), [])
   const chiudiPaziente = useCallback(() => setPazienteAperto(null), [])
@@ -78,18 +78,8 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
   const email = useFinestra<RichiestaEmail | null>(null)
 
   useEffect(() => {
-    taskService.tipi().then(setTipiTask).catch(toastErrore)
-  }, [])
-
-  const taskRapido = useCallback(async (tipo: TipoTask, pazienteId?: number | null) => {
-    try {
-      await taskService.crea({ tipoCodice: tipo.codice, pazienteId })
-      toast.success(`Task creato: ${tipo.etichetta}`)
-      aggiorna()
-    } catch (e) {
-      toastErrore(e)
-    }
-  }, [aggiorna])
+    taskService.struttura().then(setStruttura).catch(toastErrore)
+  }, [versione])
 
   const { apri: apriPazienteForm } = paziente
   const { apri: apriPercorso } = percorso
@@ -103,7 +93,7 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
   const { apri: apriEmail } = email
 
   const valore = useMemo<Azioni>(() => ({
-    versione, aggiorna, tipiTask, taskRapido,
+    versione, aggiorna, struttura,
     apriPaziente: setPazienteAperto,
     nuovoPaziente: (stato) => apriPazienteForm({ stato }),
     modificaPaziente: (p) => apriPazienteForm({ paziente: p }),
@@ -119,7 +109,7 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
     inserisciCheck: (pazienteId) => apriCheck({ pazienteId }),
     conferma: apriConferma,
     inviaEmail: apriEmail,
-  }), [versione, aggiorna, tipiTask, taskRapido, apriPazienteForm, apriPercorso, apriVisita, apriPagamento, apriRegistra, apriFattura, apriTask, apriCheck, apriConferma, apriEmail])
+  }), [versione, aggiorna, struttura, apriPazienteForm, apriPercorso, apriVisita, apriPagamento, apriRegistra, apriFattura, apriTask, apriCheck, apriConferma, apriEmail])
 
   return (
     <AzioniContext.Provider value={valore}>

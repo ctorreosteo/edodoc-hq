@@ -22,7 +22,7 @@ public class AvvioService {
     ApplicationRunner creaUtenteDottore(UtenteRepository utenteRepository, PasswordEncoder passwordEncoder,
                                         @Value("${app.admin.email:}") String email,
                                         @Value("${app.admin.password:}") String password,
-                                        DemoDataService demo,
+                                        DemoDataService demo, AccountProvaService accountProva,
                                         @Value("${app.init.demo-enabled:false}") boolean demoAttivo) {
         return args -> {
             if (utenteRepository.count() == 0) {
@@ -42,6 +42,7 @@ public class AvvioService {
             if (demoAttivo) {
                 demo.caricaSeVuoto();
             }
+            accountProva.allinea();
         };
     }
 }

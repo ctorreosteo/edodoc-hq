@@ -3,7 +3,7 @@ import type { RichiestaEmail } from "@/lib/email"
 import type {
   Acquisti, AnteprimaFattura, BozzaEmail, CheckDettaglio, Dashboard, EmettiFattura, Fattura, Impostazioni, ListaPagamenti, Listino,
   LezioneForm, Movimento, Pagamento, Paziente, PazienteForm, Percorso, RigaTessera, RiepilogoFinance, RisposteCheck,
-  RigaCorso, RigaLezione, RigaModulo, Riproduzione, ScadenzaFiscale, SettimanaCheck, StatoVideo, StrutturaCorso, Task, TaskForm, TipoTask, Utente, Visita, VisitaForm,
+  RigaCorso, RigaLezione, RigaModulo, Riproduzione, ScadenzaFiscale, SettimanaCheck, StatoVideo, StrutturaCorso, Task, TaskCartella, TaskForm, TaskLista, TaskStruttura, Utente, Visita, VisitaForm,
 } from "@/types"
 
 export const authService = {
@@ -87,13 +87,25 @@ export const emailService = {
 }
 
 export const taskService = {
-  tipi: () => api.get<TipoTask[]>("/task/tipi"),
+  struttura: () => api.get<TaskStruttura>("/task/struttura"),
   lista: (completati: boolean) => api.get<Task[]>("/task", { completati }),
   crea: (corpo: TaskForm) => api.post<Task>("/task", corpo),
   aggiorna: (id: number, corpo: TaskForm) => api.put<Task>(`/task/${id}`, corpo),
   cambiaStato: (id: number, fatto: boolean) => api.post<Task>(`/task/${id}/stato?fatto=${fatto}`),
   elimina: (id: number) => api.delete<void>(`/task/${id}`),
+  creaCartella: (corpo: { nome: string; parentId: number | null; colore: string }) => api.post<TaskCartella>("/task/cartelle", corpo),
+  modificaCartella: (id: number, corpo: ModificaStruttura) => api.put<TaskCartella>(`/task/cartelle/${id}`, corpo),
+  spostaCartella: (id: number, corpo: SpostaStruttura) => api.put<TaskCartella>(`/task/cartelle/${id}/posizione`, corpo),
+  eliminaCartella: (id: number) => api.delete<void>(`/task/cartelle/${id}`),
+  creaLista: (corpo: { nome: string; cartellaId: number | null; colore: string; icona: string }) => api.post<TaskLista>("/task/liste", corpo),
+  modificaLista: (id: number, corpo: ModificaStruttura) => api.put<TaskLista>(`/task/liste/${id}`, corpo),
+  spostaLista: (id: number, corpo: SpostaStruttura) => api.put<TaskLista>(`/task/liste/${id}/posizione`, corpo),
+  contaTaskLista: (id: number) => api.get<number>(`/task/liste/${id}/conteggio`),
+  eliminaLista: (id: number, conferma: string) => api.delete<void>(`/task/liste/${id}?conferma=${encodeURIComponent(conferma)}`),
 }
+
+type ModificaStruttura = { nome?: string; colore?: string; icona?: string; archiviata?: boolean }
+type SpostaStruttura = { contenitoreId: number | null; ordine?: number }
 
 type TestiForm = { titolo: string; descrizione: string | null }
 

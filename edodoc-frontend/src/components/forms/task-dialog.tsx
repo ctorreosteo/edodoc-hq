@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useAzioni } from "@/contexts/azioni-context"
 import { Campo, Griglia, Scelta } from "@/components/forms/campo"
 import { Finestra } from "@/components/forms/finestra"
 import { PazienteCombobox } from "@/components/forms/paziente-combobox"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { listaDaSelezione, listaPredefinita, opzioniListe } from "@/lib/task-struttura"
 import { toast, toastErrore } from "@/lib/toast"
-import { formatDateOnlyLocal } from "@/lib/utils"
 import { taskService } from "@/services/gestionale"
 import type { Task, TaskForm } from "@/types"
 
@@ -18,8 +18,8 @@ export function TaskDialog({ open, onOpenChange, task, iniziali }: {
   task?: Task
   iniziali?: Partial<TaskForm>
 }) {
-  const { aggiorna, tipiTask } = useAzioni()
-  const [tipo, setTipo] = useState("ALTRO")
+  const { aggiorna, struttura } = useAzioni()
+  const [lista, setLista] = useState<number | null>(null)
   const [titolo, setTitolo] = useState("")
   const [descrizione, setDescrizione] = useState("")
   const [scadenza, setScadenza] = useState("")
@@ -27,29 +27,20 @@ export function TaskDialog({ open, onOpenChange, task, iniziali }: {
   const [paziente, setPaziente] = useState<number | null>(null)
   const [inCorso, setInCorso] = useState(false)
 
-  const applicaPreset = (codice: string) => {
-    setTipo(codice)
-    const preset = tipiTask.find((t) => t.codice === codice)
-    if (!preset) return
-    setTitolo(preset.titoloDefault)
-    setPriorita(preset.priorita)
-    const giorno = new Date()
-    giorno.setDate(giorno.getDate() + preset.giorniDefault)
-    setScadenza(formatDateOnlyLocal(giorno))
-  }
-
   useEffect(() => {
     if (!open) return
     if (task) {
-      setTipo(task.tipo.codice)
+      setLista(task.lista.id)
       setTitolo(task.titolo)
       setDescrizione(task.descrizione ?? "")
       setScadenza(task.scadenza ?? "")
       setPriorita(task.priorita)
       setPaziente(task.pazienteId)
     } else {
-      applicaPreset(iniziali?.tipoCodice ?? "ALTRO")
-      if (iniziali?.scadenza) setScadenza(iniziali.scadenza)
+      setLista(iniziali?.listaId ?? listaPredefinita(struttura)?.id ?? null)
+      setTitolo("")
+      setScadenza(iniziali?.scadenza ?? "")
+      setPriorita("MEDIA")
       setDescrizione("")
       setPaziente(iniziali?.pazienteId ?? null)
     }
@@ -57,9 +48,10 @@ export function TaskDialog({ open, onOpenChange, task, iniziali }: {
   }, [open, task, iniziali])
 
   const salva = async () => {
+    if (lista == null) return
     setInCorso(true)
     try {
-      const corpo = { tipoCodice: tipo, titolo, descrizione: descrizione || null, scadenza: scadenza || null, priorita, pazienteId: paziente }
+      const corpo = { listaId: lista, titolo, descrizione: descrizione || null, scadenza: scadenza || null, priorita, pazienteId: paziente }
       if (task) await taskService.aggiorna(task.id, corpo)
       else await taskService.crea(corpo)
       toast.success(task ? "Task aggiornato" : "Task creato")
@@ -72,12 +64,18 @@ export function TaskDialog({ open, onOpenChange, task, iniziali }: {
     }
   }
 
-  const tipi = Object.fromEntries(tipiTask.map((t) => [t.codice, t.etichetta]))
+  // Un task già in una lista archiviata deve poter restare dov'è
+  const liste = useMemo(() => ({
+    ...opzioniListe(struttura),
+    ...(task?.lista.archiviata ? { [`lista:${task.lista.id}`]: `${task.lista.nome} (archiviata)` } : {}),
+  }), [struttura, task])
 
   return (
     <Finestra open={open} onOpenChange={onOpenChange} titolo={task ? "Modifica task" : "Nuovo task"} salva={salva} inCorso={inCorso}>
-      <Campo etichetta="Tipo" id="task-tipo"><Scelta id="task-tipo" valore={tipo} onChange={task ? setTipo : applicaPreset} opzioni={tipi} /></Campo>
       <Campo etichetta="Titolo" id="task-titolo"><Input id="task-titolo" value={titolo} onChange={(e) => setTitolo(e.target.value)} required /></Campo>
+      <Campo etichetta="Lista" id="task-lista">
+        <Scelta id="task-lista" valore={lista != null ? `lista:${lista}` : null} onChange={(s) => setLista(listaDaSelezione(s))} opzioni={liste} />
+      </Campo>
       <Campo etichetta="Paziente (facoltativo)" id="task-paziente"><PazienteCombobox id="task-paziente" valore={paziente} onChange={setPaziente} /></Campo>
       <Griglia>
         <Campo etichetta="Scadenza" id="task-scadenza"><Input id="task-scadenza" type="date" value={scadenza} onChange={(e) => setScadenza(e.target.value)} /></Campo>

@@ -7,7 +7,7 @@ import type { Task } from "@/types"
 import { TaskCheck } from "./task-check"
 import { TaskPosticipaMenu } from "./task-posticipa"
 import { TaskAggiuntaRapida } from "./task-riga-meta"
-import { coloreTipo, eFatto, formatScadenza, gruppoScadenza, ordina, PRIORITA_VALORI, type TaskCreaRapido, type TaskModifica } from "./task-utils"
+import { eFatto, formatScadenza, gruppoScadenza, ordina, PRIORITA_VALORI, type TaskCreaRapido, type TaskModifica } from "./task-utils"
 
 /** Quanti completati mostrare prima di "Mostra tutti". */
 const MAX_COMPLETATI = 30
@@ -18,7 +18,7 @@ const COLONNE = [...PRIORITA_VALORI, FATTI]
 
 type Props = {
   righe: Task[]
-  mostraTipo: boolean
+  mostraLista: boolean
   salva: (t: Task, modifica: TaskModifica) => Promise<Task | null>
   onToggleCompleta: (t: Task, el: HTMLElement | null) => Promise<Task | null>
   onApri: (t: Task) => void
@@ -27,7 +27,7 @@ type Props = {
 
 const colonnaDi = (t: Task) => (eFatto(t) ? FATTI : t.priorita)
 
-export function TaskKanbanView({ righe, mostraTipo, salva, onToggleCompleta, onApri, onCreaRapido }: Props) {
+export function TaskKanbanView({ righe, mostraLista, salva, onToggleCompleta, onApri, onCreaRapido }: Props) {
   const [tuttiCompletati, setTuttiCompletati] = useState(false)
   const [attivoId, setAttivoId] = useState<number | null>(null)
   const perId = useMemo(() => new Map(righe.map((r) => [r.id, r])), [righe])
@@ -69,7 +69,7 @@ export function TaskKanbanView({ righe, mostraTipo, salva, onToggleCompleta, onA
             <Colonna key={c} codice={c} label={fatti ? "Completati" : PRIORITA[c].testo} totale={tutte.length}
               aggiunta={fatti ? null : <div className="tkb-quick"><TaskAggiuntaRapida priorita={c} onCrea={onCreaRapido} /></div>}>
               {visibili.map((r) => (
-                <Card key={r.id} task={r} mostraTipo={mostraTipo} onApri={onApri} onCompleta={(el) => void onToggleCompleta(r, el)}
+                <Card key={r.id} task={r} mostraLista={mostraLista} onApri={onApri} onCompleta={(el) => void onToggleCompleta(r, el)}
                   onPosticipa={(s) => void salva(r, { scadenza: s })} />
               ))}
               {!visibili.length ? <div className="tkb-col-empty">{fatti ? "Trascina qui per chiudere" : "Nessun task"}</div> : null}
@@ -81,7 +81,7 @@ export function TaskKanbanView({ righe, mostraTipo, salva, onToggleCompleta, onA
         })}
       </div>
       <DragOverlay dropAnimation={{ duration: 220, easing: "cubic-bezier(0.2, 0.9, 0.3, 1.2)" }}>
-        {attivo ? <CardBody task={attivo} mostraTipo={mostraTipo} overlay /> : null}
+        {attivo ? <CardBody task={attivo} mostraLista={mostraLista} overlay /> : null}
       </DragOverlay>
     </DndContext>
   )
@@ -102,9 +102,9 @@ function Colonna({ codice, label, totale, aggiunta, children }: { codice: string
   )
 }
 
-function Card({ task, mostraTipo, onApri, onCompleta, onPosticipa }: {
+function Card({ task, mostraLista, onApri, onCompleta, onPosticipa }: {
   task: Task
-  mostraTipo: boolean
+  mostraLista: boolean
   onApri: (t: Task) => void
   onCompleta: (el: HTMLElement) => void
   onPosticipa: (scadenza: string | null) => void
@@ -118,15 +118,15 @@ function Card({ task, mostraTipo, onApri, onCompleta, onPosticipa }: {
           listeners?.onKeyDown?.(e)
           if (e.key === "Enter" && !e.defaultPrevented) onApri(task)
         }}>
-        <CardBody task={task} mostraTipo={mostraTipo} onCompleta={onCompleta} onPosticipa={onPosticipa} />
+        <CardBody task={task} mostraLista={mostraLista} onCompleta={onCompleta} onPosticipa={onPosticipa} />
       </div>
     </MenuTask>
   )
 }
 
-function CardBody({ task, mostraTipo, overlay, onCompleta, onPosticipa }: {
+function CardBody({ task, mostraLista, overlay, onCompleta, onPosticipa }: {
   task: Task
-  mostraTipo: boolean
+  mostraLista: boolean
   overlay?: boolean
   onCompleta?: (el: HTMLElement) => void
   onPosticipa?: (scadenza: string | null) => void
@@ -149,9 +149,9 @@ function CardBody({ task, mostraTipo, overlay, onCompleta, onPosticipa }: {
         <span className="tkb-card-meta-info">
           {task.scadenza ? <span className="tkb-scad" data-tono={tono}>{formatScadenza(task.scadenza)}</span> : null}
           {task.pazienteNome ? <span className="tkb-paz" title={task.pazienteNome}><User aria-hidden />{task.pazienteNome}</span> : null}
-          {mostraTipo ? (
-            <span className="tkb-lista" style={{ ["--tk-c" as string]: coloreTipo(task.tipo) }} title={task.tipo.etichetta}>
-              <i aria-hidden />{task.tipo.etichetta}
+          {mostraLista ? (
+            <span className="tkb-lista" style={{ ["--tk-c" as string]: task.lista.colore }} title={task.lista.nome}>
+              <i aria-hidden />{task.lista.nome}
             </span>
           ) : null}
         </span>

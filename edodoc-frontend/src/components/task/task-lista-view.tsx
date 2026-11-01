@@ -6,14 +6,14 @@ import type { Task } from "@/types"
 import { TaskPosticipaMenu } from "./task-posticipa"
 import { TaskEmpty } from "./task-empty"
 import {
-  TaskAggiuntaRapida, TaskAutomaticoTag, TaskPazienteTag, TaskPrioritaIcon, TaskPrioritaMenu, TaskRigaCheck, TaskRigaPosticipa, TaskScadenzaLabel, TaskTipoDot,
+  TaskAggiuntaRapida, TaskAutomaticoTag, TaskPazienteTag, TaskPrioritaIcon, TaskPrioritaMenu, TaskRigaCheck, TaskRigaPosticipa, TaskScadenzaLabel, TaskListaDot,
 } from "./task-riga-meta"
 import { ordina, tastiRiga, type TaskCreaRapido, type TaskModifica, type TaskOrdinamento, type TaskOrdinamentoCampo } from "./task-utils"
 
 type Props = {
   /** Task aperti già filtrati */
   righe: Task[]
-  mostraTipo: boolean
+  mostraLista: boolean
   ordinamento: TaskOrdinamento
   onOrdinamento: (o: TaskOrdinamento) => void
   salva: (t: Task, modifica: TaskModifica) => Promise<Task | null>
@@ -31,7 +31,7 @@ const COLONNE: { campo: TaskOrdinamentoCampo; label: string; className: string }
   { campo: "priorita", label: "Priorità", className: "tk-c-priorita" },
 ]
 
-export function TaskListaView({ righe, mostraTipo, ordinamento, onOrdinamento, salva, onToggleCompleta, onApri, selezionati, onSelezionati, onCreaRapido, cercando }: Props) {
+export function TaskListaView({ righe, mostraLista, ordinamento, onOrdinamento, salva, onToggleCompleta, onApri, selezionati, onSelezionati, onCreaRapido, cercando }: Props) {
   const [chiuso, setChiuso] = useState(false)
   const ordinate = useMemo(() => ordina(righe, ordinamento), [righe, ordinamento])
   const ids = ordinate.map((r) => r.id)
@@ -63,7 +63,7 @@ export function TaskListaView({ righe, mostraTipo, ordinamento, onOrdinamento, s
 
   return (
     <div className="tk-tabelle">
-      <div className="tk-table" data-con-lista={mostraTipo ? "" : undefined} data-selezione={selezionati.size ? "" : undefined} role="table" aria-label="Task da fare">
+      <div className="tk-table" data-con-lista={mostraLista ? "" : undefined} data-selezione={selezionati.size ? "" : undefined} role="table" aria-label="Task da fare">
         <section className="tk-group" data-stato="DA_FARE" role="rowgroup">
           {/* L'header è lo stato del riquadro: un clic ovunque lo chiude o lo riapre */}
           <div className="tk-thead" role="row" data-chiuso={chiuso ? "" : undefined} onClick={() => setChiuso((c) => !c)}>
@@ -85,12 +85,12 @@ export function TaskListaView({ righe, mostraTipo, ordinamento, onOrdinamento, s
             {!chiuso ? COLONNE.slice(1).map((c) => (
               <span key={c.campo} className={c.className} role="columnheader" aria-sort={ariaSort(c.campo)}>{bottoneOrdina(c)}</span>
             )) : null}
-            {!chiuso && mostraTipo ? <span className="tk-c-lista" role="columnheader">Tipo</span> : null}
+            {!chiuso && mostraLista ? <span className="tk-c-lista" role="columnheader">Lista</span> : null}
           </div>
           {!chiuso ? (
             <>
               {ordinate.map((r) => (
-                <Riga key={r.id} task={r} mostraTipo={mostraTipo} selezionato={selezionati.has(r.id)} onSel={() => toggleSel(r.id)}
+                <Riga key={r.id} task={r} mostraLista={mostraLista} selezionato={selezionati.has(r.id)} onSel={() => toggleSel(r.id)}
                   onApri={onApri} salva={salva} onToggleCompleta={onToggleCompleta} />
               ))}
               <TaskAggiuntaRapida onCrea={onCreaRapido} />
@@ -102,9 +102,9 @@ export function TaskListaView({ righe, mostraTipo, ordinamento, onOrdinamento, s
   )
 }
 
-function Riga({ task, mostraTipo, selezionato, onSel, onApri, salva, onToggleCompleta }: {
+function Riga({ task, mostraLista, selezionato, onSel, onApri, salva, onToggleCompleta }: {
   task: Task
-  mostraTipo: boolean
+  mostraLista: boolean
   selezionato: boolean
   onSel: () => void
   onApri: Props["onApri"]
@@ -141,7 +141,7 @@ function Riga({ task, mostraTipo, selezionato, onSel, onApri, salva, onToggleCom
           <TaskPrioritaMenu valore={task.priorita} onChange={(p) => void salva(task, { priorita: p })}
             trigger={<button type="button" className="tk-cell-btn" aria-label="Priorità"><TaskPrioritaIcon priorita={task.priorita} conEtichetta /></button>} />
         </span>
-        {mostraTipo ? <span className="tk-c-lista" role="cell"><TaskTipoDot task={task} /></span> : null}
+        {mostraLista ? <span className="tk-c-lista" role="cell"><TaskListaDot task={task} /></span> : null}
       </div>
     </MenuTask>
   )

@@ -4,7 +4,7 @@ import { ChevronDown, Search } from "lucide-react"
 import { useMemo, useState } from "react"
 import { MenuTask } from "@/components/menu-contestuali"
 import type { Task } from "@/types"
-import { TaskPazienteTag, TaskRigaCheck, TaskTipoDot } from "./task-riga-meta"
+import { TaskPazienteTag, TaskRigaCheck, TaskListaDot } from "./task-riga-meta"
 import { tastiRiga } from "./task-utils"
 
 const PAGINA = 20
@@ -75,7 +75,7 @@ export function TaskArchivio({ righe, cercando, onApri, onRiapri }: {
                     <span className="tk-riga-main">
                       <span className="tk-riga-title"><b>{t.titolo}</b></span>
                       <span className="tk-riga-sub">
-                        <TaskTipoDot task={t} />
+                        <TaskListaDot task={t} />
                         <TaskPazienteTag task={t} />
                       </span>
                     </span>

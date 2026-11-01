@@ -4,10 +4,10 @@ import it.edodoc.hq.dto.TaskDto;
 import it.edodoc.hq.exception.RisorsaNonTrovataException;
 import it.edodoc.hq.models.Paziente;
 import it.edodoc.hq.models.Task;
-import it.edodoc.hq.models.TaskTipo;
+import it.edodoc.hq.models.TaskLista;
 import it.edodoc.hq.repositories.PazienteRepository;
+import it.edodoc.hq.repositories.TaskListaRepository;
 import it.edodoc.hq.repositories.TaskRepository;
-import it.edodoc.hq.repositories.TaskTipoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,19 +20,14 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final TaskTipoRepository taskTipoRepository;
+    private final TaskListaRepository taskListaRepository;
     private final PazienteRepository pazienteRepository;
 
-    public TaskService(TaskRepository taskRepository, TaskTipoRepository taskTipoRepository,
+    public TaskService(TaskRepository taskRepository, TaskListaRepository taskListaRepository,
                        PazienteRepository pazienteRepository) {
         this.taskRepository = taskRepository;
-        this.taskTipoRepository = taskTipoRepository;
+        this.taskListaRepository = taskListaRepository;
         this.pazienteRepository = pazienteRepository;
-    }
-
-    @Transactional(readOnly = true)
-    public List<TaskDto.Tipo> tipi() {
-        return taskTipoRepository.findByAttivoTrueOrderByOrdine().stream().map(TaskDto.Tipo::da).toList();
     }
 
     @Transactional(readOnly = true)
@@ -49,6 +44,12 @@ public class TaskService {
     public List<TaskDto.Riga> delPaziente(Long pazienteId) {
         LocalDate oggi = LocalDate.now();
         return taskRepository.findDelPaziente(pazienteId).stream().map(t -> TaskDto.Riga.da(t, oggi)).toList();
+    }
+
+    /** L'id di una lista di sistema, per chi crea task da codice. */
+    @Transactional(readOnly = true)
+    public Long idListaDiSistema(String codice) {
+        return listaDiSistema(codice).getId();
     }
 
     @Transactional
@@ -80,36 +81,39 @@ public class TaskService {
 
     /** Per job e flussi di dominio: la chiave impedisce di ricreare un promemoria già esistito. */
     @Transactional
-    public void creaAutomatico(String chiave, String tipoCodice, String titolo, LocalDate scadenza, Paziente paziente) {
+    public void creaAutomatico(String chiave, String listaCodice, String titolo, Task.Priorita priorita,
+                               LocalDate scadenza, Paziente paziente) {
         if (taskRepository.existsByChiaveAutomatica(chiave)) {
             return;
         }
-        TaskTipo tipo = tipo(tipoCodice);
         Task task = new Task();
         task.setChiaveAutomatica(chiave);
-        task.setTipo(tipo);
-        task.setTitolo(titolo != null ? titolo : tipo.getTitoloDefault());
-        task.setPriorita(tipo.getPriorita());
-        task.setScadenza(scadenza != null ? scadenza : LocalDate.now().plusDays(tipo.getGiorniDefault()));
+        task.setLista(listaDiSistema(listaCodice));
+        task.setTitolo(titolo);
+        task.setPriorita(priorita);
+        task.setScadenza(scadenza);
         task.setPaziente(paziente);
         taskRepository.save(task);
     }
 
     private void applica(Task task, TaskDto.Salva r) {
-        TaskTipo tipo = tipo(r.tipoCodice());
-        boolean nuovo = task.getId() == null;
-        task.setTipo(tipo);
-        task.setTitolo(r.titolo() != null && !r.titolo().isBlank() ? r.titolo().trim() : tipo.getTitoloDefault());
+        TaskLista lista = taskListaRepository.findById(r.listaId())
+                .orElseThrow(() -> new RisorsaNonTrovataException("Lista non trovata"));
+        if (lista.getArchiviata() && lista != task.getLista()) {
+            throw new IllegalArgumentException("La lista " + lista.getNome() + " è archiviata");
+        }
+        task.setLista(lista);
+        task.setTitolo(r.titolo().trim());
         task.setDescrizione(r.descrizione());
-        task.setPriorita(r.priorita() != null ? r.priorita() : tipo.getPriorita());
-        task.setScadenza(r.scadenza() != null || !nuovo ? r.scadenza() : LocalDate.now().plusDays(tipo.getGiorniDefault()));
+        task.setPriorita(r.priorita() != null ? r.priorita() : Task.Priorita.MEDIA);
+        task.setScadenza(r.scadenza());
         task.setPaziente(r.pazienteId() == null ? null : pazienteRepository.findByIdAndAttivoTrue(r.pazienteId())
                 .orElseThrow(() -> new RisorsaNonTrovataException("Paziente non trovato")));
     }
 
-    private TaskTipo tipo(String codice) {
-        return taskTipoRepository.findByCodice(codice)
-                .orElseThrow(() -> new IllegalArgumentException("Tipo di task sconosciuto: " + codice));
+    private TaskLista listaDiSistema(String codice) {
+        return taskListaRepository.findByCodice(codice)
+                .orElseThrow(() -> new IllegalArgumentException("Lista di sistema sconosciuta: " + codice));
     }
 
     private Task trova(Long id) {
