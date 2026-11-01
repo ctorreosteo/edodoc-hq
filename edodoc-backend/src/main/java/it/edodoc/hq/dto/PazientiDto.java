@@ -48,6 +48,16 @@ public final class PazientiDto {
             boolean accessoApp) {
     }
 
+    public record Archiviato(Long id, String nome, String cognome, LocalDateTime archiviatoIl, LocalDateTime anonimizzatoIl) {
+        public static Archiviato da(Paziente p) {
+            return new Archiviato(p.getId(), p.getNome(), p.getCognome(), p.getArchiviatoIl(), p.getAnonimizzatoIl());
+        }
+    }
+
+    /** email: l'unico punto in cui resta l'indirizzo, se la conferma al paziente non è partita. */
+    public record Anonimizzazione(String email, boolean confermaInviata) {
+    }
+
     public record InvitoApp(String link, boolean emailInviata) {
     }
 }

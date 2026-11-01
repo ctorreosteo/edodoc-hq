@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @Getter @Setter @NoArgsConstructor
 public class Utente {
 
-    public enum Ruolo { ADMIN, PAZIENTE }
+    /** REVISORE: il dottore per Apple e Google. Entra nell'area dottore, ma nessuna regola di SecurityConfig lo ammette ai dati. */
+    public enum Ruolo { ADMIN, PAZIENTE, REVISORE }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

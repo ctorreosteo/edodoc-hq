@@ -19,6 +19,8 @@ import it.edodoc.hq.services.PercorsoService;
 import it.edodoc.hq.services.TaskService;
 import it.edodoc.hq.services.VisitaService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +35,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/pazienti")
 public class PazientiController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PazientiController.class);
 
     private final PazienteService pazienteService;
     private final PercorsoService percorsoService;
@@ -63,6 +67,11 @@ public class PazientiController {
         return ApiResponseDto.success(pazienteService.lista());
     }
 
+    @GetMapping("/archiviati")
+    public ApiResponseDto<List<PazientiDto.Archiviato>> archiviati() {
+        return ApiResponseDto.success(pazienteService.archiviati());
+    }
+
     @GetMapping("/{id}")
     public ApiResponseDto<PazientiDto.Riga> dettaglio(@PathVariable Long id) {
         return ApiResponseDto.success(pazienteService.dettaglio(id));
@@ -82,6 +91,24 @@ public class PazientiController {
     public ApiResponseDto<Void> archivia(@PathVariable Long id) {
         pazienteService.archivia(id);
         return ApiResponseDto.success("Paziente archiviato", null);
+    }
+
+    /** Una conferma non partita non annulla nulla: l'indirizzo torna al dottore, che può scrivere a mano. */
+    @PostMapping("/{id}/anonimizza")
+    public ApiResponseDto<PazientiDto.Anonimizzazione> anonimizza(@PathVariable Long id) {
+        String email = pazienteService.anonimizza(id);
+        boolean inviata = false;
+        if (email != null && gmailService.isAttivo()) {
+            try {
+                gmailService.invia(email, "Il tuo account EdoDoc è stato eliminato",
+                        CorpoEmail.da("Ciao,\n\nabbiamo completato l'eliminazione del tuo account EdoDoc: l'accesso è chiuso e i tuoi dati anagrafici sono stati resi anonimi."
+                                + "\n\nLe fatture restano conservate per 10 anni, come richiede la legge."), null, null);
+                inviata = true;
+            } catch (RuntimeException e) {
+                logger.warn("Conferma di anonimizzazione non inviata per il paziente {}: {}", id, e.getMessage());
+            }
+        }
+        return ApiResponseDto.success("Paziente anonimizzato", new PazientiDto.Anonimizzazione(email, inviata));
     }
 
     @GetMapping("/{id}/percorsi")

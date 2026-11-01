@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { Pagina } from "@/components/pagina"
 import { ElencoPazienti } from "@/components/pazienti/elenco-pazienti"
+import { PazientiArchiviati } from "@/components/pazienti/pazienti-archiviati"
 import { PazientiHero } from "@/components/pazienti/pazienti-hero"
 import { Caricamento, Errore } from "@/components/stati"
 import { useDati } from "@/hooks/use-dati"
@@ -56,6 +57,7 @@ export default function Pazienti() {
         <PazientiHero letture={letture} motivo={motivo} gradino={gradino} oggi={oggi} onMotivo={scegliMotivo} onGradino={scegliGradino} />
         <ElencoPazienti letture={filtrati} totale={dati.length} ricerca={ricerca} stato={stato} ordine={ordine} filtro={filtro} oggi={oggi}
           onRicerca={setRicerca} onStato={setStato} onOrdine={setOrdine} onLiberaFiltro={() => scegliMotivo(null)} />
+        <PazientiArchiviati />
       </div>
     </Pagina>
   )

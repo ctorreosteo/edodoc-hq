@@ -9,6 +9,10 @@ export type Paziente = {
   residuo: number; checkSettimana: boolean; accessoApp: boolean
 }
 
+export type PazienteArchiviato = {
+  id: number; nome: string; cognome: string; archiviatoIl: string | null; anonimizzatoIl: string | null
+}
+
 export type PazienteForm = Omit<Paziente, "id" | "createdAt" | "percorso" | "prossimaVisita" | "situazionePagamenti" | "residuo" | "checkSettimana" | "accessoApp">
 
 export type Percorso = {

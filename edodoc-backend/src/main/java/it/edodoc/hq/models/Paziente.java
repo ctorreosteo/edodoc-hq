@@ -64,6 +64,12 @@ public class Paziente {
     @Column(nullable = false)
     private Boolean attivo = true;
 
+    @Column(name = "archiviato_il")
+    private LocalDateTime archiviatoIl;
+
+    @Column(name = "anonimizzato_il")
+    private LocalDateTime anonimizzatoIl;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

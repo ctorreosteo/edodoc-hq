@@ -204,8 +204,10 @@ public class AuthService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(casuali);
     }
 
+    /** Il revisore risulta ADMIN solo alle app, che così aprono l'area dottore: i permessi veri stanno nel token. */
     private static AuthDto.Utente dto(Utente u) {
-        return new AuthDto.Utente(u.getId(), u.getUsername(), u.getNome(), u.getCognome(), u.getRuolo().name(),
+        String ruolo = u.getRuolo() == Utente.Ruolo.REVISORE ? Utente.Ruolo.ADMIN.name() : u.getRuolo().name();
+        return new AuthDto.Utente(u.getId(), u.getUsername(), u.getNome(), u.getCognome(), ruolo,
                 u.getPaziente() != null ? u.getPaziente().getId() : null);
     }
 

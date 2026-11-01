@@ -41,6 +41,7 @@ Stack completo in container, backend compreso: `cd edodoc-backend && docker comp
 | Finance | Righe del foglio Cassa calcolate da pagamenti e movimenti. Candidature da chiudere quando il margine del Livello 1 scende sotto il valore di un cliente |
 | Calendario | Il Google Calendar del dottore in diretta, senza copie nel gestionale: viste giorno, settimana, mese, anno ed elenco, eventi ricorrenti, inviti e Meet. Gli eventi delle visite aprono la scheda del paziente; spostarli o cancellarli torna sulla visita al giro successivo del job |
 | Email | Dal menu contestuale: sollecito pagamento, richiesta dati fatturazione, fattura con PDF. Il popup propone il modello di `config` e si può modificare prima dell'invio |
+| Account | Dall'app il paziente chiude l'account: archiviazione immediata con accesso, telefoni e inviti revocati, più un task entro 21 giorni. Dal gestionale, sezione Archiviati in Pazienti, il dottore anonimizza: l'operazione non si annulla, non elimina righe, lascia intatte le fatture e si blocca con visite future o pagamenti ricevuti senza fattura |
 | Task | Organizzati in cartelle annidate e liste. I job creano i promemoria (rinnovi, esami, Tessera Sanitaria, scadenze fiscali) nelle liste di sistema (`task_liste.codice`), che non si archiviano né si eliminano |
 
 ## Integrazioni
@@ -121,6 +122,7 @@ Il token dura 12 ore. Sul 401 l'app chiama `/rinnova` una volta sola anche con p
 | GET | `/api/app/messaggi` | Chat, vedi sotto |
 | POST | `/api/app/messaggi` | `{testo, clientId}` |
 | POST | `/api/app/messaggi/letti` | Il paziente ha aperto la chat |
+| POST | `/api/app/account/chiudi` | Elimina account: archivia il paziente e chiude subito l'accesso |
 
 Il corpo del check: `pastiOttimali` (0-21), `pastiLiberi`, `energia` (1-5), `allenamento`, `pesoKg`, `andamentoPeso`, `percezione`, `percezioneMigliorata`, `impegno` (1-5).
 
@@ -149,13 +151,12 @@ Le push passano da Apple e Google, quindi non contengono mai nomi o dati sanitar
 
 ## Account per Apple e Google
 
-`prova.dottore@edodoc.it` e `prova.paziente@edodoc.it` servono a chi revisiona le app. Vivono solo su un server demo con database proprio: il dottore vede tutti i pazienti, quindi non devono mai stare accanto a dati reali. Il backend rifiuta di crearli senza `APP_INIT_DEMO_ENABLED=true` e la partita IVA finta dei dati demo.
+`prova.dottore@edodoc.it` e `prova.paziente@edodoc.it` servono a chi revisiona le app. Vivono nelle tabelle normali, anche in produzione, con password `test` impostata in [deploy.sh](deploy.sh). Le app usano lo stesso URL di tutti.
 
-1. Pubblica una seconda istanza del backend con un database vuoto e `APP_INIT_DEMO_ENABLED=true`. Lascia spente tutte le integrazioni.
-2. Imposta `APP_PROVA_DOTTORE_EMAIL`, `APP_PROVA_DOTTORE_PASSWORD`, `APP_PROVA_PAZIENTE_EMAIL` e `APP_PROVA_PAZIENTE_PASSWORD`.
-3. Compila le app con l'URL di questa istanza: `API_DEMO_URL` su iOS, `-PEDODOC_API_DEMO_URL` su Android. Chi accede con un account di prova finisce qui, tutti gli altri sul server reale.
+- `prova.paziente` è una paziente inventata, Sofia Prova: vede solo se stessa. Nel gestionale compare come una paziente qualsiasi, e i suoi messaggi arrivano al dottore vero. Ha percorso, check e chat, ma non visite, pagamenti validi o fatture: finirebbero nel calendario e nella numerazione veri.
+- `prova.dottore` ha il ruolo `REVISORE`. Le app lo vedono come dottore e aprono l'area dottore, ma l'API gli rifiuta ogni dato con 403: `SecurityConfig` ammette all'API del gestionale solo `ADMIN`, quindi anche un endpoint nuovo resta chiuso. Il ruolo sta nel database e non dipende dalle variabili d'ambiente.
 
-All'avvio e ogni ora il backend ripristina password, accessi, paziente archiviata, visita futura e corso. Il cambio password di questi account è rifiutato.
+All'avvio e ogni ora il backend ripristina password, accessi e paziente archiviata. Il cambio password di questi account è rifiutato.
 
 In locale gli stessi account esistono con le password `prova-dottore-locale` e `prova-paziente-locale`.
 

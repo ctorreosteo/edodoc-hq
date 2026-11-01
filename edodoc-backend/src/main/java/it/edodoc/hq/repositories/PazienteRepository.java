@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface PazienteRepository extends JpaRepository<Paziente, Long> {
     List<Paziente> findByAttivoTrueOrderByCognomeAscNomeAsc();
 
+    List<Paziente> findByAttivoFalseOrderByArchiviatoIlDesc();
+
     List<Paziente> findByAttivoTrueAndStatoInOrderByCognomeAscNomeAsc(Collection<Paziente.Stato> stati);
 
     Optional<Paziente> findByIdAndAttivoTrue(Long id);

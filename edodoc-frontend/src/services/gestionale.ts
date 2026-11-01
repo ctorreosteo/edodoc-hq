@@ -2,7 +2,7 @@ import { api, urlApi } from "@/services/api-client"
 import type { RichiestaEmail } from "@/lib/email"
 import type {
   Acquisti, AnteprimaFattura, BozzaEmail, CheckDettaglio, Dashboard, EmettiFattura, Fattura, Impostazioni, ListaPagamenti, Listino,
-  LezioneForm, Movimento, Pagamento, Paziente, PazienteForm, Percorso, RigaTessera, RiepilogoFinance, RisposteCheck,
+  LezioneForm, Movimento, Pagamento, Paziente, PazienteArchiviato, PazienteForm, Percorso, RigaTessera, RiepilogoFinance, RisposteCheck,
   RigaCorso, RigaLezione, RigaModulo, Riproduzione, ScadenzaFiscale, SettimanaCheck, StatoVideo, StrutturaCorso, Task, TaskCartella, TaskForm, TaskLista, TaskStruttura, Utente, Visita, VisitaForm,
 } from "@/types"
 
@@ -20,6 +20,8 @@ export const pazientiService = {
   crea: (corpo: PazienteForm) => api.post<Paziente>("/pazienti", corpo),
   aggiorna: (id: number, corpo: PazienteForm) => api.put<Paziente>(`/pazienti/${id}`, corpo),
   archivia: (id: number) => api.delete<void>(`/pazienti/${id}`),
+  archiviati: () => api.get<PazienteArchiviato[]>("/pazienti/archiviati"),
+  anonimizza: (id: number) => api.post<{ email: string | null; confermaInviata: boolean }>(`/pazienti/${id}/anonimizza`),
   percorsi: (id: number) => api.get<Percorso[]>(`/pazienti/${id}/percorsi`),
   visite: (id: number) => api.get<Visita[]>(`/pazienti/${id}/visite`),
   check: (id: number) => api.get<CheckDettaglio[]>(`/pazienti/${id}/check`),

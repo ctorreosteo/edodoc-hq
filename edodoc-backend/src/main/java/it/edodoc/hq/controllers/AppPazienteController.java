@@ -15,6 +15,7 @@ import it.edodoc.hq.services.CheckService;
 import it.edodoc.hq.services.CorsoService;
 import it.edodoc.hq.services.FatturaService;
 import it.edodoc.hq.services.PagamentoService;
+import it.edodoc.hq.services.PazienteService;
 import it.edodoc.hq.services.PercorsoService;
 import jakarta.validation.Valid;
 import org.springframework.core.io.Resource;
@@ -47,16 +48,25 @@ public class AppPazienteController {
     private final PagamentoService pagamentoService;
     private final FatturaService fatturaService;
     private final PercorsoService percorsoService;
+    private final PazienteService pazienteService;
 
     public AppPazienteController(CheckService checkService, CorsoService corsoService, ChatService chatService,
                                  PagamentoService pagamentoService, FatturaService fatturaService,
-                                 PercorsoService percorsoService) {
+                                 PercorsoService percorsoService, PazienteService pazienteService) {
         this.checkService = checkService;
         this.corsoService = corsoService;
         this.chatService = chatService;
         this.pagamentoService = pagamentoService;
         this.fatturaService = fatturaService;
         this.percorsoService = percorsoService;
+        this.pazienteService = pazienteService;
+    }
+
+    /** Elimina account nell'app. Il token smette di valere subito: l'app torna al login. */
+    @PostMapping("/account/chiudi")
+    public ApiResponseDto<Void> chiudiAccount(@AuthenticationPrincipal UtenteDetails utente) {
+        pazienteService.chiudiAccount(utente.getPazienteId());
+        return ApiResponseDto.success("Account chiuso", null);
     }
 
     @GetMapping("/riepilogo")

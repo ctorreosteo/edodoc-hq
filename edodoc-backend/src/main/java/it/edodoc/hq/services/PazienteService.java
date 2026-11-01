@@ -2,16 +2,23 @@ package it.edodoc.hq.services;
 
 import it.edodoc.hq.dto.PazientiDto;
 import it.edodoc.hq.dto.PercorsiDto;
+import it.edodoc.hq.exception.ConflittoException;
 import it.edodoc.hq.exception.RisorsaNonTrovataException;
+import it.edodoc.hq.models.Fattura;
 import it.edodoc.hq.models.Pagamento;
 import it.edodoc.hq.models.Paziente;
 import it.edodoc.hq.models.Percorso;
+import it.edodoc.hq.models.Task;
 import it.edodoc.hq.models.Utente;
 import it.edodoc.hq.models.Visita;
 import it.edodoc.hq.repositories.CheckSettimanaleRepository;
+import it.edodoc.hq.repositories.DispositivoRepository;
+import it.edodoc.hq.repositories.FatturaRepository;
 import it.edodoc.hq.repositories.PagamentoRepository;
 import it.edodoc.hq.repositories.PazienteRepository;
 import it.edodoc.hq.repositories.PercorsoRepository;
+import it.edodoc.hq.repositories.SessioneAppRepository;
+import it.edodoc.hq.repositories.TaskRepository;
 import it.edodoc.hq.repositories.UtenteRepository;
 import it.edodoc.hq.repositories.VisitaRepository;
 import org.springframework.stereotype.Service;
@@ -30,22 +37,37 @@ import java.util.stream.Collectors;
 @Service
 public class PazienteService {
 
+    /** La pagina di eliminazione promette un mese: il task scade prima, per lasciare margine. */
+    private static final int GIORNI_PER_ANONIMIZZARE = 21;
+
     private final PazienteRepository pazienteRepository;
     private final PercorsoRepository percorsoRepository;
     private final VisitaRepository visitaRepository;
     private final PagamentoRepository pagamentoRepository;
     private final CheckSettimanaleRepository checkRepository;
     private final UtenteRepository utenteRepository;
+    private final SessioneAppRepository sessioneRepository;
+    private final DispositivoRepository dispositivoRepository;
+    private final FatturaRepository fatturaRepository;
+    private final TaskRepository taskRepository;
+    private final TaskService taskService;
 
     public PazienteService(PazienteRepository pazienteRepository, PercorsoRepository percorsoRepository,
                            VisitaRepository visitaRepository, PagamentoRepository pagamentoRepository,
-                           CheckSettimanaleRepository checkRepository, UtenteRepository utenteRepository) {
+                           CheckSettimanaleRepository checkRepository, UtenteRepository utenteRepository,
+                           SessioneAppRepository sessioneRepository, DispositivoRepository dispositivoRepository,
+                           FatturaRepository fatturaRepository, TaskRepository taskRepository, TaskService taskService) {
         this.pazienteRepository = pazienteRepository;
         this.percorsoRepository = percorsoRepository;
         this.visitaRepository = visitaRepository;
         this.pagamentoRepository = pagamentoRepository;
         this.checkRepository = checkRepository;
         this.utenteRepository = utenteRepository;
+        this.sessioneRepository = sessioneRepository;
+        this.dispositivoRepository = dispositivoRepository;
+        this.fatturaRepository = fatturaRepository;
+        this.taskRepository = taskRepository;
+        this.taskService = taskService;
     }
 
     /** Pochi pazienti e sempre tutti in memoria nel frontend: una query per ambito, nessun N+1. */
@@ -123,8 +145,95 @@ public class PazienteService {
     /** Soft delete: visite, pagamenti e fatture del paziente devono restare. */
     @Transactional
     public void archivia(Long id) {
-        trova(id).setAttivo(false);
-        utenteRepository.findByPazienteId(id).ifPresent(u -> u.setAttivo(false));
+        Paziente paziente = trova(id);
+        paziente.setAttivo(false);
+        paziente.setArchiviatoIl(LocalDateTime.now());
+        utenteRepository.findByPazienteId(id).ifPresent(u -> {
+            u.setAttivo(false);
+            u.setInvitoTokenHash(null);
+            u.setInvitoScadenza(null);
+            revocaTelefoni(u.getId());
+        });
+    }
+
+    /** Il paziente chiude l'account dall'app: l'accesso si chiude subito, l'anonimizzazione la conferma il dottore. */
+    @Transactional
+    public void chiudiAccount(Long id) {
+        Paziente paziente = trova(id);
+        archivia(id);
+        taskService.creaAutomatico("anonimizza-" + id, "FISCO", "Anonimizzare l'account chiuso dall'app", Task.Priorita.ALTA,
+                LocalDate.now().plusDays(GIORNI_PER_ANONIMIZZARE), paziente);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PazientiDto.Archiviato> archiviati() {
+        return pazienteRepository.findByAttivoFalseOrderByArchiviatoIlDesc().stream().map(PazientiDto.Archiviato::da).toList();
+    }
+
+    /**
+     * Non si torna indietro. Nessuna riga viene eliminata: le fatture hanno la propria copia di intestatario,
+     * indirizzo e codice fiscale, e visite, check e chat restano senza un nome collegato.
+     * Restituisce l'email che il paziente aveva, per la conferma: dopo non esiste più.
+     */
+    @Transactional
+    public String anonimizza(Long id) {
+        Paziente paziente = pazienteRepository.findById(id)
+                .filter(p -> !Boolean.TRUE.equals(p.getAttivo()))
+                .orElseThrow(() -> new RisorsaNonTrovataException("Paziente archiviato non trovato"));
+        if (paziente.getAnonimizzatoIl() != null) {
+            throw new ConflittoException("Questo paziente è già stato anonimizzato");
+        }
+        LocalDateTime adesso = LocalDateTime.now();
+        if (visitaRepository.findDelPaziente(id).stream()
+                .anyMatch(v -> v.getStato() == Visita.Stato.PROGRAMMATA && v.getInizio().isAfter(adesso))) {
+            throw new ConflittoException("Annulla prima le visite ancora in programma: l'evento su Calendar porta il suo nome");
+        }
+        // Senza anagrafica una fattura emessa dopo uscirebbe senza intestatario valido
+        if (pagamentoRepository.findDelPaziente(id).stream().anyMatch(p -> p.getStato() == Pagamento.Stato.PAGATO
+                && !fatturaRepository.existsByPagamentoIdAndStato(p.getId(), Fattura.Stato.EMESSA))) {
+            throw new ConflittoException("Emetti prima la fattura dei pagamenti ricevuti");
+        }
+
+        String email = paziente.getEmail();
+        paziente.setNome("Paziente");
+        paziente.setCognome("Anonimizzato " + id);
+        paziente.setEmail(null);
+        paziente.setCellulare(null);
+        paziente.setCodiceFiscale(null);
+        paziente.setDataNascita(null);
+        paziente.setIndirizzo(null);
+        paziente.setCap(null);
+        paziente.setCitta(null);
+        paziente.setProvincia(null);
+        paziente.setFonte(null);
+        paziente.setSituazione(null);
+        paziente.setNota(null);
+        paziente.setPesoInizialeKg(null);
+        paziente.setPesoObiettivoKg(null);
+        paziente.setAnonimizzatoIl(adesso);
+
+        // L'username è unico: con l'email libera la stessa persona può tornare come nuovo paziente
+        utenteRepository.findByPazienteId(id).ifPresent(u -> {
+            u.setUsername("anonimizzato-" + id);
+            u.setPasswordHash(null);
+            u.setNome(paziente.getNome());
+            u.setCognome(paziente.getCognome());
+            revocaTelefoni(u.getId());
+        });
+        for (Task task : taskRepository.findDelPaziente(id)) {
+            task.setTitolo("Task di un paziente anonimizzato");
+            task.setDescrizione(null);
+            if (task.getStato() == Task.Stato.DA_FARE) {
+                task.setStato(Task.Stato.FATTO);
+                task.setCompletatoIl(adesso);
+            }
+        }
+        return email;
+    }
+
+    private void revocaTelefoni(Long utenteId) {
+        sessioneRepository.deleteByUtenteId(utenteId);
+        dispositivoRepository.deleteByUtenteId(utenteId);
     }
 
     private void applica(Paziente p, PazientiDto.Salva r) {
