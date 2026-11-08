@@ -8,6 +8,7 @@ import { Caricamento, Errore } from "@/components/stati"
 import { Button } from "@/components/ui/button"
 import { AgendaGiorno } from "@/components/visite/agenda-giorno"
 import { AgendaSettimana } from "@/components/visite/agenda-settimana"
+import { TabelleVisite } from "@/components/visite/tabelle-visite"
 import { useAdesso, useVistaGiorno } from "@/components/visite/use-agenda"
 import { VisiteHero } from "@/components/visite/visite-hero"
 import { useAzioni } from "@/contexts/azioni-context"
@@ -141,6 +142,8 @@ export default function Visite() {
             </p>
           ) : null}
         </Riquadro>
+
+        <TabelleVisite />
       </div>
     </Pagina>
   )

@@ -1,6 +1,6 @@
 import {
   Banknote, CalendarPlus, Check, ClipboardCheck, ClipboardPlus, Copy, ExternalLink, IdCard, Landmark, Mail,
-  MessageCircle, Pencil, Plus, Receipt, Repeat, Route, Trash2, Undo2, UserPlus, UserRound, Video, X, type LucideIcon,
+  MessageCircle, PanelRight, Pencil, Plus, Receipt, Repeat, Route, Trash2, Undo2, UserPlus, UserRound, Video, X, type LucideIcon,
 } from "lucide-react"
 import type { ReactNode } from "react"
 import {
@@ -124,6 +124,7 @@ export function MenuVisita({ visita, children }: { visita: Visita; children: Rea
     <Guscio menu={
       <>
         <ContextMenuLabel>{visita.titoloCalendario}</ContextMenuLabel>
+        <ContextMenuItem onSelect={() => a.apriVisita(visita)}><PanelRight aria-hidden />Dettagli della visita</ContextMenuItem>
         <ContextMenuItem onSelect={() => a.apriPaziente(visita.pazienteId)}><UserRound aria-hidden />Apri il paziente</ContextMenuItem>
         <ContextMenuItem disabled={annullata} onSelect={() => a.modificaVisita(visita)}><Pencil aria-hidden />Modifica o sposta</ContextMenuItem>
         <ContextMenuItem disabled={!visita.meetUrl} onSelect={() => window.open(visita.meetUrl!, "_blank", "noopener")}><Video aria-hidden />Apri Google Meet</ContextMenuItem>

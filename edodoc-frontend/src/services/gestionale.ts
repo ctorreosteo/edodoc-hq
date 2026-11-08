@@ -3,7 +3,7 @@ import type { RichiestaEmail } from "@/lib/email"
 import type {
   Acquisti, AnteprimaFattura, BozzaEmail, CheckDettaglio, Dashboard, EmettiFattura, Fattura, Impostazioni, ListaPagamenti, Listino,
   LezioneForm, Movimento, Pagamento, Paziente, PazienteArchiviato, PazienteForm, Percorso, RigaTessera, RiepilogoFinance, RisposteCheck,
-  RigaCorso, RigaLezione, RigaModulo, Riproduzione, ScadenzaFiscale, SettimanaCheck, StatoVideo, StrutturaCorso, Task, TaskCartella, TaskForm, TaskLista, TaskStruttura, Utente, Visita, VisitaForm,
+  RigaCorso, RigaDieta, Dieta, ContenutoDieta, RigaLezione, RigaModulo, Riproduzione, ScadenzaFiscale, SettimanaCheck, StatoVideo, StrutturaCorso, Task, TaskCartella, TaskForm, TaskLista, TaskStruttura, Utente, Visita, VisitaForm,
 } from "@/types"
 
 export const authService = {
@@ -163,4 +163,31 @@ export const financeService = {
 export const impostazioniService = {
   carica: () => api.get<Impostazioni>("/impostazioni"),
   aggiorna: (chiave: string, valore: string) => api.put<unknown>("/impostazioni", { chiave, valore }),
+}
+
+const apriPdfIn = async (percorso: string) => {
+  // Scheda aperta subito: dopo l'await il browser la bloccherebbe come popup
+  const scheda = window.open("", "_blank")
+  try {
+    const url = URL.createObjectURL(await api.blob(percorso))
+    if (scheda) scheda.location.href = url
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  } catch (e) {
+    scheda?.close()
+    throw e
+  }
+}
+
+export const dieteService = {
+  tutte: () => api.get<RigaDieta[]>("/diete"),
+  delPaziente: (pazienteId: number) => api.get<RigaDieta[]>("/diete", { pazienteId }),
+  dettaglio: (id: number) => api.get<Dieta>(`/diete/${id}`),
+  crea: (corpo: { pazienteId: number | null; titolo?: string | null; daDietaId?: number | null }) => api.post<Dieta>("/diete", corpo),
+  salva: (id: number, corpo: { titolo: string; dataInizio: string | null; contenuto: ContenutoDieta }) => api.put<Dieta>(`/diete/${id}`, corpo),
+  ripristina: (id: number, numero: number) => api.post<Dieta>(`/diete/${id}/versioni/${numero}/ripristina`),
+  consegna: (id: number, consegnata: boolean) => api.post<Dieta>(`/diete/${id}/consegna?consegnata=${consegnata}`),
+  elimina: (id: number) => api.delete<void>(`/diete/${id}`),
+  pdf: (id: number) => api.blob(`/diete/${id}/pdf`),
+  apriPdf: (id: number) => apriPdfIn(`/diete/${id}/pdf`),
+  apriPdfVersione: (id: number, numero: number) => apriPdfIn(`/diete/${id}/versioni/${numero}/pdf`),
 }

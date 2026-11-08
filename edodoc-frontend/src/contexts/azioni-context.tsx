@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
+import { NuovaDietaDialog, type DatiNuovaDieta } from "@/components/diete/nuova-dieta-dialog"
 import { CheckDialog } from "@/components/forms/check-dialog"
 import { ConfermaDialog, type Conferma } from "@/components/forms/conferma-dialog"
 import { EmailDialog } from "@/components/forms/email-dialog"
@@ -10,6 +11,7 @@ import { RegistraPagamentoDialog } from "@/components/forms/registra-pagamento-d
 import { TaskDialog } from "@/components/forms/task-dialog"
 import { VisitaDialog } from "@/components/forms/visita-dialog"
 import { PazienteSheet } from "@/components/paziente-sheet"
+import { VisitaSheet } from "@/components/visite/visita-sheet"
 import type { RichiestaEmail } from "@/lib/email"
 import { toastErrore } from "@/lib/toast"
 import { taskService } from "@/services/gestionale"
@@ -22,6 +24,8 @@ type Azioni = {
   /** Cartelle e liste dei task: si ricaricano insieme a tutto il resto con aggiorna() */
   struttura: TaskStruttura
   apriPaziente: (id: number) => void
+  /** Scheda laterale della visita, come quella del paziente. */
+  apriVisita: (visita: Visita) => void
   nuovoPaziente: (stato?: string) => void
   modificaPaziente: (paziente: Paziente) => void
   nuovoPercorso: (pazienteId?: number) => void
@@ -37,6 +41,8 @@ type Azioni = {
   inserisciCheck: (pazienteId?: number) => void
   conferma: (dati: Conferma) => void
   inviaEmail: (richiesta: RichiestaEmail) => void
+  /** Dieta per un paziente (o modello): dopo la creazione si apre l'editor. */
+  nuovaDieta: (dati?: DatiNuovaDieta) => void
 }
 
 const AzioniContext = createContext<Azioni | undefined>(undefined)
@@ -65,6 +71,8 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
   const [pazienteAperto, setPazienteAperto] = useState<number | null>(null)
   const aggiorna = useCallback(() => setVersione((v) => v + 1), [])
   const chiudiPaziente = useCallback(() => setPazienteAperto(null), [])
+  const [visitaAperta, setVisitaAperta] = useState<Visita | null>(null)
+  const chiudiVisita = useCallback(() => setVisitaAperta(null), [])
 
   const paziente = useFinestra<{ paziente?: Paziente; stato?: string }>({})
   const percorso = useFinestra<{ pazienteId?: number }>({})
@@ -76,6 +84,7 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
   const check = useFinestra<{ pazienteId?: number }>({})
   const conferma = useFinestra<Conferma | null>(null)
   const email = useFinestra<RichiestaEmail | null>(null)
+  const dieta = useFinestra<DatiNuovaDieta>({})
 
   useEffect(() => {
     taskService.struttura().then(setStruttura).catch(toastErrore)
@@ -83,7 +92,7 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
 
   const { apri: apriPazienteForm } = paziente
   const { apri: apriPercorso } = percorso
-  const { apri: apriVisita } = visita
+  const { apri: apriVisitaForm } = visita
   const { apri: apriPagamento } = pagamento
   const { apri: apriRegistra } = registra
   const { apri: apriFattura } = fattura
@@ -91,15 +100,17 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
   const { apri: apriCheck } = check
   const { apri: apriConferma } = conferma
   const { apri: apriEmail } = email
+  const { apri: apriDieta } = dieta
 
   const valore = useMemo<Azioni>(() => ({
     versione, aggiorna, struttura,
     apriPaziente: setPazienteAperto,
+    apriVisita: setVisitaAperta,
     nuovoPaziente: (stato) => apriPazienteForm({ stato }),
     modificaPaziente: (p) => apriPazienteForm({ paziente: p }),
     nuovoPercorso: (pazienteId) => apriPercorso({ pazienteId }),
-    nuovaVisita: (dati) => apriVisita({ ...dati }),
-    modificaVisita: (v) => apriVisita({ visita: v }),
+    nuovaVisita: (dati) => apriVisitaForm({ ...dati }),
+    modificaVisita: (v) => apriVisitaForm({ visita: v }),
     nuovoPagamento: (pazienteId) => apriPagamento({ pazienteId }),
     modificaPagamento: (p) => apriPagamento({ pagamento: p }),
     registraPagamento: apriRegistra,
@@ -109,12 +120,14 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
     inserisciCheck: (pazienteId) => apriCheck({ pazienteId }),
     conferma: apriConferma,
     inviaEmail: apriEmail,
-  }), [versione, aggiorna, struttura, apriPazienteForm, apriPercorso, apriVisita, apriPagamento, apriRegistra, apriFattura, apriTask, apriCheck, apriConferma, apriEmail])
+    nuovaDieta: (dati) => apriDieta({ ...dati }),
+  }), [versione, aggiorna, struttura, apriPazienteForm, apriPercorso, apriVisitaForm, apriPagamento, apriRegistra, apriFattura, apriTask, apriCheck, apriConferma, apriEmail, apriDieta])
 
   return (
     <AzioniContext.Provider value={valore}>
       {children}
       <PazienteSheet pazienteId={pazienteAperto} onClose={chiudiPaziente} />
+      <VisitaSheet visita={visitaAperta} onClose={chiudiVisita} />
       <PazienteDialog open={paziente.aperta} onOpenChange={paziente.onOpenChange} paziente={paziente.dati.paziente} statoIniziale={paziente.dati.stato} />
       <PercorsoDialog open={percorso.aperta} onOpenChange={percorso.onOpenChange} pazienteId={percorso.dati.pazienteId} />
       <VisitaDialog open={visita.aperta} onOpenChange={visita.onOpenChange} {...visita.dati} />
@@ -124,6 +137,7 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
       <TaskDialog open={task.aperta} onOpenChange={task.onOpenChange} {...task.dati} />
       <CheckDialog open={check.aperta} onOpenChange={check.onOpenChange} pazienteId={check.dati.pazienteId} />
       <EmailDialog open={email.aperta} onOpenChange={email.onOpenChange} richiesta={email.dati} />
+      <NuovaDietaDialog open={dieta.aperta} onOpenChange={dieta.onOpenChange} dati={dieta.dati} />
       <ConfermaDialog open={conferma.aperta} onOpenChange={conferma.onOpenChange} conferma={conferma.dati} />
     </AzioniContext.Provider>
   )

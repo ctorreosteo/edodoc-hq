@@ -16,6 +16,8 @@ import Check from "@/pages/Check"
 import Corsi from "@/pages/Corsi"
 import Corso from "@/pages/Corso"
 import Dashboard from "@/pages/Dashboard"
+import Dieta from "@/pages/Dieta"
+import Diete from "@/pages/Diete"
 import Email from "@/pages/Email"
 import Fatture from "@/pages/Fatture"
 import Finance from "@/pages/Finance"
@@ -27,7 +29,7 @@ import Task from "@/pages/Task"
 import Visite from "@/pages/Visite"
 
 const TITOLI: Record<string, string> = {
-  "/": "Dashboard", "/pazienti": "Pazienti", "/visite": "Visite", "/calendario": "Calendario", "/check": "Check settimanale", "/email": "Email", "/task": "Task", "/corsi": "Corsi",
+  "/": "Dashboard", "/pazienti": "Pazienti", "/visite": "Visite", "/calendario": "Calendario", "/check": "Check settimanale", "/email": "Email", "/task": "Task", "/corsi": "Corsi", "/diete": "Diete",
   "/acquisti": "Acquisti", "/pagamenti": "Pagamenti", "/fatture": "Fatture", "/finance": "Finance", "/impostazioni": "Impostazioni",
 }
 
@@ -43,7 +45,7 @@ function Gestionale() {
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4 hidden sm:block" />
               <Logo className="h-5 mr-2 sm:hidden" />
-              <span className="text-sm sm:text-base font-semibold">{TITOLI[pathname] ?? (pathname.startsWith("/corsi/") ? TITOLI["/corsi"] : "EdoDoc HQ")}</span>
+              <span className="text-sm sm:text-base font-semibold">{TITOLI[pathname] ?? (pathname.startsWith("/corsi/") ? TITOLI["/corsi"] : pathname.startsWith("/diete/") ? TITOLI["/diete"] : "EdoDoc HQ")}</span>
               <div data-app-actions className="ml-auto flex items-center gap-1">
                 <ModeToggle />
               </div>
@@ -59,6 +61,8 @@ function Gestionale() {
                 <Route path="/check" element={<Check />} />
                 <Route path="/email" element={<Email />} />
                 <Route path="/task" element={<Task />} />
+                <Route path="/diete" element={<Diete />} />
+                <Route path="/diete/:id" element={<Dieta />} />
                 <Route path="/corsi" element={<Corsi />} />
                 <Route path="/corsi/:id" element={<Corso />} />
                 <Route path="/acquisti" element={<Acquisti />} />

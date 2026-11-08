@@ -175,3 +175,36 @@ export type ModuloConLezioni = { modulo: RigaModulo; lezioni: RigaLezione[] }
 export type StrutturaCorso = { corso: RigaCorso; moduli: ModuloConLezioni[] }
 export type StatoVideo = { stato: VideoStato; avanzamento: number | null; lezione: RigaLezione }
 export type Riproduzione = { iframeUrl: string; hlsUrl: string }
+
+// ── Diete ──
+export type Alimento = { id: string; nome: string; quantita: string | null; nota: string | null }
+export type OpzionePasto = { id: string; nome: string | null; alimenti: Alimento[]; nota: string | null }
+export type Pasto = { id: string; nome: string; orario: string | null; nota: string | null; opzioni: OpzionePasto[] }
+export type Giornata = { id: string; nome: string; nota: string | null; pasti: Pasto[] }
+export type Consiglio = { id: string; titolo: string | null; testo: string | null }
+export type Integratore = { id: string; nome: string; dose: string | null; quando: string | null }
+export type ContenutoDieta = {
+  obiettivo: string | null
+  kcal: number | null
+  proteine: number | null
+  carboidrati: number | null
+  grassi: number | null
+  acquaLitri: number | null
+  introduzione: string | null
+  giornate: Giornata[]
+  consigli: Consiglio[]
+  liberi: string[]
+  limitare: string[]
+  integrazione: Integratore[]
+  listaSpesa: boolean
+}
+export type RigaDieta = {
+  id: number; pazienteId: number | null; pazienteNome: string | null; titolo: string; obiettivo: string | null
+  dataInizio: string | null; kcal: number | null; giornate: number; pasti: number; versioni: number
+  consegnataIl: string | null; createdAt: string; updatedAt: string
+}
+export type VersioneDieta = { numero: number; titolo: string; kcal: number | null; pasti: number; createdAt: string; nota: string | null; modifiche: string[] }
+export type Dieta = {
+  id: number; pazienteId: number | null; pazienteNome: string | null; titolo: string; dataInizio: string | null
+  consegnataIl: string | null; createdAt: string; updatedAt: string; contenuto: ContenutoDieta; versioni: VersioneDieta[]
+}

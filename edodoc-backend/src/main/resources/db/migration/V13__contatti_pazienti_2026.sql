@@ -1,0 +1,73 @@
+-- Cellulare ed email dei pazienti 2026, dal foglio anagrafica completo (8/11/2026).
+-- Collega la scheda per codice fiscale oppure per cognome e nome (pazienti esteri senza codice
+-- fiscale, e le schede di Viviana Galetti e Marcella Moreno, intestate alla persona seguita).
+-- Sovrascrive i valori presenti; non tocca le schede anonimizzate. Su un database senza
+-- questi pazienti non aggiorna nulla.
+UPDATE pazienti p
+SET cellulare  = v.cellulare,
+    email      = v.email,
+    updated_at = now()
+FROM (VALUES
+    ('LSCSRA98A63C665C', 'Alesci', 'Sara', '+393312580695', 'alescisara@gmail.com'),
+    ('RTGNNA69P53L219W', 'Artigiani', 'Anna', '+393475126845', 'artigiania@tiscali.it'),
+    ('BRDSST94R24Z600C', 'Bardus', 'Sebastian Ariel', '+393444408809', 'bardus.sebastian@gmail.com'),
+    ('BRNNRS71P01F205Q', 'Baroni', 'Andrea Stefano Dante', '+393357277247', 'baroniandrea01@gmail.com'),
+    ('BLTMHL74A69A246I', 'Belotti', 'Michela', '+393929385889', 'michi.belotti@icloud.com'),
+    ('BGLMRA59L18L219K', 'Bigelli', 'Mauro', '+39335481502', 'bigelli@alice.it'),
+    ('BTTSVL76S46F205T', 'Bottazzi', 'Silvia Laura', '+393209257536', 'bottazzi.silvialaura@gmail.com'),
+    ('BRMCLD63L09M052G', 'Brambilla', 'Claudio', '+393287143278', 'clabram2@gmail.com'),
+    ('BRNSFN94H20L219I', 'Bruno', 'Stefano', '+393406082459', 'brunostefano.20@gmail.com'),
+    ('CNTCHR70C58L219W', 'Canuto', 'Chiara', '+393472513651', 'chiaricanuto@gmail.com'),
+    ('CRGRNI78B46D869T', 'Caraglia', 'Irene', '+393393415690', 'irecara@alice.it'),
+    ('CTLVCN90P16F839Z', 'Catalano', 'Vincenzo', '+393898897025', 'vincenzo_catalano@live.it'),
+    ('CRFCLD54M10F205A', 'Cerfoglia', 'Claudio', '+393492370585', 'cerfoglia@cerfoglia.it'),
+    ('CRRNNA76C71F132H', 'Cerri', 'Anna', '+393383534364', 'cerri_anna@hotmail.com'),
+    ('CLMLNE73M57F704E', 'Colombo', 'Elena', '+393497256512', 'elena_r_colombo@libero.it'),
+    ('CMPMNL76R58H501I', 'Comparini', 'Emanuela', '+393312730388', 'logitecno1@tiscali.it'),
+    ('DLPTRN65T25I531E', 'Dal Pozzolo', 'Ottorino', '+393425420379', 'ottorino.dalpozzolo@gmail.com'),
+    ('DSNSRN67B67D284Y', 'De Santi', 'Sabrina', '+393332107593', 'desanti@lawlab.it'),
+    ('DLPRFL70S68H223H', 'Del Prete', 'Raffaella', '+393534674129', 'leggerarte@gmail.com'),
+    ('DLLGPP60B21A105Y', 'Della Rocca', 'Giuseppe', '+393490858804', 'drg60@tiscali.it'),
+    ('DSECST67P60D612T', 'Desii', 'Cristina', '+393341612982', 'cristinadesii@tiscali.it'),
+    ('DBLLMC73C62Z133K', 'Di Bella', 'Elena Michela', '+393394229441', 'elena.dibella@gmail.com'),
+    ('DVRDVD67C31Z335A', 'Diverio', 'Davide', '+393488500619', 'diverio@stroppianaspa.it'),
+    ('FLSFRC74H03H501M', 'Falasca', 'Federico', '+393299022792', 'federico.falasca@pegasolimo.it'),
+    ('FRRKTA74P50L219A', 'Fierro', 'Katia', '+393337028120', 'katiafierro974@gmail.com'),
+    ('FNINDR73H14L219L', 'Fino', 'Andrea', '+393311651332', 'ing.fino.andrea@gmail.com'),
+    ('FRNCHR77S53D869B', 'Fiorani', 'Chiara', '+393476501131', 'fiochi1977@gmail.com'),
+    ('FLTLSN71T06I441M', 'Foltran', 'Alessandro', '+393299535365', 'alessandro71@gmail.com'),
+    ('GLNTEA01H65F205F', 'Galeone', 'Tea', '+393899465743', 'teagaleone@gmail.com'),
+    (NULL, 'Galetti', 'Viviana', '+393421027015', 'viviana.galetti@gmail.com'),
+    ('GLTCRN62H56F964C', 'Galiotto', 'Caterina', '+393488259350', 'galiotto.caterina@gmail.com'),
+    ('GRZRFL62L68D933U', 'Garzoni', 'Raffaela', '+393475888867', 'raffaella_garzoni@libero.it'),
+    ('GTTRRT77C70L219L', 'Gatti', 'Roberta', '+393383854649', 'robi_gatti@yahoo.it'),
+    ('GCHNMO00A55F335X', 'Giachino', 'Noemi', '+393807836391', 'noemigiachino7@gmail.com'),
+    ('HLPLBT00L68F335P', 'Halip', 'Elisabeta', '+393275587230', 'elisabeta.halip@yahoo.com'),
+    ('LFSNMO95A48B602H', 'Lo Faso', 'Noemi', '+393271919244', 'lofasonoemi@gmail.com'),
+    ('MSTMHL73A16H199I', 'Maestri', 'Michele', '+393316834293', 'maestrim@gmail.com'),
+    ('MGGMSM71L09F842V', 'Maggiore', 'Massimo', '+393356661147', 'massimo.maggiore@emlex.it'),
+    ('MLSMRC71A02D969I', 'Malaspina', 'Marco', '+39335430305', 'marco.malaspin@gmail.com'),
+    ('MNNLCU66D47Z401O', 'Manni', 'Lucia', '+393487036554', 'luciamanni43@gmail.com'),
+    ('MSSFRC58P64A182L', 'Massolo', 'Federica', '+393332629754', 'massolof58@gmail.com'),
+    (NULL, 'Moreno', 'Marcella', '+393287771776', 'moremar77@gmail.com'),
+    ('NCRRRT67H17F205Y', 'Nucera', 'Roberto', '+393382610520', 'rnucera67@gmail.com'),
+    (NULL, 'Paderni', 'Luca', '+41779576218', 'lucapaderni@gmail.com'),
+    ('PSSRNN75C49A944N', 'Passaretta', 'Rosanna', '+393496012738', 'r.passaretta@hotmail.it'),
+    ('PYNNLY86B65Z505B', 'Payano Taveras', 'Nelly Yacaury', '+393791533266', 'nellypayano@gmail.com'),
+    ('PRCMLD98R55L219H', 'Porcarello', 'Matilde', '+393394233070', 'matildeporcarello@gmail.com'),
+    ('RSTMFR85T23A564B', 'Restaldi', 'Manfredi', '+393341033168', 'manfredi.restaldi@outlook.com'),
+    ('RVRLSN79B04B777U', 'Rivoira', 'Alessandro', '+393462328360', 'rivoira.alessandro@gmail.com'),
+    ('RSGCRL86T27E897N', 'Rosignoli', 'Carlo', '+393493049887', 'carlorosignoli@gmail.com'),
+    ('SNTMRK77P41B639K', 'Santagada', 'Marika', '+393387849144', 'marikabalestrini@gmail.com'),
+    (NULL, 'Silvano', 'Paolo', '+33680753692', 'silvanostrategy@gmail.com'),
+    ('TRRMRS59A69E801U', 'Terreni', 'Maria Rosa', '+393473017791', 'terrenimariarosa@hotmail.com'),
+    (NULL, 'Tomescu', 'Traian', '+40726145428', 'traianxtomescu@gmail.com'),
+    ('LLULNI65D67L219C', 'Ulla', 'Ileana', '+393337767158', 'ileana.ulla@sirtweb.it'),
+    ('VNGLBT79C46B639C', 'Vangeli', 'Elisabetta', '+393382832915', 'elisabettavangeli@yahoo.it'),
+    ('VSLNNL70L16H501D', 'Vasile', 'Antonello', '+393770833934', 'antvas70@gmail.com'),
+    ('VNDDVD69M05L219J', 'Venditti', 'Davide', '+393488898438', 'dvenditti3@gmail.com'),
+    ('VNCFRC79R02A515F', 'Vincenzoni', 'Federico', '+393923966279', 'f.vincenzoni@tuttosport.com')
+) AS v (codice_fiscale, cognome, nome, cellulare, email)
+WHERE p.anonimizzato_il IS NULL
+  AND (upper(p.codice_fiscale) = v.codice_fiscale
+       OR (lower(trim(p.cognome)) = lower(v.cognome) AND lower(trim(p.nome)) = lower(v.nome)));

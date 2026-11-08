@@ -1,5 +1,7 @@
-import { Banknote, CalendarPlus, CheckCircle2, ListChecks, Pencil, Receipt, Route } from "lucide-react"
+import { Banknote, CalendarPlus, CheckCircle2, FileText, ListChecks, Pencil, Receipt, Route, Salad } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { quandoBreve } from "@/components/diete/parti-editor"
 import { Chip } from "@/components/chip"
 import { RisposteCheck } from "@/components/check-dettaglio"
 import { MenuFattura, MenuPagamento, MenuTask, MenuVisita } from "@/components/menu-contestuali"
@@ -12,20 +14,20 @@ import { useAzioni } from "@/contexts/azioni-context"
 import { data, dataBreve, dataOra, euro, linkWhatsapp } from "@/lib/format"
 import { FONTE, METODO_PAGAMENTO, MODALITA_VISITA, PIANO_PAGAMENTO, SITUAZIONE_PAGAMENTI, STATO_PAZIENTE, STATO_VISITA, TIPO_PERCORSO, TIPO_VISITA } from "@/lib/etichette"
 import { toast, toastErrore } from "@/lib/toast"
-import { pazientiService, percorsiService } from "@/services/gestionale"
-import type { CheckDettaglio, Fattura, ListaPagamenti, Paziente, Percorso, Task, Visita } from "@/types"
+import { dieteService, pazientiService, percorsiService } from "@/services/gestionale"
+import type { CheckDettaglio, Fattura, ListaPagamenti, Paziente, Percorso, RigaDieta, Task, Visita } from "@/types"
 
 type Scheda = {
   paziente: Paziente; percorsi: Percorso[]; visite: Visita[]; check: CheckDettaglio[]
-  pagamenti: ListaPagamenti; fatture: Fattura[]; task: Task[]
+  pagamenti: ListaPagamenti; fatture: Fattura[]; task: Task[]; diete: RigaDieta[]
 }
 
 async function caricaScheda(id: number): Promise<Scheda> {
-  const [paziente, percorsi, visite, check, pagamenti, fatture, task] = await Promise.all([
+  const [paziente, percorsi, visite, check, pagamenti, fatture, task, diete] = await Promise.all([
     pazientiService.dettaglio(id), pazientiService.percorsi(id), pazientiService.visite(id), pazientiService.check(id),
-    pazientiService.pagamenti(id), pazientiService.fatture(id), pazientiService.task(id),
+    pazientiService.pagamenti(id), pazientiService.fatture(id), pazientiService.task(id), dieteService.delPaziente(id),
   ])
-  return { paziente, percorsi, visite, check, pagamenti, fatture, task }
+  return { paziente, percorsi, visite, check, pagamenti, fatture, task, diete }
 }
 
 function RigaLista({ titolo, dettaglio, chip, importo, ...altro }: { titolo: string; dettaglio?: string; chip?: React.ReactNode; importo?: string } & React.HTMLAttributes<HTMLDivElement>) {
@@ -43,6 +45,7 @@ function RigaLista({ titolo, dettaglio, chip, importo, ...altro }: { titolo: str
 
 export function PazienteSheet({ pazienteId, onClose }: { pazienteId: number | null; onClose: () => void }) {
   const azioni = useAzioni()
+  const navigate = useNavigate()
   const [scheda, setScheda] = useState<Scheda | null>(null)
 
   useEffect(() => {
@@ -85,15 +88,17 @@ export function PazienteSheet({ pazienteId, onClose }: { pazienteId: number | nu
               <Button size="sm" variant="outline" onClick={() => azioni.nuovoPercorso(p.id)}><Route aria-hidden />Acquisto</Button>
               <Button size="sm" variant="outline" onClick={() => azioni.nuovoPagamento(p.id)}><Banknote aria-hidden />Pagamento</Button>
               <Button size="sm" variant="outline" onClick={() => azioni.nuovaFattura({ pazienteId: p.id })}><Receipt aria-hidden />Fattura</Button>
+              <Button size="sm" variant="outline" onClick={() => azioni.nuovaDieta({ pazienteId: p.id })}><Salad aria-hidden />Dieta</Button>
               <Button size="sm" variant="outline" onClick={() => azioni.nuovoTask({ pazienteId: p.id })}><ListChecks aria-hidden />Task</Button>
               {whatsapp ? <Button size="sm" variant="outline" asChild><a href={whatsapp} target="_blank" rel="noreferrer">WhatsApp</a></Button> : null}
             </div>
 
             <Tabs defaultValue="anagrafica" className="min-w-0 w-full max-w-full">
-              <TabsList className="flex h-auto w-full max-w-full min-w-0 sm:grid sm:grid-cols-6">
+              <TabsList className="flex h-auto w-full max-w-full min-w-0 sm:grid sm:grid-cols-7">
                 <TabsTrigger value="anagrafica">Anagrafica</TabsTrigger>
                 <TabsTrigger value="visite">Visite</TabsTrigger>
                 <TabsTrigger value="check">Check</TabsTrigger>
+                <TabsTrigger value="diete">Diete</TabsTrigger>
                 <TabsTrigger value="pagamenti">Pagamenti</TabsTrigger>
                 <TabsTrigger value="fatture">Fatture</TabsTrigger>
                 <TabsTrigger value="task">Task</TabsTrigger>
@@ -156,6 +161,28 @@ export function PazienteSheet({ pazienteId, onClose }: { pazienteId: number | nu
                   <SheetSection key={c.id} title={`Settimana del ${dataBreve(c.settimana)}`}>
                     <RisposteCheck check={c} />
                   </SheetSection>
+                ))}
+              </TabsContent>
+
+              <TabsContent value="diete" className="grid grid-cols-1 gap-2 pt-3 min-w-0">
+                {scheda.diete.length === 0 ? (
+                  <Vuoto titolo="Nessuna dieta" icona={<Salad aria-hidden />} descrizione="Ogni nuova dieta si aggiunge qui, e la precedente resta nello storico." />
+                ) : scheda.diete.map((d, i) => (
+                  <div key={d.id} className="flex items-center gap-2 min-w-0">
+                    <div className="min-w-0 flex-1 cursor-pointer" role="link" tabIndex={0} onClick={() => {
+                      onClose()
+                      navigate(`/diete/${d.id}`)
+                    }} onKeyDown={(e) => {
+                      if (e.key !== "Enter") return
+                      onClose()
+                      navigate(`/diete/${d.id}`)
+                    }}>
+                      <RigaLista titolo={d.titolo}
+                        dettaglio={`Creata ${quandoBreve(d.createdAt)} · modificata ${quandoBreve(d.updatedAt)} · ${d.versioni} ${d.versioni === 1 ? "versione" : "versioni"}`}
+                        chip={i === 0 ? <Chip tono={d.consegnataIl ? "ok" : "warn"}>{d.consegnataIl ? "In uso" : "In uso · da consegnare"}</Chip> : <Chip tono="muted">Precedente</Chip>} />
+                    </div>
+                    <Button size="icon" variant="ghost" aria-label={`PDF di ${d.titolo}`} title="Apri il PDF" onClick={() => dieteService.apriPdf(d.id).catch(toastErrore)}><FileText aria-hidden /></Button>
+                  </div>
                 ))}
               </TabsContent>
 
