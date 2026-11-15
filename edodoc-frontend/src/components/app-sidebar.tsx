@@ -1,4 +1,4 @@
-import { Mail, Banknote, CalendarDays, CalendarRange, ClipboardCheck, FileText, GraduationCap, LayoutDashboard, ListChecks, LogOut, Salad, Settings, ShoppingBag, Users, Wallet, type LucideIcon } from "lucide-react"
+import { Mail, MailPlus, Banknote, CalendarCheck2, CalendarDays, CalendarRange, ClipboardCheck, FileText, GraduationCap, LayoutDashboard, ListChecks, LogOut, Megaphone, Salad, Settings, ShoppingBag, Target, Users, Wallet, Youtube, Instagram, type LucideIcon } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar"
 import { Logo } from "@/components/logo"
@@ -10,12 +10,18 @@ type Voce = { titolo: string; url: string; icona: LucideIcon }
 const GRUPPI: { titolo: string; voci: Voce[] }[] = [
   { titolo: "Studio", voci: [
     { titolo: "Dashboard", url: "/", icona: LayoutDashboard },
+    { titolo: "Obiettivi", url: "/obiettivi", icona: Target },
     { titolo: "Pazienti", url: "/pazienti", icona: Users },
     { titolo: "Visite", url: "/visite", icona: CalendarDays },
+    { titolo: "Discovery", url: "/discovery", icona: CalendarCheck2 },
     { titolo: "Calendario", url: "/calendario", icona: CalendarRange },
     { titolo: "Check settimanale", url: "/check", icona: ClipboardCheck },
     { titolo: "Diete", url: "/diete", icona: Salad },
     { titolo: "Email", url: "/email", icona: Mail },
+    { titolo: "Email Marketing", url: "/email-marketing", icona: MailPlus },
+    { titolo: "Planner social", url: "/planner", icona: Megaphone },
+    { titolo: "Meta", url: "/meta", icona: Instagram },
+    { titolo: "YouTube", url: "/youtube", icona: Youtube },
     { titolo: "Task", url: "/task", icona: ListChecks },
     { titolo: "Corsi", url: "/corsi", icona: GraduationCap },
   ] },
@@ -53,7 +59,8 @@ export function AppSidebar() {
               </div>
               <ul className="mnav-list">
                 {gruppo.voci.map((voce) => {
-                  const attiva = voce.url === "/" ? pathname === "/" : pathname.startsWith(voce.url)
+                  // Confronto per segmento: "/email" non deve accendersi su "/email-marketing"
+                  const attiva = voce.url === "/" ? pathname === "/" : pathname === voce.url || pathname.startsWith(`${voce.url}/`)
                   return (
                     <li key={voce.url}>
                       <Link to={voce.url} className="mnav-item" data-active={attiva ? "" : undefined} aria-current={attiva ? "page" : undefined} onClick={chiudi}>

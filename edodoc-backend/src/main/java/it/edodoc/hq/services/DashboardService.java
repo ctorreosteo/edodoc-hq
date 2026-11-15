@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 public class DashboardService {
 
     private static final int GIORNI_RINNOVI = 60;
+    private static final List<Task.Stato> TASK_CHIUSI = List.of(Task.Stato.COMPLETATO, Task.Stato.ANNULLATO);
     private static final int SETTIMANE_ANDAMENTO = 8;
 
     private final PazienteRepository pazienteRepository;
@@ -78,8 +79,8 @@ public class DashboardService {
         List<VisiteDto.Riga> visiteOggi = visitaService.nelPeriodo(oggi, oggi).stream()
                 .filter(v -> v.stato() != Visita.Stato.ANNULLATA).toList();
 
-        List<TaskDto.Riga> taskUrgenti = taskRepository.findAperti().stream().limit(6)
-                .map(t -> TaskDto.Riga.da(t, oggi)).toList();
+        List<TaskDto.RigaLegacy> taskUrgenti = taskRepository.findAperti().stream().limit(6)
+                .map(t -> TaskDto.RigaLegacy.da(t, oggi)).toList();
 
         FinanceDto.Riepilogo finance = financeService.riepilogo(oggi.getYear(), oggi);
         BigDecimal incassatoAnno = finance.totali().lordo();
@@ -107,8 +108,8 @@ public class DashboardService {
                 pazienteRepository.countByAttivoTrueAndStato(Paziente.Stato.LISTA_ATTESA),
                 settimana, check.attesi(), check.compilati(), check.conSegnali(), daContattare,
                 visiteSettimana, visiteOggi,
-                taskRepository.countByStato(Task.Stato.DA_FARE),
-                taskRepository.countByStatoAndScadenzaBefore(Task.Stato.DA_FARE, oggi),
+                taskRepository.countByStatoNotIn(TASK_CHIUSI),
+                taskRepository.countByStatoNotInAndScadenzaBefore(TASK_CHIUSI, oggi),
                 taskUrgenti,
                 incassatoMese, incassatoAnno,
                 tutti.riepilogo().daPagare().add(tutti.riepilogo().scaduto()), tutti.riepilogo().scaduto(),

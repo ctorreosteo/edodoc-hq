@@ -52,11 +52,17 @@ public class PazienteService {
     private final TaskRepository taskRepository;
     private final TaskService taskService;
 
+    private final MailingEventiGestionaleService mailing;
+    private final MailingContattiService contattiMailing;
+
     public PazienteService(PazienteRepository pazienteRepository, PercorsoRepository percorsoRepository,
                            VisitaRepository visitaRepository, PagamentoRepository pagamentoRepository,
                            CheckSettimanaleRepository checkRepository, UtenteRepository utenteRepository,
                            SessioneAppRepository sessioneRepository, DispositivoRepository dispositivoRepository,
-                           FatturaRepository fatturaRepository, TaskRepository taskRepository, TaskService taskService) {
+                           FatturaRepository fatturaRepository, TaskRepository taskRepository, TaskService taskService,
+                           MailingEventiGestionaleService mailing, MailingContattiService contattiMailing) {
+        this.mailing = mailing;
+        this.contattiMailing = contattiMailing;
         this.pazienteRepository = pazienteRepository;
         this.percorsoRepository = percorsoRepository;
         this.visitaRepository = visitaRepository;
@@ -131,6 +137,7 @@ public class PazienteService {
         Paziente paziente = new Paziente();
         applica(paziente, richiesta);
         Paziente salvato = pazienteRepository.save(paziente);
+        mailing.pazienteCreato(salvato.getId());
         return riga(salvato, null, null, List.of(), false, false, LocalDate.now());
     }
 
@@ -139,6 +146,7 @@ public class PazienteService {
         Paziente paziente = trova(id);
         applica(paziente, richiesta);
         pazienteRepository.flush();
+        mailing.pazienteSalvato(id);
         return dettaglio(id);
     }
 
@@ -148,6 +156,7 @@ public class PazienteService {
         Paziente paziente = trova(id);
         paziente.setAttivo(false);
         paziente.setArchiviatoIl(LocalDateTime.now());
+        mailing.pazienteSalvato(id);
         utenteRepository.findByPazienteId(id).ifPresent(u -> {
             u.setAttivo(false);
             u.setInvitoTokenHash(null);
@@ -195,6 +204,8 @@ public class PazienteService {
         }
 
         String email = paziente.getEmail();
+        // Nella stessa transazione: se non riesce, l'anonimizzazione non avviene
+        contattiMailing.anonimizzaPerPaziente(id);
         paziente.setNome("Paziente");
         paziente.setCognome("Anonimizzato " + id);
         paziente.setEmail(null);
@@ -220,11 +231,14 @@ public class PazienteService {
             u.setCognome(paziente.getCognome());
             revocaTelefoni(u.getId());
         });
-        for (Task task : taskRepository.findDelPaziente(id)) {
+        List<Task> taskPaziente = taskRepository.findDelPaziente(id);
+        // Cronologia, commenti, allegati e checklist possono citare il paziente: se ne vanno
+        taskService.dimenticaContenuti(taskPaziente.stream().map(Task::getId).toList());
+        for (Task task : taskPaziente) {
             task.setTitolo("Task di un paziente anonimizzato");
             task.setDescrizione(null);
-            if (task.getStato() == Task.Stato.DA_FARE) {
-                task.setStato(Task.Stato.FATTO);
+            if (!task.getStato().isChiuso()) {
+                task.setStato(Task.Stato.COMPLETATO);
                 task.setCompletatoIl(adesso);
             }
         }

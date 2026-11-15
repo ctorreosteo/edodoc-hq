@@ -1,0 +1,4451 @@
+/*
+  Email Marketing — editor email, template e campagne. Stesso scope della pagina: [data-vl][data-vl-page="mailing"]
+  (anche portali: popover, menu, dialog, viste a tutto schermo portano data-vl + data-vl-page="mailing").
+  Prefissi: ml-ed-* editor, ml-mini/ml-inbox/ml-schermo anteprime condivise, ml-tpl-* template, ml-cp-* campagne.
+  Token dalla pagina (lux-mailing.css): --ml-accento, --ml-bordo, --ml-carta, --ml-r, --ml-ease, --ml-spring, ecc.
+  Temi: chiaro e .dark. Niente h1–h6: i titoli sono div.
+*/
+
+[data-vl-page="mailing"] {
+  --ml-ed-selezione: #3A6098;
+  --ml-ed-sx: 252px;
+  --ml-ed-dx: 340px;
+  --ml-ed-fondo-tela: #eef0f4;
+  --ml-ed-punti: rgba(31, 58, 99, 0.09);
+  --ml-ed-campo: var(--ml-carta);
+}
+
+.dark [data-vl-page="mailing"] {
+  --ml-ed-fondo-tela: #1A3052;
+  --ml-ed-punti: rgba(255, 255, 255, 0.06);
+  --ml-ed-campo: rgba(255, 255, 255, 0.05);
+}
+
+@keyframes ml-ed-gira {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ml-ed-entra {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes ml-ed-pannello {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+[data-vl-page="mailing"] .ml-ed-gira {
+  animation: ml-ed-gira 0.9s linear infinite;
+}
+
+/* ───────────────────────── Struttura editor ───────────────────────── */
+
+[data-vl-page="mailing"] .ml-ed {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 560px;
+  min-width: 0;
+  border-radius: var(--ml-r);
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  overflow: hidden;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  min-height: 3.25rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--ml-bordo);
+  background: var(--vl-surface);
+  flex-wrap: wrap;
+}
+
+[data-vl-page="mailing"] .ml-ed-barra-gruppo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-barra-sep {
+  width: 1px;
+  height: 1.4rem;
+  margin: 0 0.2rem;
+  background: var(--ml-bordo-forte);
+}
+
+[data-vl-page="mailing"] .ml-ed-corpo {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--ml-ed-sx) minmax(0, 1fr) var(--ml-ed-dx);
+}
+
+@media (max-width: 1240px) {
+  [data-vl-page="mailing"] {
+    --ml-ed-sx: 214px;
+    --ml-ed-dx: 304px;
+  }
+}
+
+[data-vl-page="mailing"] .ml-ed[data-mobile] .ml-ed-corpo {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-vl-page="mailing"] .ml-ed[data-mobile] .ml-ed-corpo > * {
+  flex: 1;
+  min-height: 0;
+  border: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-mobile-schede {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  padding: 0.35rem;
+  border-bottom: 1px solid var(--ml-bordo);
+}
+
+[data-vl-page="mailing"] .ml-ed-mobile-schede > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2.3rem;
+  border-radius: 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-vl-page="mailing"] .ml-ed-mobile-schede > button[data-attivo] {
+  background: var(--ml-accento-morbido);
+  color: var(--ml-accento);
+}
+
+/* Colonna sinistra */
+
+[data-vl-page="mailing"] .ml-ed-sx,
+[data-vl-page="mailing"] .ml-ed-dx {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--vl-surface);
+}
+
+[data-vl-page="mailing"] .ml-ed-sx {
+  border-right: 1px solid var(--ml-bordo);
+}
+
+[data-vl-page="mailing"] .ml-ed-dx {
+  border-left: 1px solid var(--ml-bordo);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+[data-vl-page="mailing"] .ml-ed-sx-schede {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  margin: 0.6rem 0.6rem 0.2rem;
+  padding: 0.25rem;
+  border-radius: 0.8rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-sx-schede > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2rem;
+  border-radius: 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+  transition: background-color 160ms var(--ml-ease), color 160ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-sx-schede > button svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-sx-schede > button[data-attivo] {
+  background: var(--vl-surface);
+  color: var(--vl-ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-conta {
+  min-width: 1.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--ml-accento-morbido);
+  color: var(--ml-accento);
+  font-size: 0.68rem;
+  line-height: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="mailing"] .ml-ed-sx-corpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.4rem 0.6rem 1rem;
+}
+
+/* Palette */
+
+[data-vl-page="mailing"] .ml-ed-palette-gruppo + .ml-ed-palette-gruppo {
+  margin-top: 0.9rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-palette-titolo {
+  margin: 0.35rem 0.2rem 0.45rem;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-palette-griglia {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-voce {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-width: 0;
+  padding: 0.6rem 0.6rem 0.55rem;
+  border-radius: 0.85rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  text-align: left;
+  cursor: grab;
+  touch-action: none;
+  transition: transform 180ms var(--ml-spring), box-shadow 180ms var(--ml-ease), background-color 180ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-voce:hover {
+  transform: translateY(-2px);
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset, var(--vl-shadow-hover);
+}
+
+[data-vl-page="mailing"] .ml-ed-voce:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus), 0 0 0 1px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-voce[data-trascina] {
+  opacity: 0.4;
+}
+
+[data-vl-page="mailing"] .ml-ed-voce-icona {
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  margin-bottom: 0.2rem;
+  border-radius: 0.6rem;
+  background: var(--ml-accento-morbido);
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-voce-nome {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-voce-desc {
+  font-size: 0.68rem;
+  line-height: 1.3;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-palette-suggerimento {
+  margin-top: 1rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px dashed var(--ml-bordo-forte);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-fantasma,
+[data-vl-page="mailing"].ml-ed-fantasma {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.8rem;
+  background: var(--ml-accento);
+  color: var(--ml-accento-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 16px 34px -14px var(--ml-accento);
+  cursor: grabbing;
+  transform: rotate(-2deg);
+}
+
+/* Struttura */
+
+[data-vl-page="mailing"] .ml-ed-struttura {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 0.3rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato {
+  position: relative;
+  border-radius: 0.7rem;
+  background: var(--vl-surface);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato[data-trascina] {
+  z-index: 2;
+  box-shadow: var(--vl-shadow-hover), 0 0 0 1px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-riga {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 2.35rem;
+  border-radius: 0.7rem;
+  transition: background-color 140ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-riga:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato[data-selezionato] > .ml-ed-strato-riga {
+  background: var(--ml-accento-morbido);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ml-accento) 35%, transparent) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-maniglia {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 2rem;
+  color: var(--vl-ink-3);
+  cursor: grab;
+  touch-action: none;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-corpo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.2rem;
+  padding-right: 0.35rem;
+  text-align: left;
+}
+
+[data-vl-page="mailing"] .ml-ed .ml-ed-strato-icona {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-nome {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--vl-ink);
+  white-space: nowrap;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-riassunto {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.72rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-azioni {
+  position: absolute;
+  top: 50%;
+  right: 0.25rem;
+  display: flex;
+  gap: 0.1rem;
+  padding: 0.1rem;
+  border-radius: 0.55rem;
+  background: var(--ml-carta);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-riga:hover .ml-ed-strato-azioni,
+[data-vl-page="mailing"] .ml-ed-strato-riga:focus-within .ml-ed-strato-azioni {
+  opacity: 1;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-azioni > button {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 0.45rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-azioni > button svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-azioni > button:hover {
+  background: var(--vl-surface-2);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-azioni > button[data-pericolo]:hover {
+  background: var(--vl-danger-bg);
+  color: var(--vl-danger-fg);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-figli {
+  margin: 0.1rem 0 0.25rem 1.5rem;
+  padding-left: 0.5rem;
+  border-left: 1px dashed var(--ml-bordo-forte);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-figli > li {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-corpo {
+  overflow: hidden;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-figli > li:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-figli > li[data-selezionato] {
+  background: var(--ml-accento-morbido);
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-figli .ml-ed-strato-corpo {
+  height: 1.95rem;
+  padding-left: 0.3rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-strato-col {
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.3rem;
+  background: var(--vl-surface-2);
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-struttura-vuota {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2rem 0.8rem;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-ed-struttura-vuota svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-struttura-vuota small {
+  font-weight: 500;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--vl-ink-3);
+}
+
+/* Tela */
+
+[data-vl-page="mailing"] .ml-ed-tela {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 20px 3rem;
+  background-color: var(--ml-ed-fondo-tela);
+  background-image: radial-gradient(var(--ml-ed-punti) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+  transition: background-color 260ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-ed-tela > * {
+  flex-shrink: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-tela[data-vista="scuro"] {
+  --ml-ed-fondo-tela: #0b0f0e;
+  --ml-ed-punti: rgba(255, 255, 255, 0.06);
+}
+
+[data-vl-page="mailing"] .ml-ed-tela[data-trascina] .ml-ed-iframe {
+  pointer-events: none;
+}
+
+[data-vl-page="mailing"] .ml-ed-foglio {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 24px 60px -30px rgba(0, 20, 50, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  animation: ml-ed-entra 280ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-ed-telefono {
+  position: relative;
+  padding: 44px 12px 16px;
+  border-radius: 46px;
+  background: #111416;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 30px 70px -30px rgba(0, 0, 0, 0.55);
+  animation: ml-ed-entra 280ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-ed-telefono > .ml-ed-iframe-box {
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+[data-vl-page="mailing"] .ml-ed-telefono-notch {
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  z-index: 2;
+  width: 96px;
+  height: 20px;
+  border-radius: 999px;
+  background: #000000;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+[data-vl-page="mailing"] .ml-ed-iframe-box {
+  position: relative;
+  overflow: hidden;
+  transition: height 200ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-ed-iframe {
+  display: block;
+  border: 0;
+  transform-origin: top left;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-iframe[data-pronto] {
+  opacity: 1;
+}
+
+[data-vl-page="mailing"] .ml-ed-busta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  max-width: 100%;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.8rem;
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-busta-oggetto {
+  font-size: 0.85rem;
+  font-weight: 750;
+  color: var(--vl-ink);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-vl-page="mailing"] .ml-ed-busta-pre {
+  font-size: 0.75rem;
+  color: var(--vl-ink-3);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Barra strumenti */
+
+[data-vl-page="mailing"] .ml-ed-icona-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.6rem;
+  color: var(--vl-ink-2);
+  transition: background-color 140ms ease, color 140ms ease, transform 140ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-ed-icona-btn:hover:not(:disabled) {
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-icona-btn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+[data-vl-page="mailing"] .ml-ed-icona-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+[data-vl-page="mailing"] .ml-ed-icona-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-ed-icona-btn--pericolo:hover:not(:disabled) {
+  background: var(--vl-danger-bg);
+  color: var(--vl-danger-fg);
+}
+
+[data-vl-page="mailing"] .ml-ed-interr {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.1rem;
+  padding: 0 0.7rem;
+  border-radius: 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-interr:hover {
+  color: var(--vl-ink);
+  background: var(--vl-hover);
+}
+
+[data-vl-page="mailing"] .ml-ed-interr[data-attivo] {
+  background: var(--ml-accento-morbido);
+  color: var(--ml-accento);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ml-accento) 45%, transparent) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-peso {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  font-size: 0.72rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-peso[data-tono="avviso"] {
+  background: var(--vl-warn-bg);
+  color: var(--vl-warn-fg);
+}
+
+[data-vl-page="mailing"] .ml-ed-peso[data-tono="errore"] {
+  background: var(--vl-danger-bg);
+  color: var(--vl-danger-fg);
+}
+
+/* Segmentato */
+
+[data-vl-page="mailing"] .ml-ed-seg {
+  display: inline-flex;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: 0.75rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  max-width: 100%;
+}
+
+[data-vl-page="mailing"] .ml-ed-seg > button {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 2rem;
+  height: 1.8rem;
+  padding: 0 0.6rem;
+  border-radius: 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+  white-space: nowrap;
+  transition: background-color 160ms var(--ml-ease), color 160ms ease, box-shadow 160ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-seg > button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-seg > button:hover:not([data-attivo]) {
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-seg > button[data-attivo] {
+  background: var(--vl-surface);
+  color: var(--ml-accento);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ml-bordo) inset;
+}
+
+.dark [data-vl-page="mailing"] .ml-ed-seg > button[data-attivo]{
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-vl-page="mailing"] .ml-ed-seg > button:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus);
+}
+
+/* ───────────────────────── Pannello proprietà ───────────────────────── */
+
+[data-vl-page="mailing"] .ml-ed-pannello {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  animation: ml-ed-pannello 220ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-testa {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0.85rem;
+  background: var(--vl-surface);
+  border-bottom: 1px solid var(--ml-bordo);
+  backdrop-filter: blur(10px);
+}
+
+.dark [data-vl-page="mailing"] .ml-ed-pannello-testa {
+  background: var(--ml-carta);
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-icona {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.7rem;
+  background: var(--ml-accento);
+  color: var(--ml-accento-ink);
+  box-shadow: 0 8px 18px -10px var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-titoli {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-titolo {
+  font-size: 0.92rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-sotto,
+[data-vl-page="mailing"] .ml-ed-pannello-percorso {
+  font-size: 0.72rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-percorso {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-percorso:hover {
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-azioni {
+  display: flex;
+  gap: 0.1rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-pannello-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  padding: 0.95rem 0.95rem 2rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-sezione {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-sezione + .ml-ed-sezione {
+  padding-top: 0.95rem;
+  border-top: 1px solid var(--ml-bordo);
+}
+
+[data-vl-page="mailing"] .ml-ed-sezione-titolo {
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-sezione-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-etichetta-riga {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 1.4rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-etichetta {
+  font-size: 0.74rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-ed-aiuto {
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-avviso {
+  color: var(--vl-warn-fg);
+  font-weight: 600;
+}
+
+[data-vl-page="mailing"] .ml-ed-nota {
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.7rem;
+  background: var(--vl-info-bg);
+  color: var(--vl-info-fg);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+[data-vl-page="mailing"] .ml-ed-riga2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-input {
+  width: 100%;
+  height: 2.2rem;
+  font-size: 0.82rem;
+}
+
+[data-vl-page="mailing"] textarea.ml-ed-input {
+  height: auto;
+  padding: 0.55rem 0.7rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+[data-vl-page="mailing"] .ml-ed-codice {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 450;
+}
+
+[data-vl-page="mailing"] .ml-ed-btn-piccolo svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+/* Cursore */
+
+[data-vl-page="mailing"] .ml-ed-cursore {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 1.4rem;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ml-accento) var(--ml-ed-pct), var(--ml-bordo-forte) var(--ml-ed-pct));
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ml-accento) var(--ml-ed-pct), var(--ml-bordo-forte) var(--ml-ed-pct));
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 2px solid var(--ml-accento);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transition: transform 140ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 2px solid var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore input[type="range"]:focus-visible {
+  outline: none;
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-ed-cursore-valore {
+  min-width: 3.2rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.5rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-2);
+}
+
+/* Interruttore */
+
+[data-vl-page="mailing"] .ml-ed-interruttore {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-interruttore[data-disabilitato] {
+  opacity: 0.55;
+}
+
+[data-vl-page="mailing"] .ml-ed-interruttore-testi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-interruttore-etichetta {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--vl-ink);
+  cursor: pointer;
+}
+
+[data-vl-page="mailing"] .ml-ed-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 1.4rem;
+  margin-top: 0.1rem;
+  border-radius: 999px;
+  background: var(--ml-bordo-forte);
+  transition: background-color 200ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-ed-switch[data-attivo] {
+  background: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-switch:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-ed-switch-pallino {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 220ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-ed-switch[data-attivo] .ml-ed-switch-pallino {
+  transform: translateX(1rem);
+}
+
+/* Colore */
+
+[data-vl-page="mailing"] .ml-ed-colore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 2.2rem;
+  padding: 0 0.6rem 0 0.35rem;
+  border-radius: 0.7rem;
+  background: var(--ml-ed-campo);
+  border: 1px solid var(--ml-bordo-forte);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore:hover {
+  border-color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-colore:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-campione {
+  flex-shrink: 0;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 0.45rem;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-campione[data-auto] {
+  background: linear-gradient(135deg, transparent 45%, #e5484d 45%, #e5484d 55%, transparent 55%), var(--vl-surface-2);
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-testo {
+  font-size: 0.76rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-vl-page="mailing"].ml-ed-pop,
+[data-vl-page="mailing"] .ml-ed-pop {
+  padding: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--ml-bordo);
+  background: var(--ml-carta);
+  color: var(--vl-ink);
+  box-shadow: 0 20px 50px -20px rgba(0, 20, 50, 0.45);
+}
+
+[data-vl-page="mailing"].ml-ed-pop-colore {
+  width: 15.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-auto {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.45rem;
+  border-radius: 0.7rem;
+  text-align: left;
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-auto[data-attivo] {
+  box-shadow: 0 0 0 2px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-auto > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-auto strong {
+  font-size: 0.78rem;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-auto small {
+  font-size: 0.68rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-ok {
+  width: 1rem;
+  height: 1rem;
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-griglia {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-tessera {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) inset;
+  transition: transform 140ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-tessera:hover {
+  transform: scale(1.1);
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-tessera svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-hex {
+  display: flex;
+  gap: 0.4rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-nativo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.6rem;
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset;
+  color: var(--vl-ink-2);
+  cursor: pointer;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-nativo svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-colore-nativo input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Caricamento immagini */
+
+[data-vl-page="mailing"] .ml-ed-carica {
+  position: relative;
+  display: grid;
+  min-height: 7.5rem;
+  border-radius: 0.9rem;
+  border: 1.5px dashed var(--ml-bordo-forte);
+  background: var(--vl-surface-2);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 200ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-ed-carica:hover,
+[data-vl-page="mailing"] .ml-ed-carica:focus-visible {
+  outline: none;
+  border-color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-carica[data-stato="sopra"] {
+  border-color: var(--ml-accento);
+  background: var(--ml-accento-morbido);
+  transform: scale(1.01);
+}
+
+[data-vl-page="mailing"] .ml-ed-carica[data-piena] {
+  border-style: solid;
+}
+
+[data-vl-page="mailing"] .ml-ed-carica-anteprima {
+  grid-area: 1 / 1;
+  width: 100%;
+  max-height: 11rem;
+  object-fit: contain;
+  background: repeating-conic-gradient(var(--vl-surface-2) 0% 25%, var(--vl-surface) 0% 50%) 0 0 / 16px 16px;
+}
+
+[data-vl-page="mailing"] .ml-ed-carica-velo {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-ed-carica-velo svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-carica-velo small {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-carica[data-piena] .ml-ed-carica-velo {
+  background: rgba(10, 16, 14, 0.55);
+  color: #ffffff;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-carica[data-piena] .ml-ed-carica-velo svg {
+  color: #ffffff;
+}
+
+[data-vl-page="mailing"] .ml-ed-carica[data-piena]:hover .ml-ed-carica-velo,
+[data-vl-page="mailing"] .ml-ed-carica[data-piena][data-stato="carico"] .ml-ed-carica-velo,
+[data-vl-page="mailing"] .ml-ed-carica[data-piena][data-stato="sopra"] .ml-ed-carica-velo {
+  opacity: 1;
+}
+
+[data-vl-page="mailing"] .ml-ed-carica-rimuovi {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 0.55rem;
+  background: rgba(10, 16, 14, 0.7);
+  color: #ffffff;
+  opacity: 0;
+  transition: opacity 160ms ease, background-color 140ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-carica:hover .ml-ed-carica-rimuovi {
+  opacity: 1;
+}
+
+[data-vl-page="mailing"] .ml-ed-carica-rimuovi:hover {
+  background: #e5484d;
+}
+
+/* Menu (segnaposto, toni, azioni) */
+
+[data-vl-page="mailing"].ml-ed-menu {
+  min-width: 15rem;
+  padding: 0.35rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--ml-bordo);
+  background: var(--ml-carta);
+  color: var(--vl-ink);
+  box-shadow: 0 20px 50px -20px rgba(0, 20, 50, 0.45);
+}
+
+[data-vl-page="mailing"] .ml-ed-menu-gruppo {
+  padding: 0.4rem 0.55rem 0.2rem;
+  font-size: 0.64rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-menu-voce {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+}
+
+[data-vl-page="mailing"] .ml-ed-menu-voce--riga {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+[data-vl-page="mailing"] .ml-ed-menu-voce--riga svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-menu-voce[data-highlighted] {
+  background: var(--ml-accento-morbido);
+}
+
+[data-vl-page="mailing"] .ml-ed-menu-voce--pericolo,
+[data-vl-page="mailing"] .ml-ed-menu-voce--pericolo svg {
+  color: var(--vl-danger-fg);
+}
+
+[data-vl-page="mailing"] .ml-ed-menu-voce-nome {
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-menu-voce-es {
+  font-size: 0.7rem;
+  color: var(--vl-ink-3);
+}
+
+/* Testo ricco */
+
+[data-vl-page="mailing"] .ml-ed-testo {
+  position: relative;
+  border-radius: 0.85rem;
+  border: 1px solid var(--ml-bordo-forte);
+  background: var(--ml-ed-campo);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-testo:focus-within {
+  border-color: var(--ml-accento);
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-ed-toolbar {
+  position: sticky;
+  top: 3.6rem;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.3rem;
+  border-bottom: 1px solid var(--ml-bordo);
+  border-radius: 0.85rem 0.85rem 0 0;
+  background: inherit;
+}
+
+[data-vl-page="mailing"] .ml-ed-tb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  padding: 0 0.35rem;
+  border-radius: 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-tb-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-tb-btn:hover:not(:disabled) {
+  background: var(--vl-hover);
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-tb-btn[data-attivo] {
+  background: var(--ml-accento-morbido);
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-tb-ai {
+  margin-left: auto;
+  color: #8a4fd8;
+}
+
+.dark [data-vl-page="mailing"] .ml-ed-tb-ai {
+  color: #c4a6ff;
+}
+
+[data-vl-page="mailing"] .ml-ed-tb-sep {
+  width: 1px;
+  height: 1.1rem;
+  margin: 0 0.15rem;
+  background: var(--ml-bordo-forte);
+}
+
+[data-vl-page="mailing"] .ml-ed-testo-area {
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose {
+  min-height: 7rem;
+  padding: 0.75rem 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--vl-ink);
+  outline: none;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose p {
+  margin: 0 0 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose p:last-child {
+  margin-bottom: 0;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose h2 {
+  margin: 0.4rem 0 0.4rem;
+  font-size: 1.1rem;
+  font-weight: 750;
+  color: var(--vl-ink) !important;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose h3 {
+  margin: 0.4rem 0 0.35rem;
+  font-size: 0.98rem;
+  font-weight: 750;
+  color: var(--vl-ink) !important;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose ul,
+[data-vl-page="mailing"] .ml-ed-prose ol {
+  margin: 0 0 0.6rem;
+  padding-left: 1.25rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose ul {
+  list-style: disc;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose ol {
+  list-style: decimal;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose a {
+  color: var(--ml-accento);
+  text-decoration: underline;
+}
+
+[data-vl-page="mailing"] .ml-ed-prose p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--vl-ink-3);
+  pointer-events: none;
+}
+
+[data-vl-page="mailing"] .ml-ed-testo-velo {
+  position: absolute;
+  inset: 2.6rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 0 0 0.85rem 0.85rem;
+  background: color-mix(in srgb, var(--vl-surface) 82%, transparent);
+  backdrop-filter: blur(2px);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #8a4fd8;
+}
+
+[data-vl-page="mailing"] .ml-ed-link-form {
+  display: flex;
+  gap: 0.4rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-link-togli {
+  margin-top: 0.45rem;
+}
+
+/* Colonne, social, video, stelle, temi */
+
+[data-vl-page="mailing"] .ml-ed-colonne-elenco {
+  display: grid;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna {
+  padding: 0.6rem;
+  border-radius: 0.8rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-testa {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-testa small {
+  color: var(--vl-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-figlio {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin-bottom: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.55rem;
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-figlio:hover {
+  box-shadow: 0 0 0 1px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-figlio svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-aggiungi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-top: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-aggiungi button {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  border: 1px dashed var(--ml-bordo-forte);
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-aggiungi button:hover {
+  border-color: var(--ml-accento);
+  color: var(--ml-accento);
+  background: var(--ml-accento-morbido);
+}
+
+[data-vl-page="mailing"] .ml-ed-colonna-aggiungi svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-social-elenco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+
+[data-vl-page="mailing"] .ml-ed-social-riga {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr) 2rem;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+[data-vl-page="mailing"] .ml-ed-video-anteprima {
+  overflow: hidden;
+  border-radius: 0.8rem;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+[data-vl-page="mailing"] .ml-ed-video-anteprima img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-vl-page="mailing"] .ml-ed-stelle {
+  display: flex;
+  gap: 0.2rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-stelle button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+  color: var(--ml-bordo-forte);
+  transition: transform 140ms var(--ml-spring), color 140ms ease;
+}
+
+[data-vl-page="mailing"] .ml-ed-stelle button[data-piena] {
+  color: #f2a516;
+}
+
+[data-vl-page="mailing"] .ml-ed-stelle button[data-piena] svg {
+  fill: currentColor;
+}
+
+[data-vl-page="mailing"] .ml-ed-stelle button:hover {
+  transform: scale(1.15);
+}
+
+[data-vl-page="mailing"] .ml-ed-stelle svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-temi {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-tema {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  transition: box-shadow 160ms ease, transform 180ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-ed-tema:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset, var(--vl-shadow);
+}
+
+[data-vl-page="mailing"] .ml-ed-tema[data-attivo] {
+  box-shadow: 0 0 0 2px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-tema-campione {
+  display: grid;
+  place-items: center;
+  height: 2.6rem;
+  border-radius: 0.55rem;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06) inset;
+}
+
+[data-vl-page="mailing"] .ml-ed-tema-campione > span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 64%;
+  padding: 0.3rem;
+  border-radius: 0.3rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-tema-campione i {
+  display: block;
+  width: 60%;
+  height: 0.3rem;
+  border-radius: 999px;
+}
+
+[data-vl-page="mailing"] .ml-ed-tema-campione b {
+  display: block;
+  width: 90%;
+  height: 0.2rem;
+  border-radius: 999px;
+  opacity: 0.4;
+}
+
+[data-vl-page="mailing"] .ml-ed-tema-nome {
+  font-size: 0.7rem;
+  font-weight: 650;
+  color: var(--vl-ink-2);
+}
+
+/* Dialog AI */
+
+[data-vl-page="mailing"].ml-ed-ai-dialog {
+  border-radius: 1.25rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-dialog-titolo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-ed-dialog-titolo svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: #8a4fd8;
+}
+
+[data-vl-page="mailing"] .ml-ed-ai-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-dialog-azioni {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-ed-dialog-azioni svg,
+[data-vl-page="mailing"] .ml-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ───────────────────────── Anteprime condivise ───────────────────────── */
+
+[data-vl-page="mailing"] .ml-mini {
+  position: relative;
+  overflow: hidden;
+  background: #f3f1ec;
+  -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent);
+  mask-image: linear-gradient(180deg, #000 80%, transparent);
+}
+
+[data-vl-page="mailing"] .ml-mini-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  transform-origin: top left;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+[data-vl-page="mailing"] .ml-mini[data-caricata] .ml-mini-iframe {
+  opacity: 1;
+}
+
+[data-vl-page="mailing"] .ml-mini-attesa {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+
+/* Casella di posta */
+
+[data-vl-page="mailing"] .ml-inbox {
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--ml-carta);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  font-family: Roboto, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+[data-vl-page="mailing"] .ml-inbox--mobile {
+  max-width: 380px;
+}
+
+[data-vl-page="mailing"] .ml-inbox-barra {
+  padding: 0.6rem 1rem 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-inbox-riga {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+}
+
+[data-vl-page="mailing"] .ml-inbox-riga--nuova {
+  animation: ml-ed-entra 300ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-inbox-riga + .ml-inbox-riga {
+  border-top: 1px solid var(--ml-bordo);
+}
+
+[data-vl-page="mailing"] .ml-inbox-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: hsl(var(--ml-hue, 160) 55% 42%);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+[data-vl-page="mailing"] .ml-inbox-avatar--finto {
+  background: var(--vl-surface-2);
+}
+
+[data-vl-page="mailing"] .ml-inbox-testi {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+[data-vl-page="mailing"] .ml-inbox-mittente {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-inbox-mittente > span:first-child {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-vl-page="mailing"] .ml-inbox-ora {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-inbox-oggetto {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-inbox-pre {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  font-size: 0.84rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-inbox .ml-inbox-stella {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 1.3rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-inbox-finto {
+  display: block;
+  height: 0.55rem;
+  margin: 0.2rem 0;
+  border-radius: 999px;
+  background: var(--vl-surface-2);
+}
+
+[data-vl-page="mailing"] .ml-inbox--desktop .ml-inbox-riga {
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.84rem;
+}
+
+[data-vl-page="mailing"] .ml-inbox--desktop .ml-inbox-stella {
+  margin-top: 0;
+}
+
+[data-vl-page="mailing"] .ml-inbox-mittente-d {
+  flex: 0 0 10rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 700;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-inbox-linea {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-inbox-linea strong {
+  font-weight: 700;
+}
+
+[data-vl-page="mailing"] .ml-inbox-pre-d {
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-inbox .ml-inbox-clip {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--vl-ink-3);
+  opacity: 0;
+}
+
+/* Tutto schermo */
+
+[data-vl-page="mailing"].ml-schermo {
+  position: fixed;
+  inset: 0;
+  z-index: 10040;
+  display: flex;
+  flex-direction: column;
+  background: var(--vl-canvas);
+  background-color: #f5f7fb;
+  color: var(--vl-ink);
+  animation: ml-ed-entra 240ms var(--ml-ease);
+}
+
+.dark [data-vl-page="mailing"].ml-schermo {
+  background-color: #062347;
+}
+
+/* I due tasti di ogni email: Anteprima e Invia prova */
+
+[data-vl-page="mailing"] .ml-azioni-email {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-sezione-titolo .ml-azioni-email {
+  margin: 0 0 0 auto;
+}
+
+/* Anteprima a tutto schermo di un'email (sopra editor e builder, sotto i dialog) */
+
+[data-vl-page="mailing"].ml-schermo:has(> .ml-anteprima-piena) {
+  z-index: 10045;
+}
+
+[data-vl-page="mailing"] .ml-anteprima-piena {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+[data-vl-page="mailing"] .ml-anteprima-piena-titoli {
+  flex: 1;
+  min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+[data-vl-page="mailing"] .ml-anteprima-piena-oggetto {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-vl-page="mailing"] .ml-anteprima-piena-pre {
+  font-size: 0.8rem;
+  color: var(--vl-ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-vl-page="mailing"] .ml-anteprima-piena-corpo {
+  flex: 1;
+  overflow: auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+[data-vl-page="mailing"] .ml-anteprima-piena-email {
+  display: block;
+  width: min(100%, 720px);
+  border: 1px solid var(--ml-bordo);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+[data-vl-page="mailing"] .ml-anteprima-piena-email[data-vista="telefono"] {
+  width: 375px;
+  max-width: 100%;
+  border-radius: 28px;
+  border-width: 8px;
+  border-color: #1d2421;
+}
+
+[data-vl-page="mailing"] .ml-schermo-testa {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.6rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--ml-bordo);
+  background: var(--vl-surface);
+  flex-wrap: wrap;
+}
+
+[data-vl-page="mailing"] .ml-indietro svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-schermo-titoli {
+  flex: 1;
+  min-width: 12rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-schermo-nome {
+  min-width: 0;
+  flex: 1;
+  max-width: 28rem;
+  height: 2.3rem;
+  padding: 0 0.6rem;
+  border-radius: 0.6rem;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--vl-ink);
+  outline: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+[data-vl-page="mailing"] .ml-schermo-nome:hover {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="mailing"] .ml-schermo-nome:focus {
+  border-color: var(--ml-accento);
+  background: var(--ml-carta);
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-schermo-categoria {
+  width: 10rem;
+}
+
+[data-vl-page="mailing"] .ml-schermo-azioni {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-schermo-avviso {
+  margin: 0.6rem 1rem 0;
+}
+
+[data-vl-page="mailing"] .ml-schermo-corpo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem 1rem;
+}
+
+[data-vl-page="mailing"] .ml-schermo-corpo > .ml-ed {
+  flex: 1;
+}
+
+[data-vl-page="mailing"] .ml-schermo-attesa {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-schermo-salva-esci {
+  margin-bottom: 0.25rem;
+}
+
+[data-vl-page="mailing"] .ml-salvataggio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: var(--vl-ink-3);
+  white-space: nowrap;
+}
+
+[data-vl-page="mailing"] .ml-salvataggio svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+[data-vl-page="mailing"] .ml-salvataggio[data-stato="ok"] svg {
+  color: var(--ml-ok);
+}
+
+[data-vl-page="mailing"] .ml-salvataggio[data-stato="errore"] {
+  color: var(--vl-danger-fg);
+}
+
+[data-vl-page="mailing"] .ml-salvataggio-punto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--ml-avviso);
+}
+
+@media (max-width: 640px) {
+  [data-vl-page="mailing"] .ml-schermo-testa {
+    padding: 0.5rem 0.6rem;
+  }
+
+  [data-vl-page="mailing"] .ml-schermo-corpo {
+    padding: 0.4rem;
+  }
+
+  [data-vl-page="mailing"] .ml-schermo-categoria {
+    display: none;
+  }
+
+  [data-vl-page="mailing"] .ml-salvataggio {
+    display: none;
+  }
+}
+
+/* ───────────────────────── Template ───────────────────────── */
+
+[data-vl-page="mailing"] .ml-tpl-pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl-barra {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+[data-vl-page="mailing"] .ml-tpl-cerca {
+  position: relative;
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl-cerca svg {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  color: var(--vl-ink-3);
+  transform: translateY(-50%);
+}
+
+[data-vl-page="mailing"] .ml-tpl-cerca .ml-input {
+  width: 100%;
+  padding-left: 2.2rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl-conta {
+  margin-left: 0.2rem;
+  font-size: 0.7rem;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="mailing"] .ml-tpl-nuovo {
+  margin-left: auto;
+}
+
+[data-vl-page="mailing"] .ml-tpl-categorie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl-sezione {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl-sezione-titolo {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-tpl-sezione-titolo svg {
+  width: 1rem;
+  height: 1rem;
+  align-self: center;
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-tpl-sezione-titolo span {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-tpl-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--ml-r);
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset, var(--vl-shadow);
+  text-align: left;
+  transition: transform 260ms var(--ml-spring), box-shadow 220ms var(--ml-ease);
+  animation: ml-ed-entra 320ms var(--ml-ease) both;
+}
+
+[data-vl-page="mailing"] .ml-tpl:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset, var(--vl-shadow-hover);
+}
+
+[data-vl-page="mailing"] .ml-tpl:focus-visible,
+[data-vl-page="mailing"] .ml-tpl-mini:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus), 0 0 0 1px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-tpl-mini {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-bottom: 1px solid var(--ml-bordo);
+  cursor: pointer;
+}
+
+[data-vl-page="mailing"] .ml-tpl-usa {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: var(--ml-accento);
+  color: var(--ml-accento-ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 10px 24px -10px var(--ml-accento);
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition: opacity 200ms ease, transform 240ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-tpl-usa svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl:hover .ml-tpl-usa,
+[data-vl-page="mailing"] .ml-tpl:focus-within .ml-tpl-usa {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+[data-vl-page="mailing"] .ml-tpl-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.8rem 0.95rem 0.95rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl-riga {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl-nome {
+  font-size: 0.92rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--vl-ink);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-vl-page="mailing"] .ml-tpl-nome-btn {
+  min-width: 0;
+  text-align: left;
+}
+
+[data-vl-page="mailing"] .ml-tpl-nome-btn:hover {
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-tpl-desc {
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-tpl-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-tpl-cat {
+  font-weight: 650;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-tpl--attesa {
+  animation: none;
+}
+
+[data-vl-page="mailing"] .ml-tpl-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+[data-vl-page="mailing"] .ml-tpl-vuoto {
+  padding: 2.5rem 1rem;
+  border-radius: var(--ml-r);
+  border: 1px dashed var(--ml-bordo-forte);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vl-page="mailing"] .ml-tpl,
+  [data-vl-page="mailing"] .ml-ed-foglio,
+  [data-vl-page="mailing"] .ml-ed-telefono,
+  [data-vl-page="mailing"] .ml-ed-pannello,
+  [data-vl-page="mailing"].ml-schermo {
+    animation: none;
+  }
+}
+
+/* ───────────────────────── Campagne: elenco ───────────────────────── */
+
+[data-vl-page="mailing"] .ml-cp-pagina,
+[data-vl-page="mailing"] .ml-cp-report {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-elenco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-riga {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 0.8rem 0.95rem 1rem;
+  border-radius: var(--ml-r);
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset, var(--vl-shadow);
+  transition: transform 220ms var(--ml-ease), box-shadow 220ms var(--ml-ease);
+  animation: ml-ed-entra 300ms var(--ml-ease) both;
+}
+
+[data-vl-page="mailing"] .ml-cp-riga:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset, var(--vl-shadow-hover);
+}
+
+[data-vl-page="mailing"] .ml-cp-riga-apri {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+[data-vl-page="mailing"] .ml-cp-riga-apri:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus), 0 0 0 1px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-cp-riga > :not(.ml-cp-riga-apri) {
+  position: relative;
+  pointer-events: none;
+}
+
+[data-vl-page="mailing"] .ml-cp-riga button:not(.ml-cp-riga-apri),
+[data-vl-page="mailing"] .ml-cp-riga-menu {
+  pointer-events: auto;
+}
+
+[data-vl-page="mailing"] .ml-cp-riga--attesa {
+  animation: none;
+}
+
+[data-vl-page="mailing"] .ml-cp-icona {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.85rem;
+  background: var(--vl-muted-bg);
+  color: var(--vl-muted-fg);
+}
+
+[data-vl-page="mailing"] .ml-cp-icona svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-icona[data-stato="INVIATA"] { background: var(--vl-ok-bg); color: var(--vl-ok-fg); }
+[data-vl-page="mailing"] .ml-cp-icona[data-stato="PROGRAMMATA"] { background: var(--vl-info-bg); color: var(--vl-info-fg); }
+[data-vl-page="mailing"] .ml-cp-icona[data-stato="IN_INVIO"],
+[data-vl-page="mailing"] .ml-cp-icona[data-stato="TEST_AB"] { background: var(--ml-accento); color: var(--ml-accento-ink); animation: ml-respiro 2s ease-out infinite; }
+[data-vl-page="mailing"] .ml-cp-icona[data-stato="IN_PAUSA"] { background: var(--vl-warn-bg); color: var(--vl-warn-fg); }
+[data-vl-page="mailing"] .ml-cp-icona[data-stato="ANNULLATA"] { background: var(--vl-danger-bg); color: var(--vl-danger-fg); }
+[data-vl-page="mailing"] .ml-cp-icona[data-stato="IMPORTATA"] { background: var(--vl-violet-bg); color: var(--vl-violet-fg); }
+
+[data-vl-page="mailing"] .ml-cp-riga-testi {
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-cp-riga-nome {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-riga-oggetto {
+  margin-top: 0.15rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.82rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-riga-oggetto em {
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-riga-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.8rem;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-riga-destra {
+  display: flex;
+  justify-content: flex-end;
+}
+
+[data-vl-page="mailing"] .ml-cp-metriche {
+  display: flex;
+  gap: 1.4rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-metrica {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 3.6rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-metrica-v {
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-metrica-e {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-progresso {
+  width: min(22rem, 34vw);
+}
+
+[data-vl-page="mailing"] .ml-cp-progresso-testa,
+[data-vl-page="mailing"] .ml-cp-live-testa {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--vl-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="mailing"] .ml-cp-progresso-testa strong,
+[data-vl-page="mailing"] .ml-cp-live-testa strong {
+  color: var(--vl-ink);
+  font-weight: 800;
+}
+
+[data-vl-page="mailing"] .ml-cp-progresso-piede {
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-barra .ml-barra-valore {
+  transition: width 900ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-cp-barra[data-vivo] .ml-barra-valore {
+  background-image: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
+  background-size: 200% 100%;
+  animation: ml-cp-scorre 1.6s linear infinite;
+}
+
+@keyframes ml-cp-scorre {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+[data-vl-page="mailing"] .ml-cp-barra--grande {
+  height: 0.7rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-quando {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-quando > svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--vl-info-fg);
+}
+
+[data-vl-page="mailing"] .ml-cp-quando > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+[data-vl-page="mailing"] .ml-cp-quando strong {
+  font-size: 0.86rem;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-filtri {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  [data-vl-page="mailing"] .ml-cp-riga {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-riga-destra {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-progresso {
+    width: 100%;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-metriche {
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-metrica {
+    align-items: flex-start;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-quando > div {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-riga-menu {
+    grid-row: 1;
+    grid-column: 3;
+  }
+}
+
+/* ───────────────────────── Campagne: procedura guidata ───────────────────────── */
+
+[data-vl-page="mailing"] .ml-cp-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--ml-bordo);
+  background: var(--vl-surface);
+}
+
+[data-vl-page="mailing"] .ml-cp-passo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.9rem;
+  text-align: left;
+  transition: background-color 180ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-passo:hover:not(:disabled) {
+  background: var(--vl-hover);
+}
+
+[data-vl-page="mailing"] .ml-cp-passo:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+[data-vl-page="mailing"] .ml-cp-passo:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-cp-passo:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: -0.3rem;
+  top: 50%;
+  width: 0.2rem;
+  height: 0.2rem;
+  border-radius: 999px;
+  background: var(--ml-bordo-forte);
+}
+
+[data-vl-page="mailing"] .ml-cp-passo-num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset;
+  color: var(--vl-ink-3);
+  transition: background-color 220ms ease, color 220ms ease, transform 300ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-cp-passo-num svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-passo[data-attivo] .ml-cp-passo-num {
+  background: var(--ml-accento);
+  color: var(--ml-accento-ink);
+  box-shadow: 0 8px 18px -8px var(--ml-accento);
+  transform: scale(1.06);
+}
+
+[data-vl-page="mailing"] .ml-cp-passo[data-fatto] .ml-cp-passo-num {
+  background: var(--vl-ok-bg);
+  color: var(--vl-ok-fg);
+  box-shadow: none;
+}
+
+[data-vl-page="mailing"] .ml-cp-passo-testi {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-cp-passo-nome {
+  font-size: 0.82rem;
+  font-weight: 750;
+  color: var(--vl-ink-2);
+  white-space: nowrap;
+}
+
+[data-vl-page="mailing"] .ml-cp-passo-nome small {
+  margin-right: 0.15rem;
+  font-size: 0.7rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-passo[data-attivo] .ml-cp-passo-nome {
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-passo-sotto {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.7rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-wizard-corpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.25rem 1.25rem 2rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-wizard-corpo[data-passo="contenuto"] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0.75rem 1rem 0.75rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-wizard-corpo > * {
+  animation: ml-ed-entra 260ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-cp-wizard-piede {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--ml-bordo);
+  background: var(--vl-surface);
+}
+
+[data-vl-page="mailing"] .ml-cp-wizard-punti {
+  display: flex;
+  gap: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-wizard-punti span {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--ml-bordo-forte);
+  transition: width 260ms var(--ml-spring), background-color 200ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-wizard-punti span[data-attivo] {
+  width: 1.4rem;
+  background: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-cp-wizard-fine {
+  font-size: 0.8rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-due {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  gap: 1.1rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+[data-vl-page="mailing"] .ml-cp-colonna {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-cp-appiccicoso {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-sezione {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-sezione-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+[data-vl-page="mailing"] .ml-cp-sezione-titolo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-sezione-titolo > svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-cp-sezione-nota {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-oggetto {
+  display: flex;
+  align-items: center;
+  border-radius: 0.75rem;
+  border: 1px solid var(--ml-bordo-forte);
+  background: var(--ml-ed-campo);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-oggetto:focus-within {
+  border-color: var(--ml-accento);
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-cp-oggetto .ml-input {
+  flex: 1;
+  height: 2.6rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 0.92rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-oggetto-strumenti {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding-right: 0.4rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-contatore {
+  min-width: 2rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  background: var(--vl-surface-2);
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-contatore[data-tono="ok"] { background: var(--vl-ok-bg); color: var(--vl-ok-fg); }
+[data-vl-page="mailing"] .ml-cp-contatore[data-tono="avviso"] { background: var(--vl-warn-bg); color: var(--vl-warn-fg); }
+[data-vl-page="mailing"] .ml-cp-contatore[data-tono="errore"] { background: var(--vl-danger-bg); color: var(--vl-danger-fg); }
+
+[data-vl-page="mailing"].ml-cp-emoji {
+  width: 17rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-emoji-griglia {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.15rem;
+  margin-bottom: 0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-emoji-griglia button {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  font-size: 1.15rem;
+  transition: transform 140ms var(--ml-spring), background-color 120ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-emoji-griglia button:hover {
+  background: var(--vl-hover);
+  transform: scale(1.18);
+}
+
+/* AI oggetti */
+
+[data-vl-page="mailing"] .ml-cp-ai {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  transition: opacity 200ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-lista[data-occupato] {
+  opacity: 0.5;
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-voce {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.85rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  text-align: left;
+  animation: ml-ed-entra 280ms var(--ml-ease) both;
+  transition: box-shadow 160ms ease, transform 200ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-voce:hover {
+  transform: translateX(2px);
+  box-shadow: 0 0 0 1px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-punteggio {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: conic-gradient(var(--ml-accento) var(--ml-p), var(--ml-bordo-forte) 0);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--vl-ink);
+  position: relative;
+  isolation: isolate;
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-punteggio::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  border-radius: 999px;
+  background: var(--vl-surface);
+}
+
+.dark [data-vl-page="mailing"] .ml-cp-ai-punteggio::before {
+  background: var(--ml-carta);
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-testi {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-testi strong {
+  font-size: 0.86rem;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-testi small {
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-usa {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--ml-accento);
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-ai-voce:hover .ml-cp-ai-usa {
+  opacity: 1;
+}
+
+/* A/B */
+
+[data-vl-page="mailing"] .ml-cp-ab {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: ml-ed-entra 240ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-cp-ab-variante {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-ab-lettera {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: var(--ml-s1);
+}
+
+[data-vl-page="mailing"] .ml-cp-ab-lettera[data-v="B"] { background: var(--ml-s2); }
+[data-vl-page="mailing"] .ml-cp-ab-lettera[data-v="C"] { background: var(--ml-s3); }
+
+[data-vl-page="mailing"] .ml-cp-ab-campi {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-ab-campi .ml-input {
+  width: 100%;
+}
+
+[data-vl-page="mailing"] .ml-cp-ab-pre {
+  height: 2rem;
+  font-size: 0.8rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-ab-aggiungi {
+  align-self: flex-start;
+}
+
+/* Anteprima casella */
+
+[data-vl-page="mailing"] .ml-cp-anteprima-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-anteprima-varianti {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-anteprima-variante {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-consigli {
+  padding: 0.9rem 1rem;
+  border-radius: var(--ml-r-sm);
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-cp-consigli ul {
+  margin: 0.45rem 0 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--vl-ink-2);
+}
+
+/* Pubblico */
+
+[data-vl-page="mailing"] .ml-cp-scelte {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-scelte--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.85rem;
+  border-radius: 1rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  text-align: left;
+  transition: box-shadow 180ms ease, transform 220ms var(--ml-spring), background-color 180ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset, var(--vl-shadow);
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta:focus-visible {
+  outline: none;
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta[data-attivo] {
+  background: var(--ml-accento-morbido);
+  box-shadow: 0 0 0 2px var(--ml-accento) inset;
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta-icona {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0.25rem;
+  border-radius: 0.65rem;
+  background: var(--vl-surface);
+  color: var(--ml-accento);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta-icona svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta[data-attivo] .ml-cp-scelta-icona {
+  background: var(--ml-accento);
+  color: var(--ml-accento-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta-titolo {
+  font-size: 0.86rem;
+  font-weight: 750;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-scelta-testo {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-liste,
+[data-vl-page="mailing"] .ml-cp-regole {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  animation: ml-ed-entra 240ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-cp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-chip-punto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--ml-chip-colore, var(--ml-accento));
+}
+
+[data-vl-page="mailing"] .ml-cp-chip-conta {
+  margin-left: 0.15rem;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+
+[data-vl-page="mailing"] .ml-cp-stima {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+}
+
+[data-vl-page="mailing"] .ml-cp-stima::before {
+  content: '';
+  position: absolute;
+  inset: -40% -30% auto auto;
+  width: 70%;
+  height: 120%;
+  z-index: -1;
+  background: radial-gradient(closest-side, var(--ml-accento-morbido), transparent);
+}
+
+[data-vl-page="mailing"] .ml-cp-stima-numero {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 3.2rem;
+  font-weight: 850;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+  transition: opacity 200ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-stima[data-occupato] .ml-cp-stima-numero {
+  opacity: 0.6;
+}
+
+[data-vl-page="mailing"] .ml-cp-stima-numero svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-stima-sotto {
+  margin-top: -0.3rem;
+  font-size: 0.82rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-esclusi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--ml-bordo);
+  border-bottom: 1px solid var(--ml-bordo);
+}
+
+[data-vl-page="mailing"] .ml-cp-esclusi li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-esclusi svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-esclusi span {
+  flex: 1;
+}
+
+[data-vl-page="mailing"] .ml-cp-esclusi strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-stima-giorni {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+[data-vl-page="mailing"] .ml-cp-campione {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-campione-riga {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  animation: ml-ed-entra 260ms var(--ml-ease) both;
+}
+
+[data-vl-page="mailing"] .ml-cp-campione-riga > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+[data-vl-page="mailing"] .ml-cp-campione-riga strong {
+  font-size: 0.82rem;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-campione-riga small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.72rem;
+  color: var(--vl-ink-3);
+}
+
+/* Contenuto */
+
+[data-vl-page="mailing"] .ml-cp-contenuto {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-contenuto > .ml-ed {
+  flex: 1;
+}
+
+[data-vl-page="mailing"] .ml-cp-contenuto-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-scegli {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  overflow-y: auto;
+  padding: 0.5rem 0.25rem 2rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-scegli-testa {
+  margin: 0.5rem 0 1.25rem;
+  text-align: center;
+}
+
+[data-vl-page="mailing"] .ml-cp-scegli-titolo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-scegli-sotto {
+  margin-top: 0.3rem;
+  font-size: 0.88rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-bianco-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 240px;
+  border-bottom: 1px solid var(--ml-bordo);
+  background: repeating-linear-gradient(135deg, transparent 0 12px, var(--vl-hover) 12px 13px), var(--vl-surface-2);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-bianco-mini svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--ml-accento);
+}
+
+/* Controlli e invio */
+
+[data-vl-page="mailing"] .ml-cp-controlli-corpo {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.6rem 0.4rem 0.8rem;
+  border-radius: 1rem;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+  --ml-gauge: var(--ml-ok);
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge[data-tono="avviso"] { --ml-gauge: var(--ml-avviso); }
+[data-vl-page="mailing"] .ml-cp-gauge[data-tono="errore"] { --ml-gauge: var(--ml-errore); }
+
+[data-vl-page="mailing"] .ml-cp-gauge svg {
+  width: 120px;
+  height: 70px;
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge-fondo {
+  fill: none;
+  stroke: var(--ml-bordo-forte);
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge-valore {
+  fill: none;
+  stroke: var(--ml-gauge);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dasharray 700ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge-ago {
+  stroke: var(--vl-ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge-perno {
+  fill: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge-testi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge-testi strong {
+  font-size: 1.3rem;
+  font-weight: 850;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-gauge-testi span {
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-controlli {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  transition: opacity 200ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-controlli[data-occupato] {
+  opacity: 0.55;
+}
+
+[data-vl-page="mailing"] .ml-cp-controlli li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.75rem;
+  animation: ml-ed-entra 260ms var(--ml-ease) both;
+}
+
+[data-vl-page="mailing"] .ml-cp-controlli li[data-esito="BLOCCANTE"],
+[data-vl-page="mailing"] .ml-cp-controlli li[data-esito="ERRORE"] {
+  background: var(--vl-danger-bg);
+}
+
+[data-vl-page="mailing"] .ml-cp-controlli li > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-controlli strong {
+  font-size: 0.84rem;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-controlli small {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-esito {
+  flex-shrink: 0;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.05rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-esito[data-esito="OK"] { color: var(--ml-ok); }
+[data-vl-page="mailing"] .ml-cp-esito[data-esito="AVVISO"] { color: var(--ml-avviso); }
+[data-vl-page="mailing"] .ml-cp-esito[data-esito="BLOCCANTE"] { color: var(--ml-errore); }
+
+[data-vl-page="mailing"] .ml-cp-indirizzi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.6rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--ml-bordo-forte);
+  background: var(--ml-ed-campo);
+  cursor: text;
+}
+
+[data-vl-page="mailing"] .ml-cp-indirizzi:focus-within {
+  border-color: var(--ml-accento);
+  box-shadow: var(--ml-focus);
+}
+
+[data-vl-page="mailing"] .ml-cp-indirizzi input {
+  flex: 1;
+  min-width: 10rem;
+  height: 1.8rem;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 0.84rem;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-indirizzo {
+  gap: 0.25rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-indirizzo button {
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+}
+
+[data-vl-page="mailing"] .ml-cp-indirizzo button svg {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-prova-btn {
+  align-self: flex-start;
+}
+
+[data-vl-page="mailing"] .ml-cp-data {
+  max-width: 16rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-intelligente {
+  font-size: 0.86rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-riepilogo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-riepilogo-mini {
+  overflow: hidden;
+  margin: -0.4rem -0.5rem 0;
+  border-radius: 0.9rem;
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-cp-riepilogo-dati {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-riepilogo-dati > div {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 0.6rem;
+  font-size: 0.82rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-riepilogo-dati dt {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-riepilogo-dati dt svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-riepilogo-dati dd {
+  margin: 0;
+  font-weight: 650;
+  color: var(--vl-ink);
+  overflow-wrap: anywhere;
+}
+
+[data-vl-page="mailing"] .ml-cp-invia {
+  height: 3rem;
+  font-size: 0.95rem;
+  border-radius: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-invia-nota {
+  text-align: center;
+}
+
+[data-vl-page="mailing"] .ml-cp-conferma {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-conferma-numero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.1rem;
+  border-radius: 1rem;
+  background: var(--ml-accento-morbido);
+  text-align: center;
+}
+
+[data-vl-page="mailing"] .ml-cp-conferma-numero span {
+  font-size: 2.6rem;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ml-accento);
+  animation: ml-pop 400ms var(--ml-spring);
+}
+
+[data-vl-page="mailing"] .ml-cp-conferma-numero small {
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--vl-ink-2);
+}
+
+@media (max-width: 980px) {
+  [data-vl-page="mailing"] .ml-cp-due {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-vl-page="mailing"] .ml-cp-colonna--anteprima {
+    order: -1;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-appiccicoso {
+    position: static;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-stepper {
+    grid-template-columns: repeat(4, auto);
+    overflow-x: auto;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-passo-sotto {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  [data-vl-page="mailing"] .ml-cp-scelte {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-vl-page="mailing"] .ml-cp-passo-testi {
+    display: none;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-stepper {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-controlli-corpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-vl-page="mailing"] .ml-cp-wizard-corpo {
+    padding: 0.75rem;
+  }
+
+  [data-vl-page="mailing"] .ml-cp-wizard-punti {
+    display: none;
+  }
+}
+
+/* ───────────────────────── Campagne: report ───────────────────────── */
+
+[data-vl-page="mailing"] .ml-cp-testa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-testa .ml-indietro {
+  align-self: flex-start;
+  margin: -0.4rem 0 0 -0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-testa-riga {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+[data-vl-page="mailing"] .ml-cp-testa-testi {
+  min-width: 0;
+  flex: 1 1 22rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-testa-nome {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-testa-oggetto {
+  margin-top: 0.25rem;
+  font-size: 0.92rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-testa-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: 0.45rem;
+  font-size: 0.76rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-testa-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-live {
+  padding: 0.8rem 0.9rem;
+  border-radius: var(--ml-r-sm);
+  background: var(--ml-accento-morbido);
+}
+
+[data-vl-page="mailing"] .ml-cp-kpi-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.95rem 1rem;
+  border-radius: var(--ml-r);
+  background: var(--vl-surface);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset, var(--vl-shadow);
+  animation: ml-ed-entra 320ms var(--ml-ease) both;
+}
+
+[data-vl-page="mailing"] .ml-cp-kpi[data-tono="accento"] {
+  background: linear-gradient(160deg, var(--ml-accento-morbido), transparent 70%), var(--vl-surface);
+}
+
+[data-vl-page="mailing"] .ml-cp-kpi-testa {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-kpi-testa svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--ml-accento);
+}
+
+[data-vl-page="mailing"] .ml-cp-kpi-valore {
+  font-size: 1.7rem;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-kpi-sotto {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-griglia-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-griglia-mappa {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  [data-vl-page="mailing"] .ml-cp-griglia-2,
+  [data-vl-page="mailing"] .ml-cp-griglia-mappa {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto li {
+  animation: ml-ed-entra 320ms var(--ml-ease) both;
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto-testa {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto-testa strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto-barra {
+  height: 1.6rem;
+  border-radius: 0.45rem;
+  background: var(--vl-surface-2);
+  overflow: hidden;
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto-barra span {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: var(--ml-s1);
+  animation: ml-cp-cresce 900ms var(--ml-ease) both;
+  transform-origin: left;
+}
+
+@keyframes ml-cp-cresce {
+  from { transform: scaleX(0); }
+  to { transform: none; }
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto-conv {
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto-fine {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--ml-r-sm);
+  background: var(--vl-ok-bg);
+  color: var(--vl-ok-fg);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+[data-vl-page="mailing"] .ml-cp-imbuto-fine svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-grafico {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-grafico-vuoto {
+  display: grid;
+  place-items: center;
+  height: 240px;
+  border-radius: var(--ml-r-sm);
+  border: 1px dashed var(--ml-bordo-forte);
+  font-size: 0.82rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-legenda {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-legenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-legenda i {
+  width: 0.75rem;
+  height: 0.2rem;
+  border-radius: 999px;
+}
+
+[data-vl-page="mailing"] .ml-cp-mappa {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ml-r-sm);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-cp-mappa iframe {
+  display: block;
+  border: 0;
+  transform-origin: top left;
+}
+
+[data-vl-page="mailing"] .ml-cp-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-link li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.7rem;
+  transition: background-color 140ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-link li:hover,
+[data-vl-page="mailing"] .ml-cp-link li[data-on] {
+  background: var(--ml-accento-morbido);
+}
+
+[data-vl-page="mailing"] .ml-cp-link-num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo-forte) inset;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-link-testi {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-link-testi a {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-link-testi a:hover {
+  color: var(--ml-accento);
+  text-decoration: underline;
+}
+
+[data-vl-page="mailing"] .ml-cp-link-v {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="mailing"] .ml-cp-link-v strong {
+  font-size: 0.86rem;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-link-v small {
+  font-size: 0.68rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-barre {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-barre-testa {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-barre-testa strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-barre-barra {
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--vl-surface-2);
+  overflow: hidden;
+}
+
+[data-vl-page="mailing"] .ml-cp-barre-barra span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ml-s1);
+  animation: ml-cp-cresce 800ms var(--ml-ease) both;
+  transform-origin: left;
+}
+
+[data-vl-page="mailing"] .ml-cp-varianti {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-variante {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.9rem;
+  border-radius: var(--ml-r-sm);
+  background: var(--vl-surface-2);
+  box-shadow: 0 0 0 1px var(--ml-bordo) inset;
+}
+
+[data-vl-page="mailing"] .ml-cp-variante[data-vincitore] {
+  box-shadow: 0 0 0 2px var(--ml-ok) inset;
+  background: linear-gradient(160deg, var(--vl-ok-bg), transparent 70%), var(--vl-surface-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-variante-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-vl-page="mailing"] .ml-cp-variante-testa .ml-badge svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-variante-oggetto {
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-variante-numeri {
+  display: flex;
+  gap: 1.2rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-variante-numeri div {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-vl-page="mailing"] .ml-cp-variante-numeri strong {
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-variante-numeri span {
+  font-size: 0.7rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-conversioni {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-conversioni li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.4rem;
+  border-bottom: 1px solid var(--ml-bordo);
+}
+
+[data-vl-page="mailing"] .ml-cp-conversioni li:last-child {
+  border-bottom: 0;
+}
+
+[data-vl-page="mailing"] .ml-cp-conversioni li > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-vl-page="mailing"] .ml-cp-conversioni strong {
+  font-size: 0.86rem;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-conversioni small {
+  font-size: 0.74rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-conv-icona {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.7rem;
+  background: var(--vl-info-bg);
+  color: var(--vl-info-fg);
+}
+
+[data-vl-page="mailing"] .ml-cp-conv-icona[data-tipo="CONVERSIONE_ACQUISTO"] {
+  background: var(--vl-ok-bg);
+  color: var(--vl-ok-fg);
+}
+
+[data-vl-page="mailing"] .ml-cp-conv-icona svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-conv-valore {
+  font-size: 0.92rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--vl-ok-fg);
+}
+
+[data-vl-page="mailing"] .ml-cp-conv-quando {
+  min-width: 4.5rem;
+  text-align: right;
+  font-size: 0.72rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-dest-cerca {
+  flex: 0 1 16rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-tabella-box {
+  position: relative;
+  overflow-x: auto;
+  transition: opacity 200ms ease;
+}
+
+[data-vl-page="mailing"] .ml-cp-tabella-box[data-occupato] {
+  opacity: 0.6;
+}
+
+[data-vl-page="mailing"] .ml-cp-tabella {
+  width: 100%;
+}
+
+[data-vl-page="mailing"] .ml-cp-tabella .ml-cp-num,
+[data-vl-page="mailing"] .ml-cp-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-vl-page="mailing"] .ml-cp-dest-nome {
+  font-weight: 650;
+}
+
+[data-vl-page="mailing"] .ml-cp-dest-email,
+[data-vl-page="mailing"] .ml-cp-dest-quando {
+  font-size: 0.74rem;
+  color: var(--vl-ink-3);
+  -webkit-text-fill-color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-dest-extra {
+  margin-left: 0.3rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-tabella-vuota {
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-paginazione {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--vl-ink-3);
+}
+
+[data-vl-page="mailing"] .ml-cp-paginazione > div {
+  display: flex;
+  gap: 0.3rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: linear-gradient(150deg, rgba(155, 93, 229, 0.1), transparent 55%), var(--vl-surface);
+  animation: ml-ed-entra 320ms var(--ml-ease);
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi .ml-cp-sezione-titolo > svg {
+  color: #9b5de5;
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi-rifai {
+  margin-left: auto;
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi-attesa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi-sintesi {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--vl-ink);
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi-colonne {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi-colonne .ml-etichetta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi-colonne .ml-etichetta svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi-colonne ul,
+[data-vl-page="mailing"] .ml-cp-analisi-colonne ol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--vl-ink-2);
+}
+
+[data-vl-page="mailing"] .ml-cp-analisi-colonne ul { list-style: disc; }
+[data-vl-page="mailing"] .ml-cp-analisi-colonne ol { list-style: decimal; }
+
+@media (max-width: 700px) {
+  [data-vl-page="mailing"] .ml-cp-analisi-colonne {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vl-page="mailing"] .ml-cp-riga,
+  [data-vl-page="mailing"] .ml-cp-kpi,
+  [data-vl-page="mailing"] .ml-cp-imbuto-barra span,
+  [data-vl-page="mailing"] .ml-cp-barre-barra span,
+  [data-vl-page="mailing"] .ml-cp-barra[data-vivo] .ml-barra-valore {
+    animation: none;
+  }
+}
+
+/* Le anteprime mostrano l'email come la vede chi ha il tema chiaro (la vista "Scuro" dell'editor la forza a parte):
+   senza questo l'iframe erediterebbe lo schema scuro del gestionale e attiverebbe @media (prefers-color-scheme: dark). */
+[data-vl-page="mailing"] .ml-mini-iframe,
+[data-vl-page="mailing"] .ml-cp-mappa iframe,
+[data-vl-page="mailing"] .ml-ed-iframe {
+  color-scheme: light;
+}

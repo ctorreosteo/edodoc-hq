@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react"
 import { NuovaDietaDialog, type DatiNuovaDieta } from "@/components/diete/nuova-dieta-dialog"
 import { CheckDialog } from "@/components/forms/check-dialog"
 import { ConfermaDialog, type Conferma } from "@/components/forms/conferma-dialog"
@@ -8,21 +8,19 @@ import { PagamentoDialog } from "@/components/forms/pagamento-dialog"
 import { PazienteDialog } from "@/components/forms/paziente-dialog"
 import { PercorsoDialog } from "@/components/forms/percorso-dialog"
 import { RegistraPagamentoDialog } from "@/components/forms/registra-pagamento-dialog"
-import { TaskDialog } from "@/components/forms/task-dialog"
 import { VisitaDialog } from "@/components/forms/visita-dialog"
 import { PazienteSheet } from "@/components/paziente-sheet"
+import { TaskCreaDialog, type TaskCreaPrefill } from "@/components/task/task-crea-dialog"
+import { TaskDettaglioSheet } from "@/components/task/task-dettaglio-sheet"
 import { VisitaSheet } from "@/components/visite/visita-sheet"
 import type { RichiestaEmail } from "@/lib/email"
-import { toastErrore } from "@/lib/toast"
-import { taskService } from "@/services/gestionale"
-import type { Pagamento, Paziente, Task, TaskForm, TaskStruttura, Visita } from "@/types"
+import { useTaskChanged } from "@/hooks/use-task-cambi"
+import type { Pagamento, Paziente, Visita } from "@/types"
 
 type Azioni = {
   /** Cresce a ogni salvataggio: le pagine la usano per ricaricare. */
   versione: number
   aggiorna: () => void
-  /** Cartelle e liste dei task: si ricaricano insieme a tutto il resto con aggiorna() */
-  struttura: TaskStruttura
   apriPaziente: (id: number) => void
   /** Scheda laterale della visita, come quella del paziente. */
   apriVisita: (visita: Visita) => void
@@ -35,8 +33,10 @@ type Azioni = {
   modificaPagamento: (pagamento: Pagamento) => void
   registraPagamento: (pagamento: Pagamento) => void
   nuovaFattura: (dati?: { pagamento?: Pagamento; pazienteId?: number }) => void
-  nuovoTask: (dati?: Partial<TaskForm>) => void
-  modificaTask: (task: Task) => void
+  /** Finestra di creazione del task, con lista, paziente o scadenza già scelti */
+  nuovoTask: (dati?: TaskCreaPrefill) => void
+  /** Scheda del task (dettaglio, commenti, sottotask...) da qualunque pagina */
+  apriTask: (id: number) => void
   /** Task del preset senza passare dal form: è l'azione rapida del menu contestuale. */
   inserisciCheck: (pazienteId?: number) => void
   conferma: (dati: Conferma) => void
@@ -67,7 +67,6 @@ function useFinestra<T>(iniziale: T) {
 
 export function AzioniProvider({ children }: { children: ReactNode }) {
   const [versione, setVersione] = useState(0)
-  const [struttura, setStruttura] = useState<TaskStruttura>({ cartelle: [], liste: [] })
   const [pazienteAperto, setPazienteAperto] = useState<number | null>(null)
   const aggiorna = useCallback(() => setVersione((v) => v + 1), [])
   const chiudiPaziente = useCallback(() => setPazienteAperto(null), [])
@@ -80,15 +79,18 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
   const pagamento = useFinestra<{ pagamento?: Pagamento; pazienteId?: number }>({})
   const registra = useFinestra<Pagamento | null>(null)
   const fattura = useFinestra<{ pagamento?: Pagamento; pazienteId?: number }>({})
-  const task = useFinestra<{ task?: Task; iniziali?: Partial<TaskForm> }>({})
+  const task = useFinestra<TaskCreaPrefill | undefined>(undefined)
+  const [taskAperto, setTaskAperto] = useState<number | null>(null)
+  const chiudiTask = useCallback((aperto: boolean) => {
+    if (!aperto) setTaskAperto(null)
+  }, [])
   const check = useFinestra<{ pazienteId?: number }>({})
   const conferma = useFinestra<Conferma | null>(null)
   const email = useFinestra<RichiestaEmail | null>(null)
   const dieta = useFinestra<DatiNuovaDieta>({})
 
-  useEffect(() => {
-    taskService.struttura().then(setStruttura).catch(toastErrore)
-  }, [versione])
+  // Un task cambiato (creato, completato, spostato) aggiorna anche dashboard e schede che lo mostrano
+  useTaskChanged(aggiorna)
 
   const { apri: apriPazienteForm } = paziente
   const { apri: apriPercorso } = percorso
@@ -103,7 +105,7 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
   const { apri: apriDieta } = dieta
 
   const valore = useMemo<Azioni>(() => ({
-    versione, aggiorna, struttura,
+    versione, aggiorna,
     apriPaziente: setPazienteAperto,
     apriVisita: setVisitaAperta,
     nuovoPaziente: (stato) => apriPazienteForm({ stato }),
@@ -115,13 +117,13 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
     modificaPagamento: (p) => apriPagamento({ pagamento: p }),
     registraPagamento: apriRegistra,
     nuovaFattura: (dati) => apriFattura({ ...dati }),
-    nuovoTask: (iniziali) => apriTask({ iniziali }),
-    modificaTask: (t) => apriTask({ task: t }),
+    nuovoTask: (dati) => apriTask(dati),
+    apriTask: setTaskAperto,
     inserisciCheck: (pazienteId) => apriCheck({ pazienteId }),
     conferma: apriConferma,
     inviaEmail: apriEmail,
     nuovaDieta: (dati) => apriDieta({ ...dati }),
-  }), [versione, aggiorna, struttura, apriPazienteForm, apriPercorso, apriVisitaForm, apriPagamento, apriRegistra, apriFattura, apriTask, apriCheck, apriConferma, apriEmail, apriDieta])
+  }), [versione, aggiorna, apriPazienteForm, apriPercorso, apriVisitaForm, apriPagamento, apriRegistra, apriFattura, apriTask, apriCheck, apriConferma, apriEmail, apriDieta])
 
   return (
     <AzioniContext.Provider value={valore}>
@@ -134,7 +136,8 @@ export function AzioniProvider({ children }: { children: ReactNode }) {
       <PagamentoDialog open={pagamento.aperta} onOpenChange={pagamento.onOpenChange} {...pagamento.dati} />
       <RegistraPagamentoDialog open={registra.aperta} onOpenChange={registra.onOpenChange} pagamento={registra.dati} />
       <FatturaDialog open={fattura.aperta} onOpenChange={fattura.onOpenChange} {...fattura.dati} />
-      <TaskDialog open={task.aperta} onOpenChange={task.onOpenChange} {...task.dati} />
+      <TaskCreaDialog open={task.aperta} onOpenChange={task.onOpenChange} prefill={task.dati} />
+      <TaskDettaglioSheet taskId={taskAperto} onOpenChange={chiudiTask} onApriTask={setTaskAperto} />
       <CheckDialog open={check.aperta} onOpenChange={check.onOpenChange} pazienteId={check.dati.pazienteId} />
       <EmailDialog open={email.aperta} onOpenChange={email.onOpenChange} richiesta={email.dati} />
       <NuovaDietaDialog open={dieta.aperta} onOpenChange={dieta.onOpenChange} dati={dieta.dati} />

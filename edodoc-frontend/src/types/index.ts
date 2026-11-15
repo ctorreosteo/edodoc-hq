@@ -90,26 +90,16 @@ export type EmettiFattura = {
 
 export type RigaTessera = { fatturaId: number; numero: number; data: string; codiceFiscale: string; importo: number }
 
-export type TaskCartella = { id: number; nome: string; parentId: number | null; colore: string; ordine: number; archiviata: boolean }
-
 /** codice: solo le liste di sistema, dove scrivono i job; non si archiviano e non si eliminano. */
 export type TaskLista = {
   id: number; nome: string; cartellaId: number | null; codice: string | null; colore: string; icona: string; ordine: number; archiviata: boolean
 }
 
-export type TaskStruttura = { cartelle: TaskCartella[]; liste: TaskLista[] }
-
-export type TaskTipoStruttura = "LISTA" | "CARTELLA"
-
+/** Riga compatta di dashboard e scheda paziente (stessa forma che legge l'app): stato FATTO o DA_FARE. */
 export type Task = {
   id: number; titolo: string; descrizione: string | null; lista: TaskLista; stato: string; priorita: string
   scadenza: string | null; pazienteId: number | null; pazienteNome: string | null; automatico: boolean
   completatoIl: string | null; inRitardo: boolean
-}
-
-export type TaskForm = {
-  listaId: number; titolo: string; descrizione?: string | null; scadenza?: string | null
-  priorita?: string | null; pazienteId?: number | null
 }
 
 export type MeseFinance = {
@@ -207,4 +197,29 @@ export type VersioneDieta = { numero: number; titolo: string; kcal: number | nul
 export type Dieta = {
   id: number; pazienteId: number | null; pazienteNome: string | null; titolo: string; dataInizio: string | null
   consegnataIl: string | null; createdAt: string; updatedAt: string; contenuto: ContenutoDieta; versioni: VersioneDieta[]
+}
+
+// ── Prenotazioni dal sito ──
+export type StatoPrenotazione = "IN_PROGRAMMA" | "DA_CHIUDERE" | "SVOLTA" | "NON_PRESENTATO" | "DISDETTA" | "ANNULLATA"
+export type RispostaInvito = "IN_ATTESA" | "ACCETTATO" | "FORSE" | "RIFIUTATO"
+export type EsitoPrenotazione = "INTERESSATO" | "CI_PENSA" | "ACQUISTATO" | "NON_ADATTO"
+export type Prenotazione = {
+  id: number; visitaId: number; pazienteId: number; nome: string; cognome: string; email: string | null; cellulare: string | null
+  obiettivo: string | null; messaggio: string | null; nuovoContatto: boolean; inizio: string; fine: string
+  professione: string | null; conosciutoDa: string | null; percorsiPrecedenti: string | null
+  investimento: string | null; priorita: string | null; percheOra: string | null
+  stato: StatoPrenotazione; rispostaInvito: RispostaInvito; esito: EsitoPrenotazione | null; esitoAutomatico: boolean
+  meetUrl: string | null; googleSyncStato: string; googleSyncErrore: string | null; createdAt: string
+  disdettaIl: string | null; disdettaDa: "PERSONA" | "INVITO" | null; disdettaMotivo: string | null; noteDottore: string | null
+  statoPaziente: string
+}
+export type EventoPrenotazione = { tipo: string; testo: string; quando: string }
+export type DettaglioPrenotazione = { riga: Prenotazione; cronologia: EventoPrenotazione[]; altreChiamate: number }
+
+export type Conquista = {
+  pazienteId: number; nome: string; data: string; tipo: string; fonte: string | null; importo: number; percorsi: number
+}
+
+export type Obiettivo = {
+  anno: number; target: number; oggi: string; conquiste: Conquista[]; annoPrecedente: Conquista[]; lead: number; listaAttesa: number
 }

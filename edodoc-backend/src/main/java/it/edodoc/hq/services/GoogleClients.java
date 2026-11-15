@@ -83,10 +83,19 @@ public class GoogleClients {
     }
 
     private GoogleCredentials credenziali(String scope) throws IOException {
-        if (!isConfigurato()) {
+        return credenzialiDelegate(scope, account());
+    }
+
+    /**
+     * Credenziali del Service Account che impersona {@code casella} (una casella del dominio Workspace, anche diversa
+     * da quella del dottore: i mittenti dell'Email Marketing). Restano in cache come le altre.
+     */
+    public GoogleCredentials credenzialiDelegate(String scope, String casella) throws IOException {
+        boolean conFile = !credentialsPath.isBlank() && Files.isReadable(Path.of(credentialsPath));
+        if (!(senzaChiave || conFile) || casella == null || casella.isBlank()) {
             throw new IntegrazioneDisattivataException("Account Google non ancora collegato: mancano le credenziali o l'account del dottore");
         }
-        String account = account();
+        String account = casella.trim();
         String chiave = scope + "|" + account;
         GoogleCredentials esistenti = credenziali.get(chiave);
         if (esistenti != null) {

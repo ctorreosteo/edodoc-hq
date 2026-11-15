@@ -42,11 +42,13 @@ public class PercorsoService {
     private final ConfigService configService;
     private final TaskService taskService;
     private final FatturaRepository fatturaRepository;
+    private final MailingEventiGestionaleService mailing;
 
     public PercorsoService(PercorsoRepository percorsoRepository, PazienteRepository pazienteRepository,
                            PagamentoRepository pagamentoRepository, VisitaRepository visitaRepository,
                            ConfigService configService, TaskService taskService,
-                           FatturaRepository fatturaRepository) {
+                           FatturaRepository fatturaRepository, MailingEventiGestionaleService mailing) {
+        this.mailing = mailing;
         this.percorsoRepository = percorsoRepository;
         this.pazienteRepository = pazienteRepository;
         this.pagamentoRepository = pagamentoRepository;
@@ -120,6 +122,7 @@ public class PercorsoService {
         percorso.setImportoTotale(totale);
         percorso.setNote(richiesta.note());
         percorsoRepository.save(percorso);
+        mailing.percorsoCreato(percorso.getId());
 
         acconti.forEach(a -> a.setPercorso(percorso));
         for (Rata rata : rate) {
@@ -136,7 +139,7 @@ public class PercorsoService {
         paziente.setStato(tipo == Percorso.Tipo.MANTENIMENTO ? Paziente.Stato.MANTENIMENTO : Paziente.Stato.ATTIVO);
         if (tipo == Percorso.Tipo.METODO_BUSSOLA) {
             taskService.creaAutomatico("esami-percorso-" + percorso.getId(), "PIANI", "Chiedere gli esami del sangue",
-                    Task.Priorita.MEDIA, LocalDate.now().plusDays(1), paziente);
+                    Task.Priorita.NORMALE, LocalDate.now().plusDays(1), paziente);
         }
         return sintesi(percorso, List.of());
     }

@@ -46,7 +46,7 @@ function RigaTask({ task }: { task: Task }) {
           <span aria-hidden><Check className="size-3.5" strokeWidth={3} /></span>
         </button>
         <div className="db-task-corpo">
-          <button type="button" className="db-task-titolo" title={task.titolo} onClick={() => azioni.modificaTask(task)}>{task.titolo}</button>
+          <button type="button" className="db-task-titolo" title={task.titolo} onClick={() => azioni.apriTask(task.id)}>{task.titolo}</button>
           {task.pazienteId ? (
             <button type="button" className="db-task-paziente" onClick={() => azioni.apriPaziente(task.pazienteId!)}>{task.pazienteNome}</button>
           ) : null}

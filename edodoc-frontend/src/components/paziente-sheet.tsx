@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { quandoBreve } from "@/components/diete/parti-editor"
 import { Chip } from "@/components/chip"
+import { MailingPazientePannello } from "@/components/mailing/mailing-paziente-pannello"
+import { AccettazionePannello } from "@/components/pazienti/accettazione-pannello"
 import { RisposteCheck } from "@/components/check-dettaglio"
 import { MenuFattura, MenuPagamento, MenuTask, MenuVisita } from "@/components/menu-contestuali"
 import { Caricamento, Vuoto } from "@/components/stati"
@@ -118,6 +120,8 @@ export function PazienteSheet({ pazienteId, onClose }: { pazienteId: number | nu
                   </SheetKVGrid>
                   {p.nota ? <p className="mt-3 text-sm">{p.nota}</p> : null}
                 </SheetSection>
+                <AccettazionePannello pazienteId={p.id} email={p.email} />
+                <MailingPazientePannello pazienteId={p.id} onApri={onClose} />
                 <SheetSection title="Acquisti">
                   {scheda.percorsi.length === 0 ? <Vuoto titolo="Nessun acquisto" /> : (
                     <div className="grid grid-cols-1 gap-2">

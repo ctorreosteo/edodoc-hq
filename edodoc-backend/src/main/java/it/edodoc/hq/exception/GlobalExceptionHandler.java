@@ -16,6 +16,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
@@ -79,6 +80,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponseDto<Object>> integrita(DataIntegrityViolationException e) {
         logger.warn("Vincolo DB violato: {}", e.getMostSpecificCause().getMessage());
         return risposta(HttpStatus.CONFLICT, "Dato già presente o non coerente", "Il dato è in conflitto con uno esistente.");
+    }
+
+    /** Errori con stato esplicito (Email Marketing): il motivo è già scritto per il dottore. */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponseDto<Object>> conStato(ResponseStatusException e) {
+        HttpStatus status = HttpStatus.resolve(e.getStatusCode().value());
+        String motivo = e.getReason() != null ? e.getReason() : "Richiesta non valida";
+        return risposta(status != null ? status : HttpStatus.BAD_REQUEST, motivo, motivo);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

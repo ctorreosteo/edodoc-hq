@@ -12,6 +12,8 @@ export default defineConfig(({ mode }) => {
     appType: 'spa',
     plugins: [react(), tailwindcss()],
     define: {
+      // sockjs-client (realtime della pagina Meta) si aspetta il global di Node
+      global: 'globalThis',
       __VERSIONE_BUILD__: JSON.stringify(new Date().toISOString()),
     },
     resolve: {
@@ -29,6 +31,12 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: apiBaseUrl.replace(/\/api\/?$/, ''),
           changeOrigin: true,
+        },
+        // Realtime STOMP/SockJS della pagina Meta
+        '/ws': {
+          target: apiBaseUrl.replace(/\/api\/?$/, ''),
+          changeOrigin: true,
+          ws: true,
         },
       },
     },

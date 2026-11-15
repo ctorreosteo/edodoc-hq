@@ -16,13 +16,21 @@ import java.io.IOException;
 
 /**
  * Il limite multipart di Spring è uno solo e deve bastare agli allegati email (Gmail arriva a 25 MB):
- * qui gli altri upload, come le copertine dei corsi, restano al limite stretto.
+ * qui gli altri upload, come le copertine dei corsi, restano al limite stretto. Gli allegati dei task arrivano a 20 MB.
  */
 @Component
 public class LimiteUploadFilter extends OncePerRequestFilter {
 
     static final long LIMITE_BYTES = 6L * 1024 * 1024;
+    /** 20 MB di file più il margine della richiesta multipart. */
+    static final long LIMITE_TASK_BYTES = 21L * 1024 * 1024;
+    /** Allegati email: era il limite multipart di Spring (34 MB), che ora è più alto per i video del Planner. */
+    static final long LIMITE_CASELLA_BYTES = 34L * 1024 * 1024;
+    /** Video del Planner social: fino a 100 MB più l'anteprima. */
+    static final long LIMITE_PLANNER_BYTES = 110L * 1024 * 1024;
     private static final String CASELLA = "/api/casella/";
+    private static final String PLANNER_MEDIA = "/api/planner/media";
+    private static final java.util.regex.Pattern ALLEGATI_TASK = java.util.regex.Pattern.compile("^/api/task/\\d+/allegati$");
 
     private final ObjectMapper objectMapper;
 
@@ -35,7 +43,11 @@ public class LimiteUploadFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain chain) throws ServletException, IOException {
         String tipo = request.getContentType();
         boolean multipart = tipo != null && tipo.toLowerCase().startsWith("multipart/");
-        if (multipart && request.getContentLengthLong() > LIMITE_BYTES && !request.getServletPath().startsWith(CASELLA)) {
+        String percorso = request.getServletPath();
+        long limite = ALLEGATI_TASK.matcher(percorso).matches() ? LIMITE_TASK_BYTES
+                : percorso.startsWith(PLANNER_MEDIA) ? LIMITE_PLANNER_BYTES
+                : percorso.startsWith(CASELLA) ? LIMITE_CASELLA_BYTES : LIMITE_BYTES;
+        if (multipart && request.getContentLengthLong() > limite) {
             response.setStatus(HttpStatus.PAYLOAD_TOO_LARGE.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");

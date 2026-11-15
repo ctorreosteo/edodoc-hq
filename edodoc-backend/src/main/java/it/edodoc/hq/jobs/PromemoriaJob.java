@@ -35,6 +35,6 @@ public class PromemoriaJob {
         }
         YearMonth meseScorso = YearMonth.from(oggi).minusMonths(1);
         taskService.creaAutomatico("tessera-" + meseScorso, "FISCO",
-                "Inserire nel Sistema TS le fatture di " + meseScorso, Task.Priorita.MEDIA, oggi.withDayOfMonth(1).plusDays(9), null);
+                "Inserire nel Sistema TS le fatture di " + meseScorso, Task.Priorita.NORMALE, oggi.withDayOfMonth(1).plusDays(9), null);
     }
 }

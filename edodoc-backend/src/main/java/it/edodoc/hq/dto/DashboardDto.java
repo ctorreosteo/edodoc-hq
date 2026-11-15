@@ -8,7 +8,7 @@ public record DashboardDto(
         long pazientiAttivi, long pazientiMantenimento, long lead, long listaAttesa,
         LocalDate settimana, int checkAttesi, int checkCompilati, int checkConSegnali, int daContattareOggi,
         long visiteSettimana, List<VisiteDto.Riga> visiteOggi,
-        long taskAperti, long taskInRitardo, List<TaskDto.Riga> taskUrgenti,
+        long taskAperti, long taskInRitardo, List<TaskDto.RigaLegacy> taskUrgenti,
         BigDecimal incassatoMese, BigDecimal incassatoAnno, BigDecimal daIncassare, BigDecimal scaduto,
         BigDecimal margineSoglia, boolean candidatureAperte,
         List<Rinnovo> rinnovi, List<IncassoMese> incassiMensili, List<AndamentoCheck> andamentoCheck,

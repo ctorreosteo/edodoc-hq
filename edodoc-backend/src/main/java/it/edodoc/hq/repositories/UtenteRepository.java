@@ -10,5 +10,8 @@ public interface UtenteRepository extends JpaRepository<Utente, Long> {
 
     Optional<Utente> findByPazienteId(Long pazienteId);
 
+    /** Operatori del gestionale: chi può essere assegnatario di un task. */
+    java.util.List<Utente> findByRuoloAndAttivoTrueOrderByCognomeAscNomeAsc(Utente.Ruolo ruolo);
+
     Optional<Utente> findByInvitoTokenHash(String invitoTokenHash);
 }

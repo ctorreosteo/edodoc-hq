@@ -29,7 +29,9 @@ public class TaskLista {
     @Column(nullable = false)
     private String colore;
 
-    @Column(nullable = false)
+    @Column(length = 500)
+    private String descrizione;
+
     private String icona = "list";
 
     @Column(nullable = false)

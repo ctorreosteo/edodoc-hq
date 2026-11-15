@@ -11,6 +11,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
+import it.edodoc.hq.models.Prenotazione;
 import it.edodoc.hq.models.Visita;
 import it.edodoc.hq.repositories.VisitaRepository;
 import org.slf4j.Logger;
@@ -44,13 +45,15 @@ public class GoogleCalendarService {
     private final VisitaService visitaService;
     private final GoogleClients googleClients;
     private final ConfigService configService;
+    private final PrenotazioneService prenotazioneService;
 
     public GoogleCalendarService(VisitaRepository visitaRepository, VisitaService visitaService,
-                                 GoogleClients googleClients, ConfigService configService) {
+                                 GoogleClients googleClients, ConfigService configService, PrenotazioneService prenotazioneService) {
         this.visitaRepository = visitaRepository;
         this.visitaService = visitaService;
         this.googleClients = googleClients;
         this.configService = configService;
+        this.prenotazioneService = prenotazioneService;
     }
 
     public boolean isAttivo() {
@@ -162,6 +165,24 @@ public class GoogleCalendarService {
         visita.setMeetUrl(risultato.getHangoutLink());
     }
 
+    /**
+     * La risposta dell'invitato (accettato, forse, rifiutato) finisce sulla prenotazione dal sito, se c'è.
+     * L'organizzatore è il dottore: conta l'unico invitato che non lo è.
+     */
+    private void rispostaInvito(Visita visita, Event evento) {
+        if (evento.getAttendees() == null || "cancelled".equals(evento.getStatus())) return;
+        evento.getAttendees().stream()
+                .filter(a -> !Boolean.TRUE.equals(a.getOrganizer()) && !Boolean.TRUE.equals(a.getSelf()) && a.getResponseStatus() != null)
+                .findFirst()
+                .map(a -> switch (a.getResponseStatus()) {
+                    case "accepted" -> Prenotazione.RispostaInvito.ACCETTATO;
+                    case "declined" -> Prenotazione.RispostaInvito.RIFIUTATO;
+                    case "tentative" -> Prenotazione.RispostaInvito.FORSE;
+                    default -> Prenotazione.RispostaInvito.IN_ATTESA;
+                })
+                .ifPresent(r -> prenotazioneService.rispostaInvito(visita.getId(), r));
+    }
+
     /** Spostamenti e cancellazioni fatti direttamente su Google tornano sulla visita collegata. */
     private void leggiModificheDaGoogle() {
         Instant adesso = Instant.now();
@@ -190,6 +211,7 @@ public class GoogleCalendarService {
 
     private void applica(Visita visita, Event evento) {
         boolean cancellato = "cancelled".equals(evento.getStatus());
+        rispostaInvito(visita, evento);
         if (cancellato) {
             if (visita.getStato() != Visita.Stato.ANNULLATA) {
                 visitaService.applicaModificaDaGoogle(visita.getId(), Visita.Stato.ANNULLATA, visita.getInizio(), visita.getFine(), null);

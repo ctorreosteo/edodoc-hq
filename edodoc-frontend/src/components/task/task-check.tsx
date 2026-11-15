@@ -1,11 +1,24 @@
-import { useEffect, useRef, useState } from "react"
-import { cn } from "@/lib/utils"
+import { useEffect, useRef, useState } from 'react'
+import { cn } from '@/lib/utils'
+import '@/style/lux-task-board.css'
 
-/** Cerchio di completamento: riempimento a molla, spunta disegnata e un piccolo ripple. */
-export function TaskCheck({ completato, onToggle, size = "md", className }: {
+/**
+ * Cerchio di completamento: riempimento a molla, spunta disegnata e un piccolo ripple.
+ * Il colore di riempimento è `colore` (es. il colore della lista) o il verde "fatto".
+ */
+export function TaskCheck({
+  completato,
+  onToggle,
+  size = 'md',
+  disabled,
+  colore,
+  className,
+}: {
   completato: boolean
   onToggle: (el: HTMLButtonElement) => void
-  size?: "sm" | "md"
+  size?: 'sm' | 'md'
+  disabled?: boolean
+  colore?: string
   className?: string
 }) {
   const ref = useRef<HTMLButtonElement>(null)
@@ -13,25 +26,37 @@ export function TaskCheck({ completato, onToggle, size = "md", className }: {
   const [anima, setAnima] = useState(false)
   const precedente = useRef(completato)
   useEffect(() => {
-    if (precedente.current === completato) return
-    precedente.current = completato
-    setAnima(true)
-    const t = window.setTimeout(() => setAnima(false), 600)
-    return () => window.clearTimeout(t)
+    if (precedente.current !== completato) {
+      precedente.current = completato
+      setAnima(true)
+      const t = window.setTimeout(() => setAnima(false), 600)
+      return () => window.clearTimeout(t)
+    }
   }, [completato])
 
   return (
-    <button ref={ref} type="button" role="checkbox" aria-checked={completato} aria-label={completato ? "Riapri" : "Completa"}
-      title={completato ? "Riapri" : "Completa"} data-size={size} data-on={completato ? "" : undefined}
-      data-anima={anima ? "" : undefined} className={cn("tkb-check", className)}
+    <button
+      ref={ref}
+      type="button"
+      role="checkbox"
+      aria-checked={completato}
+      aria-label={completato ? 'Riapri' : 'Completa'}
+      title={completato ? 'Riapri' : 'Completa'}
+      disabled={disabled}
+      data-size={size}
+      data-on={completato ? '' : undefined}
+      data-anima={anima ? '' : undefined}
+      className={cn('tkb-check', className)}
+      style={colore ? ({ '--tkb-check-colore': colore } as React.CSSProperties) : undefined}
       onClick={(e) => {
         e.stopPropagation()
         if (ref.current) onToggle(ref.current)
       }}
       onPointerDown={(e) => e.stopPropagation()}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") e.stopPropagation()
-      }}>
+        if (e.key === 'Enter' || e.key === ' ') e.stopPropagation()
+      }}
+    >
       <svg viewBox="0 0 24 24" aria-hidden>
         <circle className="tkb-check-ring" cx="12" cy="12" r="10" />
         <circle className="tkb-check-fill" cx="12" cy="12" r="10" />

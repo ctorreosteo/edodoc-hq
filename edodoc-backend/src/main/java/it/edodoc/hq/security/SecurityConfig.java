@@ -50,6 +50,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/media/copertine/*").permitAll()
+                        // Il sito edodoc.it prenota la chiamata conoscitiva senza login
+                        .requestMatchers("/api/pubblico/**").permitAll()
+                        // Webhook Meta: lo difende la firma HMAC X-Hub-Signature-256 (SocialWebhookController)
+                        .requestMatchers(HttpMethod.GET, "/api/social/webhook").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/social/webhook").permitAll()
+                        // Handshake STOMP/SockJS: il JWT arriva nel frame CONNECT (WebSocketConfig)
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/app/imposta-password",
                                 "/api/auth/rinnova", "/api/auth/logout").permitAll()
                         // Chi ha un token paziente vede soltanto l'app: il resto dell'API è del dottore

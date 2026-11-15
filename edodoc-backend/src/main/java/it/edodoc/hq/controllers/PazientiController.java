@@ -137,7 +137,7 @@ public class PazientiController {
     }
 
     @GetMapping("/{id}/task")
-    public ApiResponseDto<List<TaskDto.Riga>> task(@PathVariable Long id) {
+    public ApiResponseDto<List<TaskDto.RigaLegacy>> task(@PathVariable Long id) {
         return ApiResponseDto.success(taskService.delPaziente(id));
     }
 

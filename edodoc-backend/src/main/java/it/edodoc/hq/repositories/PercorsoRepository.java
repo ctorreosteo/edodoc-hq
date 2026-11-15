@@ -30,4 +30,12 @@ public interface PercorsoRepository extends JpaRepository<Percorso, Long> {
             order by p.dataFine
             """)
     List<Percorso> findAttiviInScadenza(@Param("da") LocalDate da, @Param("a") LocalDate a);
+
+    /** Percorsi venduti (non annullati) con inizio nel periodo, col paziente: base dell'obiettivo annuale. */
+    @Query("""
+            select p from Percorso p join fetch p.paziente
+            where p.stato <> 'ANNULLATO' and p.dataInizio between :da and :a
+            order by p.dataInizio, p.id
+            """)
+    List<Percorso> findVendutiTra(@Param("da") LocalDate da, @Param("a") LocalDate a);
 }

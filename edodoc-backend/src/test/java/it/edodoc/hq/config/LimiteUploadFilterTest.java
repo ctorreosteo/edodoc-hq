@@ -34,4 +34,16 @@ class LimiteUploadFilterTest {
     void uploadPiccolo_passa() throws Exception {
         assertThat(esegui("/api/corsi/1/copertina", 1024).getStatus()).isEqualTo(200);
     }
+
+    @Test
+    void allegatoDelTask_arrivaA20Mega() throws Exception {
+        assertThat(esegui("/api/task/7/allegati", (int) LimiteUploadFilter.LIMITE_BYTES + 1).getStatus()).isEqualTo(200);
+        assertThat(esegui("/api/task/7/allegati", (int) LimiteUploadFilter.LIMITE_TASK_BYTES + 1).getStatus()).isEqualTo(413);
+    }
+
+    @Test
+    void videoDelPlanner_arrivaA100Mega_eLaCasellaResta34() throws Exception {
+        assertThat(esegui("/api/planner/media", (int) LimiteUploadFilter.LIMITE_TASK_BYTES + 1).getStatus()).isEqualTo(200);
+        assertThat(esegui("/api/casella/invia", (int) LimiteUploadFilter.LIMITE_CASELLA_BYTES + 1).getStatus()).isEqualTo(413);
+    }
 }

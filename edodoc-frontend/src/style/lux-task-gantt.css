@@ -1,0 +1,904 @@
+/*
+  Task — vista Gantt. Classi .tkg-*; token --vl-* da lux.css; --tk-c = colore della lista, --d = pixel per giorno,
+  --riga = altezza di una riga, --tkg-sx = colonna dei titoli (fissa a sinistra mentre il tempo scorre).
+*/
+
+.tkg {
+  --tkg-sx: 18rem;
+  --tkg-testa: 3.25rem;
+  --tkg-weekend: rgba(0, 37, 82, 0.035);
+  --tkg-griglia: rgba(0, 37, 82, 0.06);
+  --tkg-freccia: #94a3b8;
+  --tkg-rosso: #e11d48;
+  --tkg-critico: #f59e0b;
+  position: relative;
+  border-radius: 1rem;
+  background: var(--vl-surface);
+  border: 1px solid var(--vl-line);
+  box-shadow: var(--vl-shadow);
+  overflow: hidden;
+}
+
+.dark [data-vl] .tkg,
+.silvia [data-vl] .tkg {
+  --tkg-weekend: rgba(255, 255, 255, 0.025);
+  --tkg-griglia: rgba(255, 255, 255, 0.05);
+  --tkg-freccia: rgba(255, 255, 255, 0.35);
+}
+
+/* ───────── Barra in alto ───────── */
+
+.tkg-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--vl-line);
+}
+
+.tkg-head-sx,
+.tkg-head-dx {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.tkg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 2rem;
+  padding: 0 0.75rem !important;
+  border: 1px solid var(--vl-line-strong) !important;
+  border-radius: 0.6rem !important;
+  background: transparent !important;
+  color: var(--vl-ink);
+  font-size: 0.8125rem !important;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.tkg-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.tkg-btn:hover {
+  background: var(--vl-hover) !important;
+}
+
+.tkg-btn[data-attivo] {
+  border-color: color-mix(in srgb, var(--tkg-critico) 55%, transparent) !important;
+  background: color-mix(in srgb, var(--tkg-critico) 12%, transparent) !important;
+  color: color-mix(in srgb, var(--tkg-critico) 70%, var(--vl-ink));
+}
+
+.tkg-btn--primario {
+  border-color: transparent !important;
+  background: var(--vl-cta-bg) !important;
+  color: var(--vl-cta-ink);
+}
+
+.tkg-seg {
+  display: inline-flex;
+  padding: 0.2rem;
+  border-radius: 0.7rem;
+  background: var(--vl-muted-bg);
+}
+
+.dark [data-vl] .tkg-seg {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tkg-seg button {
+  height: 1.6rem;
+  padding: 0 0.7rem !important;
+  border: 0 !important;
+  border-radius: 0.5rem !important;
+  background: transparent !important;
+  color: var(--vl-ink-2);
+  font-size: 0.78rem !important;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.tkg-seg button[aria-selected="true"] {
+  background: var(--vl-surface) !important;
+  color: var(--vl-ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.dark [data-vl] .tkg-seg button[aria-selected="true"] {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.tkg-conflitti {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2rem;
+  padding: 0 0.3rem 0 0.7rem !important;
+  border: 1px solid color-mix(in srgb, var(--tkg-rosso) 35%, transparent) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--tkg-rosso) 8%, transparent) !important;
+  color: var(--tkg-rosso);
+  font-size: 0.8rem !important;
+  font-weight: 650;
+  cursor: pointer;
+  animation: tkg-pulsa 2.4s ease-in-out infinite;
+}
+
+.tkg-conflitti > svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.tkg-conflitti span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 1.45rem;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: var(--tkg-rosso);
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+.tkg-conflitti span svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+@keyframes tkg-pulsa {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tkg-rosso) 0%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--tkg-rosso) 14%, transparent); }
+}
+
+.tkg-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--vl-ok-fg);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.tkg-ok svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.tkg-nota {
+  color: var(--vl-ink-3);
+  font-size: 0.78rem;
+}
+
+/* ───────── Tela: colonna fissa a sinistra, tempo che scorre ───────── */
+
+.tkg-scroll {
+  position: relative;
+  overflow: auto;
+  max-height: max(26rem, calc(100vh - 17rem));
+  overscroll-behavior-x: contain;
+}
+
+.tkg-tela {
+  position: relative;
+  min-width: 100%;
+}
+
+.tkg-testa {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  height: var(--tkg-testa);
+  background: var(--vl-surface);
+  border-bottom: 1px solid var(--vl-line);
+}
+
+.tkg-angolo {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 0.4rem;
+  width: var(--tkg-sx);
+  padding: 0 0.9rem 0.55rem;
+  background: var(--vl-surface);
+  border-right: 1px solid var(--vl-line);
+  color: var(--vl-ink-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tkg-angolo small {
+  color: var(--vl-ink-3);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.tkg-scala {
+  position: relative;
+  flex: none;
+}
+
+.tkg-scala-sopra,
+.tkg-scala-sotto {
+  position: relative;
+  height: 50%;
+}
+
+.tkg-scala span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tkg-scala-sopra span {
+  overflow: visible;
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--vl-line);
+  color: var(--vl-ink);
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+/* Il nome del mese resta leggibile mentre il mese scorre via a sinistra */
+.tkg-scala-sopra b {
+  position: sticky;
+  left: calc(var(--tkg-sx) + 0.6rem);
+  font-weight: 700;
+}
+
+.tkg-scala-sotto span {
+  justify-content: center;
+  border-left: 1px solid var(--tkg-griglia);
+  color: var(--vl-ink-3);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tkg-scroll[data-scala="mesi"] .tkg-scala-sotto span {
+  text-transform: capitalize;
+}
+
+.tkg-scala-sotto span[data-weekend] {
+  background: var(--tkg-weekend);
+}
+
+.tkg-scala-sotto span[data-oggi] {
+  color: var(--vl-accent-strong);
+  font-weight: 750;
+}
+
+.tkg-oggi-pill {
+  position: absolute;
+  bottom: -0.55rem;
+  z-index: 3;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: var(--vl-accent-strong);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.tkg-corpo {
+  position: relative;
+}
+
+/* ───────── Righe ───────── */
+
+.tkg-riga {
+  display: flex;
+  height: var(--riga);
+}
+
+.tkg-sx {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.4rem;
+  width: var(--tkg-sx);
+  padding: 0 0.6rem 0 0.4rem;
+  background: var(--vl-surface);
+  border-right: 1px solid var(--vl-line);
+  border-bottom: 1px solid var(--tkg-griglia);
+  transition: background 0.12s;
+}
+
+.tkg-riga[data-livello="1"] .tkg-sx {
+  padding-left: 1.6rem;
+}
+
+.tkg-riga:hover .tkg-sx,
+.tkg-riga:hover .tkg-dx {
+  background-color: var(--vl-hover);
+}
+
+.tkg-riga[data-selezionato] .tkg-sx {
+  box-shadow: inset 3px 0 0 var(--vl-accent-strong);
+  background: color-mix(in srgb, var(--vl-accent) 9%, var(--vl-surface));
+}
+
+.tkg-riga--gruppo .tkg-sx {
+  gap: 0.5rem;
+  padding-left: 0.9rem;
+  color: var(--vl-ink);
+  font-size: 0.8rem;
+}
+
+.tkg-riga--gruppo .tkg-sx small {
+  color: var(--vl-ink-3);
+}
+
+.tkg-riga--gruppo .tkg-dx {
+  background: color-mix(in srgb, var(--tk-c) 5%, transparent);
+}
+
+.tkg-gruppo-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 0.2rem;
+  background: var(--tk-c);
+}
+
+.tkg-espandi,
+.tkg-espandi-vuoto {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.tkg-espandi {
+  display: grid;
+  place-items: center;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0.35rem !important;
+  background: transparent !important;
+  color: var(--vl-ink-3);
+  cursor: pointer;
+}
+
+.tkg-espandi svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform 0.18s;
+}
+
+.tkg-espandi[aria-expanded="true"] svg {
+  transform: rotate(90deg);
+}
+
+.tkg-stato {
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #94a3b8;
+}
+
+.tkg-stato[data-stato="IN_CORSO"] { background: #0ea5e9; }
+.tkg-stato[data-stato="IN_ATTESA"] { background: #f59e0b; }
+.tkg-stato[data-stato="COMPLETATO"] { background: #10b981; }
+.tkg-stato[data-stato="ANNULLATO"] { background: transparent; box-shadow: inset 0 0 0 1.5px #94a3b8; }
+
+.tkg-titolo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--vl-ink);
+  font-size: 0.8125rem !important;
+  font-weight: 550;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tkg-titolo:hover {
+  color: var(--vl-accent-strong);
+}
+
+.tkg-titolo[data-fatto] {
+  color: var(--vl-ink-3);
+  text-decoration: line-through;
+}
+
+.tkg-attesa {
+  flex: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  color: #d97706;
+}
+
+.tkg-dx {
+  position: relative;
+  flex: none;
+  border-bottom: 1px solid var(--tkg-griglia);
+  /* Sabato e domenica in grigio: il Gantt parte sempre di lunedì */
+  background-image: repeating-linear-gradient(90deg, transparent 0 calc(5 * var(--d)), var(--tkg-weekend) calc(5 * var(--d)) calc(7 * var(--d)));
+}
+
+.tkg-scroll[data-scala="giorni"] .tkg-dx {
+  background-image:
+    repeating-linear-gradient(90deg, var(--tkg-griglia) 0 1px, transparent 1px var(--d)),
+    repeating-linear-gradient(90deg, transparent 0 calc(5 * var(--d)), var(--tkg-weekend) calc(5 * var(--d)) calc(7 * var(--d)));
+}
+
+.tkg-scroll[data-scala="mesi"] .tkg-dx {
+  background-image: none;
+}
+
+.tkg-dx[data-vuota] {
+  cursor: crosshair;
+}
+
+.tkg-pianifica {
+  position: sticky;
+  left: calc(var(--tkg-sx) + 1rem);
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  color: var(--vl-ink-3);
+  font-size: 0.72rem;
+  font-style: italic;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.tkg-riga:hover .tkg-pianifica {
+  opacity: 1;
+}
+
+/* ───────── Barre ───────── */
+
+.tkg-barra {
+  position: absolute;
+  top: 7px;
+  z-index: 3;
+  height: calc(var(--riga) - 14px);
+  min-width: 6px;
+  border-radius: 0.45rem;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tk-c) 88%, #fff), var(--tk-c));
+  box-shadow: 0 1px 2px rgba(0, 37, 82, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  color: #fff;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: box-shadow 0.15s, filter 0.15s, transform 0.15s;
+}
+
+.tkg-barra:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--tk-c) 70%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.tkg-barra:not([data-modificabile]) {
+  cursor: pointer;
+}
+
+.tkg-barra[data-fatto] {
+  background: color-mix(in srgb, var(--tk-c) 30%, var(--vl-surface));
+  box-shadow: none;
+}
+
+.tkg-barra[data-anteprima],
+.tkg-traguardo[data-anteprima] {
+  z-index: 5;
+  box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--tk-c) 80%, transparent), 0 0 0 2px var(--vl-surface), 0 0 0 4px color-mix(in srgb, var(--tk-c) 55%, transparent);
+}
+
+.tkg-barra[data-critico] {
+  box-shadow: 0 0 0 2px var(--vl-surface), 0 0 0 4px var(--tkg-critico), 0 6px 18px -6px var(--tkg-critico);
+}
+
+.tkg-barra[data-conflitto] {
+  box-shadow: 0 0 0 2px var(--vl-surface), 0 0 0 4px var(--tkg-rosso);
+}
+
+/* In ritardo: la fine della barra diventa rossa */
+.tkg-barra[data-ritardo]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 0 0.45rem 0.45rem 0;
+  background: var(--tkg-rosso);
+}
+
+.tkg-avanza {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}
+
+.tkg-barra[data-fatto] .tkg-avanza {
+  background: color-mix(in srgb, var(--tk-c) 45%, transparent);
+}
+
+.tkg-etichetta-dentro {
+  position: absolute;
+  inset: 0 0.6rem;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+.tkg-barra[data-fatto] .tkg-etichetta-dentro {
+  color: var(--vl-ink-2);
+  text-shadow: none;
+}
+
+.tkg-etichetta {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  max-width: 16rem;
+  overflow: hidden;
+  color: var(--vl-ink-2);
+  font-size: 0.75rem;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tkg-maniglia {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 9px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.tkg-maniglia[data-lato="inizio"] { left: -2px; }
+.tkg-maniglia[data-lato="fine"] { right: -2px; }
+
+.tkg-maniglia::before {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 3px;
+  width: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.85);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.tkg-barra:hover .tkg-maniglia::before {
+  opacity: 1;
+}
+
+/* Il pallino per collegare: si tira su un'altra barra */
+.tkg-collega {
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  z-index: 2;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--tk-c);
+  border-radius: 999px;
+  background: var(--vl-surface);
+  cursor: crosshair;
+  opacity: 0;
+  touch-action: none;
+  transform: translateY(-50%) scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.tkg-barra:hover .tkg-collega,
+.tkg-traguardo:hover .tkg-collega,
+body[data-tkg-trascina="collega"] .tkg-collega {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+.tkg-collega:hover {
+  background: var(--tk-c);
+  transform: translateY(-50%) scale(1.25) !important;
+}
+
+/* Mentre si collega, le barre sono bersagli */
+body[data-tkg-trascina="collega"] .tkg-barra:hover,
+body[data-tkg-trascina="collega"] .tkg-traguardo:hover {
+  box-shadow: 0 0 0 2px var(--vl-surface), 0 0 0 4px var(--vl-accent-strong);
+}
+
+body[data-tkg-trascina="sposta"],
+body[data-tkg-trascina="sposta"] * {
+  cursor: grabbing !important;
+}
+
+body[data-tkg-trascina="inizio"],
+body[data-tkg-trascina="inizio"] *,
+body[data-tkg-trascina="fine"],
+body[data-tkg-trascina="fine"] * {
+  cursor: ew-resize !important;
+}
+
+body[data-tkg-trascina] {
+  user-select: none;
+}
+
+/* Traguardo: solo la scadenza, un rombo */
+.tkg-traguardo {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 3px;
+  background: var(--tk-c);
+  box-shadow: 0 0 0 2px var(--vl-surface), 0 2px 6px -1px color-mix(in srgb, var(--tk-c) 70%, transparent);
+  cursor: grab;
+  touch-action: none;
+  transform: rotate(45deg);
+}
+
+.tkg-traguardo[data-fatto] {
+  background: color-mix(in srgb, var(--tk-c) 35%, var(--vl-surface));
+}
+
+.tkg-traguardo[data-ritardo] {
+  background: var(--tkg-rosso);
+}
+
+.tkg-traguardo[data-conflitto] {
+  box-shadow: 0 0 0 2px var(--vl-surface), 0 0 0 4px var(--tkg-rosso);
+}
+
+.tkg-traguardo[data-critico] {
+  box-shadow: 0 0 0 2px var(--vl-surface), 0 0 0 4px var(--tkg-critico);
+}
+
+.tkg-traguardo .tkg-collega {
+  top: -6px;
+  right: -12px;
+  transform: rotate(-45deg) scale(0.6);
+}
+
+.tkg-traguardo:hover .tkg-collega {
+  transform: rotate(-45deg) scale(1);
+}
+
+.tkg-traguardo .tkg-maniglia[data-lato="inizio"] {
+  top: 4px;
+  bottom: auto;
+  left: -10px;
+  width: 8px;
+  height: 8px;
+  transform: rotate(-45deg);
+}
+
+/* Parentesi dei sottotask sotto il principale */
+.tkg-parentesi {
+  position: absolute;
+  bottom: 3px;
+  z-index: 1;
+  height: 5px;
+  border: 2px solid color-mix(in srgb, var(--tk-c) 55%, transparent);
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  pointer-events: none;
+}
+
+/* ───────── Sopra le righe: oggi e frecce ───────── */
+
+.tkg-sovra {
+  position: absolute;
+  top: 0;
+  left: var(--tkg-sx);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.tkg-oggi {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: linear-gradient(180deg, var(--vl-accent-strong), color-mix(in srgb, var(--vl-accent-strong) 15%, transparent));
+}
+
+.tkg-frecce {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.tkg-freccia {
+  fill: none;
+  stroke: var(--tkg-freccia);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transition: stroke 0.15s;
+}
+
+.tkg-frecce g[data-fatto] .tkg-freccia {
+  stroke-dasharray: 3 3;
+  opacity: 0.6;
+}
+
+.tkg-frecce g[data-critica] .tkg-freccia {
+  stroke: var(--tkg-critico);
+  stroke-width: 2;
+}
+
+.tkg-frecce g[data-rosso] .tkg-freccia {
+  stroke: var(--tkg-rosso);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  animation: tkg-scorre 0.9s linear infinite;
+}
+
+.tkg-frecce g:hover .tkg-freccia,
+.tkg-frecce g[data-scelta] .tkg-freccia {
+  stroke: var(--vl-accent-strong);
+  stroke-width: 2.25;
+}
+
+@keyframes tkg-scorre {
+  to { stroke-dashoffset: -18; }
+}
+
+.tkg-punta path { fill: var(--tkg-freccia); }
+.tkg-punta[data-tipo="rosso"] path { fill: var(--tkg-rosso); }
+.tkg-punta[data-tipo="critico"] path { fill: var(--tkg-critico); }
+.tkg-punta[data-tipo="scelta"] path { fill: var(--vl-accent-strong); }
+
+.tkg-avatar {
+  display: inline-flex;
+  flex: none;
+}
+
+.tkg-freccia-presa {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 12;
+  cursor: pointer;
+  pointer-events: stroke;
+}
+
+.tkg-filo {
+  fill: none;
+  stroke: var(--vl-accent-strong);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  animation: tkg-scorre 0.6s linear infinite;
+}
+
+.tkg-scollega {
+  position: absolute;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 1.75rem;
+  padding: 0 0.65rem !important;
+  border: 1px solid var(--vl-line-strong) !important;
+  border-radius: 999px !important;
+  background: var(--vl-surface) !important;
+  box-shadow: var(--vl-shadow-hover);
+  color: var(--tkg-rosso);
+  font-size: 0.75rem !important;
+  font-weight: 650;
+  pointer-events: auto;
+  transform: translate(-50%, -140%);
+  cursor: pointer;
+  animation: tkg-compare 0.14s ease-out;
+}
+
+.tkg-scollega svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+@keyframes tkg-compare {
+  from { opacity: 0; transform: translate(-50%, -110%) scale(0.92); }
+}
+
+/* ───────── Vuoto ───────── */
+
+.tkg--vuoto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 3.5rem 1.5rem;
+  color: var(--vl-ink-2);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.tkg--vuoto > svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--vl-accent-strong);
+}
+
+.tkg--vuoto b {
+  color: var(--vl-ink);
+}
+
+.tkg[aria-busy] .tkg-scroll {
+  cursor: progress;
+}
+
+/* ───────── Schermi stretti ───────── */
+
+@media (max-width: 767px) {
+  .tkg {
+    --tkg-sx: 10.5rem;
+  }
+
+  .tkg-nota--aiuto {
+    display: none;
+  }
+
+  .tkg-avatar {
+    display: none;
+  }
+}
+
+@media (hover: none) {
+  .tkg-collega {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tkg-conflitti,
+  .tkg-frecce g[data-rosso] .tkg-freccia,
+  .tkg-filo,
+  .tkg-scollega {
+    animation: none;
+  }
+}

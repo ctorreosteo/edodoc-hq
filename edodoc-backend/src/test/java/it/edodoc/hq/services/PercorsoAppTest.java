@@ -28,7 +28,7 @@ class PercorsoAppTest {
     private final VisitaRepository visite = mock(VisitaRepository.class);
     private final PercorsoService service = new PercorsoService(percorsi, mock(PazienteRepository.class),
             mock(PagamentoRepository.class), visite, mock(ConfigService.class), mock(TaskService.class),
-            mock(FatturaRepository.class));
+            mock(FatturaRepository.class), mock(MailingEventiGestionaleService.class));
 
     private final Paziente paziente = new Paziente();
 

@@ -115,10 +115,10 @@ public class DemoDataService {
             }
         }
 
-        taskService.crea(new TaskDto.Salva(taskService.idListaDiSistema("CONTATTI"), "Ricontattare dopo la call conoscitiva", null, oggi.plusDays(2), null,
+        taskService.creaLegacy(new TaskDto.Salva(taskService.idListaDiSistema("CONTATTI"), "Ricontattare dopo la call conoscitiva", null, oggi.plusDays(2), null,
                 pazienteRepository.findAll().get(12).getId()));
-        taskService.crea(new TaskDto.Salva(taskService.idListaDiSistema("PIANI"), "Sostituire il pesce a pranzo", null, oggi.minusDays(1), null, attivi.get(2)));
-        taskService.crea(new TaskDto.Salva(taskService.idListaDiSistema("GENERALE"), "Rispondere ai commenti YouTube", null, oggi, null, null));
+        taskService.creaLegacy(new TaskDto.Salva(taskService.idListaDiSistema("PIANI"), "Sostituire il pesce a pranzo", null, oggi.minusDays(1), null, attivi.get(2)));
+        taskService.creaLegacy(new TaskDto.Salva(taskService.idListaDiSistema("GENERALE"), "Rispondere ai commenti YouTube", null, oggi, null, null));
 
         incassiDelFoglioCassa(attivi, oggi);
         movimentiEScadenze(oggi);

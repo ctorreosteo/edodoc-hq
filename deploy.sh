@@ -38,6 +38,7 @@ echo "=== Backend (Cloud Run, $region) ==="
   # CPU sempre attiva e un'istanza minima: i job pianificati devono girare anche senza richieste.
   # LOGGING_FILE_NAME vuoto: su Cloud Run il disco è in memoria, i log vanno su Cloud Logging.
   # GOOGLE_SENZA_CHIAVE: l'organizzazione vieta le chiavi, la delega Google la firma IAM.
+  # CORS: anche il sito edodoc.it, che prenota la chiamata conoscitiva su /api/pubblico.
   gcloud run deploy edodoc-backend \
       --source . \
       --region "$region" \
@@ -50,7 +51,7 @@ echo "=== Backend (Cloud Run, $region) ==="
       --max-instances 3 \
       --no-cpu-throttling \
       --cpu-boost \
-      --update-env-vars "^|^SPRING_DATASOURCE_URL=jdbc:postgresql:///edodochq?cloudSqlInstance=$project:$region:edodoc-db&socketFactory=com.google.cloud.sql.postgres.SocketFactory|DB_USERNAME=edodoc|ADMIN_EMAIL=edoardo@edodoc.it|CORS_ALLOWED_ORIGINS=https://hq.edodoc.it,$site,https://$project.firebaseapp.com|LOGGING_FILE_NAME=|GOOGLE_SENZA_CHIAVE=true|APP_PROVA_DOTTORE_EMAIL=prova.dottore@edodoc.it|APP_PROVA_PAZIENTE_EMAIL=prova.paziente@edodoc.it|APP_PROVA_DOTTORE_PASSWORD=test|APP_PROVA_PAZIENTE_PASSWORD=test" \
+      --update-env-vars "^|^SPRING_DATASOURCE_URL=jdbc:postgresql:///edodochq?cloudSqlInstance=$project:$region:edodoc-db&socketFactory=com.google.cloud.sql.postgres.SocketFactory|DB_USERNAME=edodoc|ADMIN_EMAIL=edoardo@edodoc.it|CORS_ALLOWED_ORIGINS=https://hq.edodoc.it,$site,https://$project.firebaseapp.com,https://www.edodoc.it,https://edodoc.it,https://edodoc-sito.web.app,https://edodoc-sito.firebaseapp.com|LOGGING_FILE_NAME=|GOOGLE_SENZA_CHIAVE=true|APP_PROVA_DOTTORE_EMAIL=prova.dottore@edodoc.it|APP_PROVA_PAZIENTE_EMAIL=prova.paziente@edodoc.it|APP_PROVA_DOTTORE_PASSWORD=test|APP_PROVA_PAZIENTE_PASSWORD=test" \
       --update-secrets "DB_PASSWORD=edodoc-db-password:latest,JWT_SECRET=edodoc-jwt-secret:latest,ADMIN_PASSWORD=edodoc-admin-password:latest" \
       --quiet
 )

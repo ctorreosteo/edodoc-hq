@@ -33,10 +33,12 @@ public class VisitaService {
     private final PercorsoRepository percorsoRepository;
     private final TaskService taskService;
     private final ApplicationEventPublisher eventi;
+    private final MailingEventiGestionaleService mailing;
 
     public VisitaService(VisitaRepository visitaRepository, PazienteRepository pazienteRepository,
                          PercorsoRepository percorsoRepository, TaskService taskService,
-                         ApplicationEventPublisher eventi) {
+                         ApplicationEventPublisher eventi, MailingEventiGestionaleService mailing) {
+        this.mailing = mailing;
         this.visitaRepository = visitaRepository;
         this.pazienteRepository = pazienteRepository;
         this.percorsoRepository = percorsoRepository;
@@ -89,6 +91,7 @@ public class VisitaService {
         applica(visita, richiesta);
         visitaRepository.save(visita);
         dopoLaModifica(visita);
+        mailing.visitaCreata(visita.getId());
         return riga(visita);
     }
 
@@ -110,7 +113,11 @@ public class VisitaService {
     public VisiteDto.Riga cambiaStato(Long id, Visita.Stato stato) {
         Visita visita = trova(id);
         boolean eraAnnullata = visita.getStato() == Visita.Stato.ANNULLATA;
+        boolean effettuataOra = stato == Visita.Stato.EFFETTUATA && visita.getStato() != Visita.Stato.EFFETTUATA;
         visita.setStato(stato);
+        if (effettuataOra) {
+            mailing.visitaEffettuata(id);
+        }
         // Effettuata o assente non cambiano nulla sull'evento: si tocca Google solo se la visita sparisce o torna
         if (eraAnnullata != (stato == Visita.Stato.ANNULLATA)) {
             dopoLaModifica(visita);

@@ -16,7 +16,7 @@ import type { Acquisto, Fattura, Pagamento, Paziente, RigaCheck, Task, Visita } 
 
 function VoceNuovoTask({ pazienteId }: { pazienteId?: number | null }) {
   const { nuovoTask } = useAzioni()
-  return <ContextMenuItem onSelect={() => nuovoTask({ pazienteId })}><Plus aria-hidden />Nuovo task</ContextMenuItem>
+  return <ContextMenuItem onSelect={() => nuovoTask({ pazienteId: pazienteId ?? undefined })}><Plus aria-hidden />Nuovo task</ContextMenuItem>
 }
 
 /** Le tre email al paziente. Il popup parte dal riferimento più preciso che il menu conosce. */
@@ -283,7 +283,7 @@ export function MenuTask({ task, children }: { task: Task; children: ReactNode }
       <>
         <ContextMenuLabel>{task.titolo}</ContextMenuLabel>
         <ContextMenuItem onSelect={() => void cambia()}>{fatto ? <Undo2 aria-hidden /> : <Check aria-hidden />}{fatto ? "Riapri" : "Segna fatto"}</ContextMenuItem>
-        <ContextMenuItem onSelect={() => a.modificaTask(task)}><Pencil aria-hidden />Modifica</ContextMenuItem>
+        <ContextMenuItem onSelect={() => a.apriTask(task.id)}><Pencil aria-hidden />Apri</ContextMenuItem>
         {task.pazienteId ? <ContextMenuItem onSelect={() => a.apriPaziente(task.pazienteId!)}><UserRound aria-hidden />Apri il paziente</ContextMenuItem> : null}
         {task.pazienteId ? <SottomenuEmail riferimento={{ pazienteId: task.pazienteId }} /> : null}
         <ContextMenuSeparator />

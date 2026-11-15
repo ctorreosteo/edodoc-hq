@@ -22,8 +22,14 @@ public class TaskCartella {
     @JoinColumn(name = "parent_id")
     private TaskCartella parent;
 
+    @Column(length = 500)
+    private String descrizione;
+
     @Column(nullable = false)
     private String colore;
+
+    @Column(length = 40)
+    private String icona;
 
     @Column(nullable = false)
     private Integer ordine = 0;

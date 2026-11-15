@@ -1,9 +1,9 @@
 import { api, urlApi } from "@/services/api-client"
 import type { RichiestaEmail } from "@/lib/email"
 import type {
-  Acquisti, AnteprimaFattura, BozzaEmail, CheckDettaglio, Dashboard, EmettiFattura, Fattura, Impostazioni, ListaPagamenti, Listino,
+  Acquisti, AnteprimaFattura, BozzaEmail, CheckDettaglio, Dashboard, EmettiFattura, Fattura, Impostazioni, ListaPagamenti, Listino, Obiettivo,
   LezioneForm, Movimento, Pagamento, Paziente, PazienteArchiviato, PazienteForm, Percorso, RigaTessera, RiepilogoFinance, RisposteCheck,
-  RigaCorso, RigaDieta, Dieta, ContenutoDieta, RigaLezione, RigaModulo, Riproduzione, ScadenzaFiscale, SettimanaCheck, StatoVideo, StrutturaCorso, Task, TaskCartella, TaskForm, TaskLista, TaskStruttura, Utente, Visita, VisitaForm,
+  RigaCorso, Prenotazione, DettaglioPrenotazione, StatoPrenotazione, EsitoPrenotazione, RigaDieta, Dieta, ContenutoDieta, RigaLezione, RigaModulo, Riproduzione, ScadenzaFiscale, SettimanaCheck, StatoVideo, StrutturaCorso, Task, Utente, Visita, VisitaForm,
 } from "@/types"
 
 export const authService = {
@@ -13,6 +13,8 @@ export const authService = {
 }
 
 export const dashboardService = { carica: () => api.get<Dashboard>("/dashboard") }
+
+export const obiettiviService = { carica: () => api.get<Obiettivo>("/obiettivi") }
 
 export const pazientiService = {
   lista: () => api.get<Paziente[]>("/pazienti"),
@@ -88,26 +90,11 @@ export const emailService = {
   invia: (corpo: RichiestaEmail & { destinatario: string; oggetto: string; corpo: string }) => api.post<void>("/email/invia", corpo),
 }
 
+/** Le azioni rapide su dashboard e scheda paziente; tutto il resto dei task sta in task-service.ts. */
 export const taskService = {
-  struttura: () => api.get<TaskStruttura>("/task/struttura"),
-  lista: (completati: boolean) => api.get<Task[]>("/task", { completati }),
-  crea: (corpo: TaskForm) => api.post<Task>("/task", corpo),
-  aggiorna: (id: number, corpo: TaskForm) => api.put<Task>(`/task/${id}`, corpo),
   cambiaStato: (id: number, fatto: boolean) => api.post<Task>(`/task/${id}/stato?fatto=${fatto}`),
   elimina: (id: number) => api.delete<void>(`/task/${id}`),
-  creaCartella: (corpo: { nome: string; parentId: number | null; colore: string }) => api.post<TaskCartella>("/task/cartelle", corpo),
-  modificaCartella: (id: number, corpo: ModificaStruttura) => api.put<TaskCartella>(`/task/cartelle/${id}`, corpo),
-  spostaCartella: (id: number, corpo: SpostaStruttura) => api.put<TaskCartella>(`/task/cartelle/${id}/posizione`, corpo),
-  eliminaCartella: (id: number) => api.delete<void>(`/task/cartelle/${id}`),
-  creaLista: (corpo: { nome: string; cartellaId: number | null; colore: string; icona: string }) => api.post<TaskLista>("/task/liste", corpo),
-  modificaLista: (id: number, corpo: ModificaStruttura) => api.put<TaskLista>(`/task/liste/${id}`, corpo),
-  spostaLista: (id: number, corpo: SpostaStruttura) => api.put<TaskLista>(`/task/liste/${id}/posizione`, corpo),
-  contaTaskLista: (id: number) => api.get<number>(`/task/liste/${id}/conteggio`),
-  eliminaLista: (id: number, conferma: string) => api.delete<void>(`/task/liste/${id}?conferma=${encodeURIComponent(conferma)}`),
 }
-
-type ModificaStruttura = { nome?: string; colore?: string; icona?: string; archiviata?: boolean }
-type SpostaStruttura = { contenitoreId: number | null; ordine?: number }
 
 type TestiForm = { titolo: string; descrizione: string | null }
 
@@ -190,4 +177,15 @@ export const dieteService = {
   pdf: (id: number) => api.blob(`/diete/${id}/pdf`),
   apriPdf: (id: number) => apriPdfIn(`/diete/${id}/pdf`),
   apriPdfVersione: (id: number, numero: number) => apriPdfIn(`/diete/${id}/versioni/${numero}/pdf`),
+}
+
+export const prenotazioniService = {
+  tutte: () => api.get<Prenotazione[]>("/prenotazioni"),
+  dettaglio: (id: number) => api.get<DettaglioPrenotazione>(`/prenotazioni/${id}`),
+  sposta: (id: number, inizio: string) => api.post<DettaglioPrenotazione>(`/prenotazioni/${id}/sposta`, { inizio }),
+  stato: (id: number, stato: StatoPrenotazione, motivo?: string | null) => api.post<DettaglioPrenotazione>(`/prenotazioni/${id}/stato`, { stato, motivo }),
+  contatto: (id: number, corpo: { nome: string; cognome: string; email: string; cellulare: string | null }) =>
+    api.put<DettaglioPrenotazione>(`/prenotazioni/${id}/contatto`, corpo),
+  esito: (id: number, esito: EsitoPrenotazione | null, noteDottore: string | null) =>
+    api.put<DettaglioPrenotazione>(`/prenotazioni/${id}/esito`, { esito, noteDottore }),
 }

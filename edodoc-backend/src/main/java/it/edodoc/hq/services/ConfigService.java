@@ -24,7 +24,11 @@ public class ConfigService {
     public static final String CALENDAR_ULTIMO_SYNC = "GOOGLE_CALENDAR_ULTIMO_SYNC";
     public static final String PROSSIMO_NUMERO = "FATTURA_PROSSIMO_NUMERO";
 
-    private static final Set<String> SOLO_SISTEMA = Set.of(CALENDAR_ULTIMO_SYNC);
+    // Valori scritti dal sistema e mai mostrati in Impostazioni (segreti OAuth compresi)
+    private static final Set<String> SOLO_SISTEMA = Set.of(CALENDAR_ULTIMO_SYNC,
+            "YOUTUBE_OAUTH_REFRESH_TOKEN", "YOUTUBE_OAUTH_STATE",
+            // Chiave privata del sigillo dei moduli firmati: non si mostra né si cambia da Impostazioni
+            "ACCETTAZIONE_SIGILLO_P12", "ACCETTAZIONE_SIGILLO_P12_PASSWORD");
 
     private final ConfigRepository configRepository;
 

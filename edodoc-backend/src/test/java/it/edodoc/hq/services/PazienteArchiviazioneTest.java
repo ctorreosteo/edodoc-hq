@@ -43,7 +43,8 @@ class PazienteArchiviazioneTest {
     private final TaskRepository taskRepository = mock(TaskRepository.class);
     private final TaskService taskService = mock(TaskService.class);
     private final PazienteService service = new PazienteService(pazienti, mock(PercorsoRepository.class), visite, pagamenti,
-            mock(CheckSettimanaleRepository.class), utenti, sessioni, dispositivi, fatture, taskRepository, taskService);
+            mock(CheckSettimanaleRepository.class), utenti, sessioni, dispositivi, fatture, taskRepository, taskService,
+            mock(MailingEventiGestionaleService.class), mock(MailingContattiService.class));
 
     private Paziente paziente;
     private Utente utente;
@@ -103,7 +104,7 @@ class PazienteArchiviazioneTest {
         assertThat(utente.getUsername()).isEqualTo("anonimizzato-7");
         assertThat(utente.getPasswordHash()).isNull();
         assertThat(task.getTitolo()).doesNotContain("Verdi");
-        assertThat(task.getStato()).isEqualTo(Task.Stato.FATTO);
+        assertThat(task.getStato()).isEqualTo(Task.Stato.COMPLETATO);
     }
 
     @Test
