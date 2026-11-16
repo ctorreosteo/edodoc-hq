@@ -17,7 +17,20 @@ class SlotConoscitivaTest {
     private static final LocalDateTime LUNEDI_8 = LocalDateTime.of(2026, 11, 16, 8, 0);
 
     private static SlotConoscitiva.Regole regole(String orari, int preavviso, int margine, int max) {
-        return new SlotConoscitiva.Regole(SlotConoscitiva.leggiOrari(orari), preavviso, 7, margine, max);
+        return new SlotConoscitiva.Regole(SlotConoscitiva.leggiOrari(orari), preavviso, 0, 7, margine, max);
+    }
+
+    @Test
+    void siPrenotaSoloDaDopodomaniEFinoAlleDiciannove() {
+        var regole = new SlotConoscitiva.Regole(SlotConoscitiva.leggiOrari("lun-ven 09:00-19:30"), 12, 2, 7, 0, 4);
+        var liberi = SlotConoscitiva.liberi(LUNEDI_8, regole, List.of(), Map.of());
+        // Lunedì alle 8: niente oggi né domani, il primo giorno è mercoledì 18
+        assertThat(liberi.keySet()).first().isEqualTo(LocalDate.of(2026, 11, 18));
+        assertThat(liberi).doesNotContainKeys(LocalDate.of(2026, 11, 16), LocalDate.of(2026, 11, 17));
+        // Fascia 9:00-19:30: la prima chiamata alle 9, l'ultima alle 19
+        List<LocalTime> mercoledi = liberi.get(LocalDate.of(2026, 11, 18));
+        assertThat(mercoledi.get(0)).isEqualTo(LocalTime.of(9, 0));
+        assertThat(mercoledi.get(mercoledi.size() - 1)).isEqualTo(LocalTime.of(19, 0));
     }
 
     @Test

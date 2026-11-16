@@ -255,7 +255,9 @@
 [data-vl] .pr-invito[data-tono="warn"] i { background: var(--vl-warn-dot); }
 [data-vl] .pr-invito[data-tono="danger"] i { background: var(--vl-danger-dot); }
 
-[data-vl] .pr-prenotata { color: var(--vl-ink-2); font-size: 0.82rem; white-space: nowrap; }
+/* Quando è arrivata la richiesta: giorno e ora, sotto quanto tempo fa (ora e "fa" vanno su righe diverse se stretta) */
+[data-vl] .pr-richiesta .pr-quando-giorno { font-weight: 600; }
+[data-vl] .pr-richiesta-fa { color: var(--vl-ink-3, var(--vl-ink-2)); font-size: 0.76rem; }
 
 [data-vl] .pr-col-google { text-align: right; white-space: nowrap; }
 [data-vl] th.pr-col-google .pr-th { justify-content: flex-end; }
@@ -429,7 +431,7 @@
 
 @media (min-width: 640px) and (max-width: 1359px) {
   [data-vl] .pr-persona small { max-width: 9rem; }
-  [data-vl] .pr-prenotata { white-space: normal; }
+  [data-vl] .pr-richiesta-fa { display: none; }
   [data-vl] .pr-nuovo { display: none; }
 }
 

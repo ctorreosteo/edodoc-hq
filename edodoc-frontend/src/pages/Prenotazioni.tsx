@@ -145,13 +145,13 @@ export default function Prenotazioni() {
             <Tabella>
               <thead>
                 <tr>
+                  <Intestazione colonna="prenotata" ordine={ordine} onOrdina={ordina}>Richiesta</Intestazione>
                   <Intestazione colonna="chiamata" ordine={ordine} onOrdina={ordina}>Chiamata</Intestazione>
                   <Intestazione colonna="persona" ordine={ordine} onOrdina={ordina}>Persona</Intestazione>
                   <Intestazione colonna="obiettivo" ordine={ordine} onOrdina={ordina} className="pr-col-obiettivo">Obiettivo</Intestazione>
                   <Intestazione colonna="stato" ordine={ordine} onOrdina={ordina}>Stato</Intestazione>
                   <Intestazione colonna="invito" ordine={ordine} onOrdina={ordina}>Invito</Intestazione>
                   <Intestazione colonna="esito" ordine={ordine} onOrdina={ordina}>Esito</Intestazione>
-                  <Intestazione colonna="prenotata" ordine={ordine} onOrdina={ordina}>Prenotata</Intestazione>
                   <Intestazione colonna="google" ordine={ordine} onOrdina={ordina} className="pr-col-google">Google</Intestazione>
                 </tr>
               </thead>
@@ -166,6 +166,15 @@ export default function Prenotazioni() {
                           setAperta(p.id)
                         }
                       }}>
+                      <td>
+                        <span className="pr-quando pr-richiesta" title={format(parseISO(p.createdAt), "EEEE d MMMM yyyy, HH:mm", { locale: it })}>
+                          <span className="pr-quando-giorno">{format(parseISO(p.createdAt), "EEE d MMM", { locale: it })}</span>
+                          <span className="pr-quando-ora">
+                            {format(parseISO(p.createdAt), "HH:mm")}
+                            <span className="pr-richiesta-fa">{formatDistanceToNowStrict(parseISO(p.createdAt), { locale: it, addSuffix: true })}</span>
+                          </span>
+                        </span>
+                      </td>
                       <td>
                         <span className="pr-quando">
                           <span className="pr-quando-giorno">{format(parseISO(p.inizio), "EEE d MMM", { locale: it })}</span>
@@ -190,11 +199,6 @@ export default function Prenotazioni() {
                       <td><Chip tono={STATO_PRENOTAZIONE[p.stato].tono}>{STATO_PRENOTAZIONE[p.stato].testo}</Chip></td>
                       <td><span className="pr-invito" data-tono={RISPOSTA_INVITO[p.rispostaInvito].tono}><i aria-hidden />{RISPOSTA_INVITO[p.rispostaInvito].testo}</span></td>
                       <td>{p.esito ? <Chip tono={ESITO[p.esito].tono}>{ESITO[p.esito].testo}</Chip> : <span className="text-muted-foreground">—</span>}</td>
-                      <td>
-                        <span className="pr-prenotata" title={format(parseISO(p.createdAt), "d MMMM yyyy, HH:mm", { locale: it })}>
-                          {formatDistanceToNowStrict(parseISO(p.createdAt), { locale: it, addSuffix: true })}
-                        </span>
-                      </td>
                       <td className="pr-col-google">
                         {p.meetUrl && (p.stato === "IN_PROGRAMMA" || p.stato === "DA_CHIUDERE") ? (
                           <a className="pr-meet" href={p.meetUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} title="Apri Google Meet">

@@ -11,6 +11,7 @@ import it.edodoc.hq.repositories.VisitaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +49,7 @@ public class ConoscitivaService {
     private final VisitaService visitaService;
     private final PrenotazioneService prenotazioneService;
     private final MailingEventiGestionaleService mailing;
+    private final ApplicationEventPublisher eventi;
     private final boolean demoAttiva;
 
     private volatile ConoscitivaDto.Disponibilita cache;
@@ -56,8 +58,10 @@ public class ConoscitivaService {
     public ConoscitivaService(ConfigService configService, GoogleClients googleClients, AgendaService agendaService,
                               VisitaRepository visitaRepository, PazienteRepository pazienteRepository, VisitaService visitaService,
                               PrenotazioneService prenotazioneService, MailingEventiGestionaleService mailing,
+                              ApplicationEventPublisher eventi,
                               @Value("${app.init.demo-enabled:false}") boolean demoAttiva) {
         this.mailing = mailing;
+        this.eventi = eventi;
         this.configService = configService;
         this.googleClients = googleClients;
         this.agendaService = agendaService;
@@ -107,7 +111,8 @@ public class ConoscitivaService {
 
     private SlotConoscitiva.Regole regole() {
         return new SlotConoscitiva.Regole(SlotConoscitiva.leggiOrari(configService.get("CONOSCITIVA_ORARI")),
-                intero("CONOSCITIVA_PREAVVISO_ORE", 12), Math.min(intero("CONOSCITIVA_GIORNI", 21), 60),
+                intero("CONOSCITIVA_PREAVVISO_ORE", 12), intero("CONOSCITIVA_GIORNI_MINIMI", 2),
+                Math.min(intero("CONOSCITIVA_GIORNI", 21), 60),
                 intero("CONOSCITIVA_MARGINE_MINUTI", 10), intero("CONOSCITIVA_MAX_AL_GIORNO", 4));
     }
 
@@ -192,9 +197,36 @@ public class ConoscitivaService {
         VisiteDto.Riga visita = visitaService.crea(new VisiteDto.Salva(paziente.getId(), Visita.Tipo.CHIAMATA_CONOSCITIVA, Visita.Modalita.ONLINE,
                 inizio, SlotConoscitiva.DURATA_MINUTI, true, true, situazione(r)));
         prenotazioneService.registra(visita.id(), paziente, r, nuovo);
+        eventi.publishEvent(avviso(paziente, r, inizio, nuovo));
         cache = null;
         logger.info("Chiamata conoscitiva prenotata dal sito per {}", inizio);
         return new ConoscitivaDto.Conferma(inizio, fine, email, paziente.getNome(), googlePronto());
+    }
+
+    /** Email al dottore: chi, quando, come contattarlo e cosa ha scritto nel questionario. */
+    static AvvisoPrenotazioneService.Avviso avviso(Paziente paziente, ConoscitivaDto.Prenota r, LocalDateTime inizio, boolean nuovo) {
+        String nome = (paziente.getNome() + " " + (paziente.getCognome() == null ? "" : paziente.getCognome())).trim();
+        String quando = inizio.format(QUANDO);
+        StringBuilder t = new StringBuilder();
+        t.append("È arrivata una nuova prenotazione della discovery call dal sito edodoc.it.\n\n");
+        t.append("Chi: ").append(nome).append(nuovo ? " (nuovo contatto)" : " (già in anagrafica)").append('\n');
+        t.append("Quando: ").append(quando.substring(0, 1).toUpperCase(Locale.ITALIAN)).append(quando.substring(1)).append('\n');
+        t.append("Email: ").append(paziente.getEmail()).append('\n');
+        if (!vuoto(paziente.getCellulare())) t.append("Telefono: ").append(paziente.getCellulare()).append('\n');
+        riga(t, "\nObiettivo", r.obiettivo());
+        riga(t, "Professione", r.professione());
+        riga(t, "Ci ha conosciuto da", r.conosciutoDa());
+        riga(t, "Percorsi già provati", r.percorsiPrecedenti());
+        riga(t, "Investimento previsto", r.investimento());
+        riga(t, "Priorità", r.priorita());
+        riga(t, "Perché adesso", r.percheOra());
+        riga(t, "Messaggio", r.messaggio());
+        t.append("\nLa trovi nel gestionale, pagina Discovery: https://hq.edodoc.it/discovery");
+        return new AvvisoPrenotazioneService.Avviso("Nuova discovery call: " + nome + ", " + inizio.format(QUANDO), t.toString());
+    }
+
+    private static void riga(StringBuilder t, String etichetta, String valore) {
+        if (!vuoto(valore)) t.append(etichetta).append(": ").append(valore.trim()).append('\n');
     }
 
     /**

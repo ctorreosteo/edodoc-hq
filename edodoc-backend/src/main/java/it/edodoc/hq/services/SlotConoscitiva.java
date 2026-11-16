@@ -12,7 +12,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Gli slot liberi della chiamata conoscitiva: dentro le fasce del dottore, ogni mezz'ora, con il preavviso minimo,
+ * Gli slot liberi della chiamata conoscitiva: dentro le fasce del dottore, ogni mezz'ora, dal primo giorno prenotabile
+ * (oggi + giorniMinimi) e con il preavviso minimo,
  * lontani dagli impegni (margine compreso) e solo nei giorni che non hanno già raggiunto il massimo di chiamate.
  * Solo calcolo, senza Google né database: si prova a parte.
  */
@@ -33,7 +34,9 @@ public final class SlotConoscitiva {
     public record Impegno(LocalDateTime inizio, LocalDateTime fine) {
     }
 
-    public record Regole(Map<DayOfWeek, List<Fascia>> orari, int preavvisoOre, int giorni, int margineMinuti, int maxAlGiorno) {
+    /** giorniMinimi: 0 = anche oggi, 2 = da dopodomani. giorni: fin dove si può prenotare, contando da oggi. */
+    public record Regole(Map<DayOfWeek, List<Fascia>> orari, int preavvisoOre, int giorniMinimi, int giorni, int margineMinuti,
+                         int maxAlGiorno) {
     }
 
     /**
@@ -89,7 +92,7 @@ public final class SlotConoscitiva {
                                                         Map<LocalDate, Integer> chiamateFissate) {
         Map<LocalDate, List<LocalTime>> giorni = new LinkedHashMap<>();
         LocalDateTime primo = adesso.plusHours(regole.preavvisoOre());
-        for (int i = 0; i < regole.giorni(); i++) {
+        for (int i = Math.max(0, regole.giorniMinimi()); i < regole.giorni(); i++) {
             LocalDate giorno = adesso.toLocalDate().plusDays(i);
             if (chiamateFissate.getOrDefault(giorno, 0) >= regole.maxAlGiorno()) continue;
             List<LocalTime> orari = new ArrayList<>();
